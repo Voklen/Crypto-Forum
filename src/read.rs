@@ -14,7 +14,7 @@ pub fn main() -> Vec<&'static str>{
 	println!("Hello");
 
 	let messages = get_messages("test_data/succeed.sml");
-	println!("{:?}", messages);
+	let verified = verify_messages(messages);
 
 	vec!["hello"]
 }
@@ -41,3 +41,11 @@ pub fn get_messages_vec(file: &str) -> Vec<([u8; 32], String, [u8; 32], [u8; 32]
 	res
 }
 
+fn verify_messages(messages: Vec<Message>) -> Vec<bool> {
+	messages
+	.into_iter()
+	.map(|x|{
+		x.public_key.verify(x.message.as_bytes(), &x.signature).is_ok()
+	})
+	.collect()
+}
