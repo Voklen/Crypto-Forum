@@ -8,5 +8,6 @@ mod read;
 fn main() {
 	let keypair = user_keypair::get_keypair();
 	write::interactive_write(keypair);
-	let messages = read::main();
+	let messages = read::get_messages("test_data/succeed.sml");
+	println!("Messages: {:?}", messages)
 }
