@@ -18,6 +18,6 @@ use text_io::try_read;
 
 fn main() {
 	let keypair = user_keypair::get_keypair();
-	write::main(keypair);
+	write::interactive_write(keypair);
 	let messages = read::main();
 }
