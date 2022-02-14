@@ -33,10 +33,10 @@ pub fn interactive_write(keypair: Keypair) {
 	let bad_keypair = Keypair{secret: bad_secret, public: bad_public};
 
 	loop {
-		println!("Please enter desired message\n");
+		println!("Please enter desired message");
 		let message: String = text_io::try_read!().unwrap();
 
-		println!("Would you like to properly sign it? (true/false)\n");
+		println!("Would you like to properly sign it? (true/false)");
 		if text_io::try_read!().unwrap() {
 			let signature: Signature = keypair.sign(message.as_bytes());
 
@@ -56,7 +56,7 @@ pub fn interactive_write(keypair: Keypair) {
 				to_32(bad_signature.to_bytes(), false),
 			));
 		}
-		println!("Would you like to enter another message? (true/false)\n");
+		println!("Would you like to enter another message? (true/false)");
 		let res: bool = text_io::try_read!().unwrap();
 		if !res {
 			write_to_smile("test_data/succeed.sml", write_data);
