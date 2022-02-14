@@ -1,5 +1,3 @@
-extern crate ed25519_dalek;
-
 use std::io::Read;
 
 use ed25519_dalek::*;

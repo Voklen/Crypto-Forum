@@ -1,12 +1,6 @@
-extern crate ed25519_dalek;
-
-use std::io::{Write, Read};
-use std::convert::TryInto;
-use std::os::unix::prelude::OsStrExt;
+use std::io::Write;
 
 use ed25519_dalek::*;
-use serde::{Deserialize, Serialize};
-use serde_smile::Error;
 
 pub fn main(keypair: Keypair) {
 

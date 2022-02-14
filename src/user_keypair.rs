@@ -1,6 +1,3 @@
-extern crate ed25519_dalek;
-extern crate text_io;
-
 use ed25519_dalek::*;
 use text_io::try_read;
 
