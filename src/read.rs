@@ -9,10 +9,9 @@ struct Message {
 }
 
 pub fn main() -> Vec<&'static str>{
-	println!("Hello");
-
 	let messages = get_messages("test_data/succeed.sml");
 	let verified = verify_messages(messages);
+	println!("Message verification results: {:?}", verified);
 
 	vec!["hello"]
 }

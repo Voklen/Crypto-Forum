@@ -14,11 +14,7 @@ pub fn main(keypair: Keypair) {
 		to_32(signature.to_bytes(), false),
 	)]);
 	
-	if keypair.verify(message.as_bytes(), &signature).is_ok() {
-		println!("YASS")
-	} else {
-		println!("aw")
-	}
+	assert!(keypair.verify(message.as_bytes(), &signature).is_ok());
 }
 
 pub fn interactive_write(keypair: Keypair) {
