@@ -3,9 +3,9 @@ use std::io::Read;
 use ed25519_dalek::*;
 #[derive(Debug)]
 pub struct Message {
-    public_key: PublicKey,
-    message: String,
-    signed: bool,
+    pub public_key: PublicKey,
+    pub message: String,
+    pub signed: bool,
 }
 
 pub fn get_messages(file: &str) -> Vec<Message> {
