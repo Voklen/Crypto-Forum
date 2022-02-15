@@ -11,6 +11,7 @@ pub struct Message {
 pub fn get_messages(file: &str) -> Vec<Message> {
 	
 	get_messages_vec(file)
+	.unwrap()
 	.into_iter()
 	.map(|x|{
 		let public_key = PublicKey::from_bytes(&x.0).unwrap();
@@ -26,11 +27,11 @@ pub fn get_messages(file: &str) -> Vec<Message> {
 	.collect()
 }
 
-pub fn get_messages_vec(file: &str) -> Vec<([u8; 32], String, [u8; 32], [u8; 32])> {
-	let mut file = std::fs::File::open(file).unwrap();
+pub fn get_messages_vec(file: &str) -> Result<Vec<([u8; 32], String, [u8; 32], [u8; 32])>, std::io::Error> {
+	let mut file = std::fs::File::open(file)?;
 	let mut smile = Vec::<u8>::new();
 	file.read_to_end(&mut smile);
 
 	let res: Vec<([u8; 32], String, [u8; 32], [u8; 32])> = serde_smile::from_slice(&smile).unwrap();
-	res
+	Ok(res)
 }

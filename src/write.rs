@@ -1,5 +1,3 @@
-use std::io::Write;
-
 use ed25519_dalek::*;
 
 pub fn main(keypair: Keypair) {
@@ -66,7 +64,13 @@ pub fn interactive_write(keypair: Keypair) {
 }
 
 pub fn write_to_smile(file: &str, data: Vec<([u8; 32], String, [u8; 32], [u8; 32])>) {
-	let value = serde_smile::to_vec(&data).unwrap();
+	use std::io::Write;
+
+	let orig_messages = crate::read::get_messages_vec(file)
+		.unwrap_or(Vec::new());
+	let final_write_data = [orig_messages,data].concat();
+	let value = serde_smile::to_vec(&final_write_data).unwrap();
+
 	let mut file = std::fs::File::create(file).unwrap();
 	file.write_all(&value);
 }
