@@ -1,20 +1,5 @@
 use ed25519_dalek::*;
 
-pub fn main(keypair: Keypair) {
-
-	let message = "Yes, send all my money to Voklen";
-	let signature: Signature = keypair.sign(message.as_bytes());
-	write_to_smile("test_data/succeed.sml", vec![(
-		keypair.public.to_bytes(), 
-		message.to_string(), 
-		// We have to split up th [u8; 64] into two [u8; 32] as currently serde_smile::from_slice() cannot handle the former
-		to_32(signature.to_bytes(), true),
-		to_32(signature.to_bytes(), false),
-	)]);
-	
-	assert!(keypair.verify(message.as_bytes(), &signature).is_ok());
-}
-
 pub fn interactive_write(keypair: Keypair) {
 
 	let mut write_data = Vec::<(
