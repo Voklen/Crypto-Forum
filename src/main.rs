@@ -6,9 +6,11 @@ mod write;
 mod read;
 
 fn main() {
+	let messages_file = "messages.sml";
+	
 	let keypair = user_keypair::get_keypair();
-	write::interactive_write(keypair);
-	let messages = read::get_messages("test_data/succeed.sml");
+	write::interactive_write(messages_file ,keypair);
+	let messages = read::get_messages(messages_file);
 	output_messages(messages);
 }
 

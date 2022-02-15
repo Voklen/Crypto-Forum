@@ -1,6 +1,6 @@
 use ed25519_dalek::*;
 
-pub fn interactive_write(keypair: Keypair) {
+pub fn interactive_write(file: &str, keypair: Keypair) {
 
 	let mut write_data = Vec::<(
 		[u8; 32], // Keypair
@@ -42,7 +42,7 @@ pub fn interactive_write(keypair: Keypair) {
 		println!("Would you like to enter another message? (true/false)");
 		let res: bool = text_io::try_read!().unwrap();
 		if !res {
-			write_to_smile("test_data/succeed.sml", write_data);
+			write_to_smile(file, write_data);
 			break;
 		}
 	}
