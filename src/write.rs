@@ -1,7 +1,7 @@
 use ed25519_dalek::*;
 
 pub fn interactive_write(file: &str, keypair: Keypair) {
-	let mut write_data = Vec::<(
+	let write_data = Vec::<(
 		[u8; 32], // Keypair
 		String,   // Message
 		// We have to split up the [u8; 64] into two [u8; 32] as currently serde_smile::from_slice() cannot handle the former
@@ -17,37 +17,39 @@ pub fn interactive_write(file: &str, keypair: Keypair) {
 		public: bad_public,
 	};
 
-	loop {
-		println!("Please enter desired message");
-		let message: String = text_io::try_read!().unwrap();
+	let messages = get_messages_from_user(keypair, write_data, bad_keypair);
+	write_to_smile(file, messages)
+}
 
-		println!("Would you like to properly sign it? (true/false)");
+fn get_messages_from_user(
+	keypair: Keypair,
+	mut write_data: Vec<([u8; 32], String, [u8; 32], [u8; 32])>,
+	bad_keypair: Keypair,
+) -> Vec<([u8; 32], std::string::String, [u8; 32], [u8; 32])> {
+	println!("Please enter desired message");
+	let message: String = text_io::try_read!().unwrap();
+	println!("Would you like to properly sign it? (true/false)");
+	let signature: Signature = 
 		if text_io::try_read!().unwrap() {
-			let signature: Signature = keypair.sign(message.as_bytes());
-
-			write_data.push((
-				keypair.public.to_bytes(),
-				message.to_string(),
-				to_32(signature.to_bytes(), true),
-				to_32(signature.to_bytes(), false),
-			));
+			keypair.sign(message.as_bytes())
 		} else {
-			let bad_signature: Signature = bad_keypair.sign(message.as_bytes());
+			bad_keypair.sign(message.as_bytes())
+		};
+	
+	let new_element = (
+		keypair.public.to_bytes(),
+		message.to_string(),
+		to_32(signature.to_bytes(), true),
+		to_32(signature.to_bytes(), false),
+	);
+	write_data.push(new_element);
 
-			write_data.push((
-				*keypair.public.as_bytes(),
-				message.to_string(),
-				to_32(bad_signature.to_bytes(), true),
-				to_32(bad_signature.to_bytes(), false),
-			));
-		}
-		println!("Would you like to enter another message? (true/false)");
-		let res: bool = text_io::try_read!().unwrap();
-		if !res {
-			write_to_smile(file, write_data);
-			break;
-		}
+	println!("Would you like to enter another message? (true/false)");
+	let res: bool = text_io::try_read!().unwrap();
+	if !res {
+		return write_data;
 	}
+	get_messages_from_user(keypair, write_data, bad_keypair)
 }
 
 pub fn write_to_smile(file: &str, data: Vec<([u8; 32], String, [u8; 32], [u8; 32])>) {

@@ -28,9 +28,9 @@ pub fn get_messages(file: &str) -> Vec<Message> {
 }
 
 pub fn get_messages_vec(file: &str) -> Result<Vec<([u8; 32], String, [u8; 32], [u8; 32])>, std::io::Error> {
-	let mut file = std::fs::File::open(file)?;
+	let file = std::fs::File::open(file)?;
 	let mut smile = Vec::<u8>::new();
-	file.read_to_end(&mut smile);
+	(&file).read_to_end(&mut smile);
 
 	let res: Vec<([u8; 32], String, [u8; 32], [u8; 32])> = serde_smile::from_slice(&smile).unwrap();
 	Ok(res)
