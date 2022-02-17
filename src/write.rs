@@ -1,10 +1,9 @@
 use ed25519_dalek::*;
 
 pub fn interactive_write(file: &str, keypair: Keypair) {
-
 	let mut write_data = Vec::<(
 		[u8; 32], // Keypair
-		String, // Message
+		String,   // Message
 		// We have to split up the [u8; 64] into two [u8; 32] as currently serde_smile::from_slice() cannot handle the former
 		[u8; 32], // Signature part 1
 		[u8; 32], // Signature part 2
@@ -13,7 +12,10 @@ pub fn interactive_write(file: &str, keypair: Keypair) {
 	// THIS BREAKS IF THEIR KEY SEED IS ALL 0'S
 	let bad_secret: SecretKey = SecretKey::from_bytes(&[0; SECRET_KEY_LENGTH]).unwrap();
 	let bad_public: PublicKey = PublicKey::from(&bad_secret);
-	let bad_keypair = Keypair{secret: bad_secret, public: bad_public};
+	let bad_keypair = Keypair {
+		secret: bad_secret,
+		public: bad_public,
+	};
 
 	loop {
 		println!("Please enter desired message");
@@ -62,7 +64,7 @@ pub fn write_to_smile(file: &str, data: Vec<([u8; 32], String, [u8; 32], [u8; 32
 
 /* Hope to eventually replace this with a better way, probably including slices */
 fn to_32(input: [u8; 64], first_32: bool) -> [u8; 32] {
-	let offset = if first_32 {0} else {32};
+	let offset = if first_32 { 0 } else { 32 };
 	let mut out = [0; 32];
 	for (i, element) in input.iter().enumerate() {
 		if offset <= i && i < (32 + offset) {
