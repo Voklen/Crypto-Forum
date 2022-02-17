@@ -26,8 +26,8 @@ pub fn interactive_write(file: &str, keypair: Keypair) {
 			let signature: Signature = keypair.sign(message.as_bytes());
 
 			write_data.push((
-				keypair.public.to_bytes(), 
-				message.to_string(), 
+				keypair.public.to_bytes(),
+				message.to_string(),
 				to_32(signature.to_bytes(), true),
 				to_32(signature.to_bytes(), false),
 			));
@@ -35,8 +35,8 @@ pub fn interactive_write(file: &str, keypair: Keypair) {
 			let bad_signature: Signature = bad_keypair.sign(message.as_bytes());
 
 			write_data.push((
-				*keypair.public.as_bytes(), 
-				message.to_string(), 
+				*keypair.public.as_bytes(),
+				message.to_string(),
 				to_32(bad_signature.to_bytes(), true),
 				to_32(bad_signature.to_bytes(), false),
 			));
@@ -55,7 +55,7 @@ pub fn write_to_smile(file: &str, data: Vec<([u8; 32], String, [u8; 32], [u8; 32
 
 	let orig_messages = crate::read::get_messages_vec(file)
 		.unwrap_or(Vec::new());
-	let final_write_data = [orig_messages,data].concat();
+	let final_write_data = [orig_messages, data].concat();
 	let value = serde_smile::to_vec(&final_write_data).unwrap();
 
 	let mut file = std::fs::File::create(file).unwrap();
