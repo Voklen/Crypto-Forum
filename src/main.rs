@@ -1,6 +1,3 @@
-extern crate ed25519_dalek;
-extern crate text_io;
-
 #[path ="CLI/user_keypair.rs"]
 mod user_keypair;
 #[path ="CLI/write.rs"]

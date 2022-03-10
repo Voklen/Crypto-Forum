@@ -1,6 +1,5 @@
-use std::io::Read;
-
 use ed25519_dalek::*;
+
 #[derive(Debug)]
 pub struct Message {
     pub public_key: PublicKey,
@@ -28,6 +27,7 @@ pub fn get_messages(file: &str) -> Vec<Message> {
 }
 
 pub fn get_messages_vec(file: &str) -> Result<Vec<([u8; 32], String, [u8; 32], [u8; 32])>, std::io::Error> {
+	use std::io::Read;
 	let file = std::fs::File::open(file)?;
 	let mut smile = Vec::<u8>::new();
 	(&file).read_to_end(&mut smile);
