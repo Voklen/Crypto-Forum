@@ -13,7 +13,7 @@ fn main() {
 	
 	let keypair = user_keypair::get_keypair();
 	write::interactive_write(messages_file, keypair);
-	let messages = read::get_messages(messages_file);
+	let messages = read::get_messages(messages_file).unwrap();
 	output_messages(messages);
 }
 
