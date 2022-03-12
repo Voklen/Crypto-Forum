@@ -1,13 +1,29 @@
-pub fn write_to_smile(file: &str, data: Vec<([u8; 32], String, [u8; 32], [u8; 32])>) {
+use crate:: SignatureMessage;
+
+pub fn write_to_smile(file: &str, data: Vec<SignatureMessage>) {
 	use std::io::Write;
 
-	let orig_messages = crate::read_smile::get_messages_vec(file)
-		.unwrap_or(Vec::new());
-	let final_write_data = [orig_messages, data].concat();
-	let value = serde_smile::to_vec(&final_write_data).unwrap();
+	let write_data = match crate::read_smile::get_messages_vec(file) {
+		Ok(orig_messages) => [orig_messages, sig_message_to_vec(data)].concat(),
+		Err(_) => Vec::<([u8; 32], String, [u8; 32], [u8; 32])>::new(),
+	};
+	let value = serde_smile::to_vec(&write_data).unwrap();
 
 	let mut file = std::fs::File::create(file).unwrap();
 	file.write_all(&value);
+}
+
+fn sig_message_to_vec(data: Vec<SignatureMessage>) -> Vec<([u8; 32], String, [u8; 32], [u8; 32])> {
+	data.into_iter()
+		.map(|f| {
+			(
+				f.public_key.to_bytes(),
+				f.message,
+				to_32(f.signature.to_bytes(), true),
+				to_32(f.signature.to_bytes(), false),
+			)
+		})
+		.collect()
 }
 
 /* Hope to eventually replace this with a better way, probably including slices */

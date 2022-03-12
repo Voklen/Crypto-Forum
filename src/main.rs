@@ -21,6 +21,13 @@ pub struct Message {
 	pub signed: bool,
 }
 
+#[derive(Debug)]
+pub struct SignatureMessage {
+	pub public_key: ed25519_dalek::PublicKey,
+	pub message: String,
+	pub signature: ed25519_dalek::Signature,
+}
+
 fn main() {
 	let messages_file = "messages.sml";
 	
