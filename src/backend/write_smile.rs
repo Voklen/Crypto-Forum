@@ -1,7 +1,7 @@
 pub fn write_to_smile(file: &str, data: Vec<([u8; 32], String, [u8; 32], [u8; 32])>) {
 	use std::io::Write;
 
-	let orig_messages = crate::read::get_messages_vec(file)
+	let orig_messages = crate::read_smile::get_messages_vec(file)
 		.unwrap_or(Vec::new());
 	let final_write_data = [orig_messages, data].concat();
 	let value = serde_smile::to_vec(&final_write_data).unwrap();

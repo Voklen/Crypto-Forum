@@ -1,17 +1,6 @@
 use ed25519_dalek::*;
 
-#[derive(Debug, PartialEq)]
-pub enum Error {
-	StdIo(std::io::ErrorKind),
-	SmileError,
-}
-
-#[derive(Debug)]
-pub struct Message {
-	pub public_key: PublicKey,
-	pub message: String,
-	pub signed: bool,
-}
+use crate::{Message, Error};
 
 pub fn get_messages(file: &str) -> Result<Vec<Message>, Error> {
 	fn to_message(x: ([u8; 32], String, [u8; 32], [u8; 32])) -> Option<Message> {
