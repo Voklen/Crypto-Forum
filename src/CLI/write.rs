@@ -13,12 +13,18 @@ pub fn interactive_write(file: &str, keypair: Keypair) {
 		public: bad_public,
 	};
 
-	let messages = get_messages_from_user(keypair, write_data, bad_keypair);
-	write_smile::write_to_smile(file, messages)
+	let messages = get_messages_from_user(&keypair, write_data, bad_keypair);
+	match write_smile::write_to_smile(file, messages) {
+		Ok(()) => {}
+		Err(_) => {
+			println!("Failed to write to file");
+			interactive_write(file, keypair)
+		}
+	}
 }
 
 fn get_messages_from_user(
-	keypair: Keypair,
+	keypair: &Keypair,
 	mut write_data: Vec<SignatureMessage>,
 	bad_keypair: Keypair,
 ) -> Vec<SignatureMessage> {

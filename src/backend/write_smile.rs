@@ -1,16 +1,23 @@
-use crate:: SignatureMessage;
+use crate::{Error, SignatureMessage};
 
-pub fn write_to_smile(file: &str, data: Vec<SignatureMessage>) {
+pub fn write_to_smile(file: &str, data: Vec<SignatureMessage>) -> Result<(), Error> {
 	use std::io::Write;
 
-	let write_data = match crate::read_smile::get_messages_vec(file) {
-		Ok(orig_messages) => [orig_messages, sig_message_to_vec(data)].concat(),
+	let orig_messages = match crate::read_smile::get_messages_vec(file) {
+		Ok(i) => i,
 		Err(_) => Vec::<([u8; 32], String, [u8; 32], [u8; 32])>::new(),
 	};
-	let value = serde_smile::to_vec(&write_data).unwrap();
+	let write_data = [orig_messages, sig_message_to_vec(data)].concat();
+	let value = match serde_smile::to_vec(&write_data) {
+		Ok(i) => i,
+		Err(_) => return Err(Error::SmileError),
+	};
 
 	let mut file = std::fs::File::create(file).unwrap();
-	file.write_all(&value);
+	match file.write_all(&value) {
+		Ok(_) => Ok(()),
+		Err(err) => Err(Error::StdIo(err.kind())),
+	}
 }
 
 fn sig_message_to_vec(data: Vec<SignatureMessage>) -> Vec<([u8; 32], String, [u8; 32], [u8; 32])> {
