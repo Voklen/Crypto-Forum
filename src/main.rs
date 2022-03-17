@@ -8,10 +8,11 @@ mod write_smile;
 #[path ="backend/read_smile.rs"]
 mod read_smile;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub enum Error {
 	StdIo(std::io::ErrorKind),
 	SmileError,
+	JsonError(serde_json::Error),
 }
 
 #[derive(Debug)]
@@ -28,12 +29,18 @@ pub struct SignatureMessage {
 	pub signature: ed25519_dalek::Signature,
 }
 
+pub enum SerdeParser {
+	Json,
+	Smile,
+}
+
 fn main() {
 	let messages_file = "messages.sml";
+	let parser = &SerdeParser::Smile;
 	
 	let keypair = user_keypair::get_keypair();
-	write::interactive_write(messages_file, keypair);
-	let messages = read_smile::get_messages(messages_file).unwrap();
+	write::interactive_write(messages_file, parser, keypair);
+	let messages = read_smile::get_messages(messages_file, parser).unwrap();
 	output_messages(messages);
 }
 

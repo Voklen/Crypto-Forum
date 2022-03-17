@@ -1,18 +1,33 @@
-use crate::{Error, SignatureMessage};
+use crate::{Error, SerdeParser, SignatureMessage};
 
-pub fn write_to_smile(file: &str, data: Vec<SignatureMessage>) -> Result<(), Error> {
+pub fn write_to_smile(
+	file: &str,
+	parser: &SerdeParser,
+	data: Vec<SignatureMessage>,
+) -> Result<(), Error> {
 	use std::io::Write;
 
-	let orig_messages = match crate::read_smile::get_messages_vec(file) {
+	// Get messages already in file to concatenate
+	let orig_messages = match crate::read_smile::get_messages_vec(file, parser) {
 		Ok(i) => i,
 		Err(_) => Vec::<([u8; 32], String, [u8; 32], [u8; 32])>::new(),
 	};
+	// Concatenate messages
 	let write_data = [orig_messages, sig_message_to_vec(data)].concat();
-	let value = match serde_smile::to_vec(&write_data) {
-		Ok(i) => i,
-		Err(_) => return Err(Error::SmileError),
+
+	// Convert into chosen format
+	let value = match parser {
+		&SerdeParser::Json => match serde_json::to_vec(&write_data) {
+			Ok(i) => i,
+			Err(err) => return Err(Error::JsonError(err)),
+		},
+		&SerdeParser::Smile => match serde_smile::to_vec(&write_data) {
+			Ok(i) => i,
+			Err(_) => return Err(Error::SmileError),
+		},
 	};
 
+	// Write to file
 	let mut file = std::fs::File::create(file).unwrap();
 	match file.write_all(&value) {
 		Ok(_) => Ok(()),

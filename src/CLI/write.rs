@@ -1,8 +1,7 @@
 use ed25519_dalek::*;
-use crate::SignatureMessage;
-use crate::write_smile;
+use crate::{SignatureMessage, write_smile, SerdeParser};
 
-pub fn interactive_write(file: &str, keypair: Keypair) {
+pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair) {
 	let write_data = Vec::<SignatureMessage>::new();
 
 	// THIS BREAKS IF THEIR KEY SEED IS ALL 0'S
@@ -14,11 +13,11 @@ pub fn interactive_write(file: &str, keypair: Keypair) {
 	};
 
 	let messages = get_messages_from_user(&keypair, write_data, bad_keypair);
-	match write_smile::write_to_smile(file, messages) {
+	match write_smile::write_to_smile(file, &parser, messages) {
 		Ok(()) => {}
 		Err(_) => {
 			println!("Failed to write to file");
-			interactive_write(file, keypair)
+			interactive_write(file, parser, keypair)
 		}
 	}
 }

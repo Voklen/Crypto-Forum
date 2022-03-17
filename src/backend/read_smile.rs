@@ -1,8 +1,8 @@
 use ed25519_dalek::*;
 
-use crate::{Message, Error};
+use crate::{Error, Message, SerdeParser};
 
-pub fn get_messages(file: &str) -> Result<Vec<Message>, Error> {
+pub fn get_messages(file: &str, parser: &SerdeParser) -> Result<Vec<Message>, Error> {
 	fn to_message(x: ([u8; 32], String, [u8; 32], [u8; 32])) -> Option<Message> {
 		let public_key = match PublicKey::from_bytes(&x.0) {
 			Ok(i) => i,
@@ -21,28 +21,37 @@ pub fn get_messages(file: &str) -> Result<Vec<Message>, Error> {
 		})
 	}
 
-	Ok(get_messages_vec(file)?
+	Ok(get_messages_vec(file, parser)?
 		.into_iter()
 		.filter_map(to_message)
 		.collect())
 }
 
-pub fn get_messages_vec(file: &str) -> Result<Vec<([u8; 32], String, [u8; 32], [u8; 32])>, Error> {
+pub fn get_messages_vec(
+	file: &str,
+	parser: &SerdeParser,
+) -> Result<Vec<([u8; 32], String, [u8; 32], [u8; 32])>, Error> {
 	use std::io::Read;
 
 	let file = match std::fs::File::open(file) {
 		Err(i) => return Err(Error::StdIo(i.kind())),
 		Ok(i) => i,
 	};
-	let mut smile = Vec::<u8>::new();
 
-	match (&file).read_to_end(&mut smile) {
+	let mut file_slice = Vec::<u8>::new();
+	match (&file).read_to_end(&mut file_slice) {
 		Err(i) => return Err(Error::StdIo(i.kind())),
-		Ok(i) => i,
+		Ok(_) => {}
 	};
 
-	Ok(match serde_smile::from_slice(&smile) {
-		Err(_) => return Err(Error::SmileError), // serde_smile unfortunately does not expose the ErrorKind enum as public so we cannot specify the error
-		Ok(i) => i,
-	})
+	match parser {
+		SerdeParser::Smile => match serde_smile::from_slice(&file_slice) {
+			Err(_) => Err(Error::SmileError), // serde_smile unfortunately does not expose the ErrorKind enum as public so we cannot specify the error
+			Ok(i) => Ok(i),
+		},
+		SerdeParser::Json => match serde_json::from_slice(&file_slice) {
+			Err(err) => Err(Error::JsonError(err)),
+			Ok(i) => Ok(i),
+		},
+	}
 }
