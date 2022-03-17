@@ -45,12 +45,12 @@ pub fn get_messages_vec(
 	};
 
 	match parser {
-		SerdeParser::Smile => match serde_smile::from_slice(&file_slice) {
-			Err(_) => Err(Error::SmileError), // serde_smile unfortunately does not expose the ErrorKind enum as public so we cannot specify the error
-			Ok(i) => Ok(i),
-		},
 		SerdeParser::Json => match serde_json::from_slice(&file_slice) {
 			Err(err) => Err(Error::JsonError(err)),
+			Ok(i) => Ok(i),
+		},
+		SerdeParser::Smile => match serde_smile::from_slice(&file_slice) {
+			Err(_) => Err(Error::SmileError), // serde_smile unfortunately does not expose the ErrorKind enum as public so we cannot specify the error
 			Ok(i) => Ok(i),
 		},
 	}

@@ -8,7 +8,7 @@ pub fn write_to_smile(
 	use std::io::Write;
 
 	// Get messages already in file to concatenate
-	let orig_messages = match crate::read_smile::get_messages_vec(file, parser) {
+	let orig_messages = match crate::read_serde::get_messages_vec(file, parser) {
 		Ok(i) => i,
 		Err(_) => Vec::<([u8; 32], String, [u8; 32], [u8; 32])>::new(),
 	};
@@ -49,7 +49,7 @@ fn sig_message_to_vec(data: Vec<SignatureMessage>) -> Vec<([u8; 32], String, [u8
 }
 
 /* Hope to eventually replace this with a better way, probably including slices */
-pub fn to_32(input: [u8; 64], first_32: bool) -> [u8; 32] {
+fn to_32(input: [u8; 64], first_32: bool) -> [u8; 32] {
 	let offset = if first_32 { 0 } else { 32 };
 	let mut out = [0; 32];
 	for (i, element) in input.iter().enumerate() {

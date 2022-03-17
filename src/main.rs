@@ -3,10 +3,10 @@ mod user_keypair;
 #[path ="CLI/write.rs"]
 mod write;
 
-#[path ="backend/write_smile.rs"]
-mod write_smile;
-#[path ="backend/read_smile.rs"]
-mod read_smile;
+#[path ="backend/write_serde.rs"]
+mod write_serde;
+#[path ="backend/read_serde.rs"]
+mod read_serde;
 
 #[derive(Debug)]
 pub enum Error {
@@ -35,12 +35,12 @@ pub enum SerdeParser {
 }
 
 fn main() {
-	let messages_file = "messages.sml";
-	let parser = &SerdeParser::Smile;
+	let messages_file = "messages.json";
+	let parser = &SerdeParser::Json;
 	
 	let keypair = user_keypair::get_keypair();
 	write::interactive_write(messages_file, parser, keypair);
-	let messages = read_smile::get_messages(messages_file, parser).unwrap();
+	let messages = read_serde::get_messages(messages_file, parser).unwrap();
 	output_messages(messages);
 }
 
