@@ -10,4 +10,4 @@ Prerequisites: [cargo](https://www.rust-lang.org/tools/install)\
 To build, simply run\
 `cargo build --release`\
 then it can be launched with\
-`./target/release/terminal_cubing `
+`./target/release/crypto_forum`

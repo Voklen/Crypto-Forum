@@ -1,12 +1,12 @@
-#[path ="CLI/user_keypair.rs"]
+#[path = "CLI/user_keypair.rs"]
 mod user_keypair;
-#[path ="CLI/write.rs"]
+#[path = "CLI/write.rs"]
 mod write;
 
-#[path ="backend/write_serde.rs"]
-mod write_serde;
-#[path ="backend/read_serde.rs"]
+#[path = "backend/read_serde.rs"]
 mod read_serde;
+#[path = "backend/write_serde.rs"]
+mod write_serde;
 
 #[derive(Debug)]
 pub enum Error {
@@ -45,14 +45,14 @@ fn main() {
 }
 
 fn output_messages(messages: Vec<Message>) {
-    for i in messages {
-		    println!("--------");
-		    if !i.signed {
-			    println!("!!!WARNING: INVALID SIGNATURE!!!");
-			    println!("!!!WE HAVE NO PROOF THIS PUBLIC KEY EVER POSTED THIS!!!");
-		    }
-		    println!("Public key: {:?}", i.public_key.as_bytes());
-		    println!("Message: \n{}", i.message);
-		    println!("--------")
-	    }
+	for i in messages {
+		println!("--------");
+		if !i.signed {
+			println!("!!!WARNING: INVALID SIGNATURE!!!");
+			println!("!!!WE HAVE NO PROOF THIS PUBLIC KEY EVER POSTED THIS!!!");
+		}
+		println!("Public key: {:?}", i.public_key.as_bytes());
+		println!("Message: \n{}", i.message);
+		println!("--------")
+	}
 }
