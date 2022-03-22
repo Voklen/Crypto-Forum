@@ -2,13 +2,14 @@ use crate::{Error, SerdeParser, SignatureMessage};
 
 pub fn write_to_smile(
 	file: &str,
+	file_slice: &Vec<u8>,
 	parser: &SerdeParser,
 	data: Vec<SignatureMessage>,
 ) -> Result<(), Error> {
 	use std::io::Write;
 
 	// Get messages already in file to concatenate
-	let orig_messages = match crate::read_serde::get_messages_vec(file, parser) {
+	let orig_messages = match crate::read_serde::get_messages_vec(&file_slice, parser) {
 		Ok(i) => i,
 		Err(_) => Vec::<([u8; 32], String, [u8; 32], [u8; 32])>::new(),
 	};

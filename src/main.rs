@@ -8,6 +8,9 @@ mod read_serde;
 #[path = "backend/write_serde.rs"]
 mod write_serde;
 
+#[path = "backend/read.rs"]
+mod read;
+
 #[derive(Debug)]
 pub enum Error {
 	StdIo(std::io::ErrorKind),
@@ -29,6 +32,7 @@ pub struct SignatureMessage {
 	pub signature: ed25519_dalek::Signature,
 }
 
+#[derive(Debug)]
 pub enum SerdeParser {
 	Json,
 	Smile,
@@ -36,11 +40,11 @@ pub enum SerdeParser {
 
 fn main() {
 	let messages_file = "messages.json";
-	let parser = &SerdeParser::Json;
+	let (parser, file_slice) = read::read_file_data(messages_file).unwrap();
 	
 	let keypair = user_keypair::get_keypair();
-	write::interactive_write(messages_file, parser, keypair);
-	let messages = read_serde::get_messages(messages_file, parser).unwrap();
+	write::interactive_write(messages_file, &file_slice, &parser, keypair);
+	let messages = read_serde::get_messages(&file_slice, &parser).unwrap();
 	output_messages(messages);
 }
 
