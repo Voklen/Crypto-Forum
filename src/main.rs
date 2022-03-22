@@ -39,13 +39,15 @@ pub enum SerdeParser {
 }
 
 fn main() {
-	let messages_file = "messages.json";
+	let args: Vec<String> = std::env::args().collect();
+	let messages_file: &str = &args[1];
 	let (parser, file_slice) = read::read_file_data(messages_file).unwrap();
+
+	let messages = read_serde::get_messages(&file_slice, &parser).unwrap();
+	output_messages(messages);
 	
 	let keypair = user_keypair::get_keypair();
 	write::interactive_write(messages_file, &file_slice, &parser, keypair);
-	let messages = read_serde::get_messages(&file_slice, &parser).unwrap();
-	output_messages(messages);
 }
 
 fn output_messages(messages: Vec<Message>) {

@@ -28,10 +28,10 @@ fn get_messages_from_user(
 	bad_keypair: Keypair,
 ) -> Vec<SignatureMessage> {
 	println!("Please enter desired message");
-	let message: String = text_io::try_read!().unwrap();
+	let message: String = text_io::try_read!("{}\n").unwrap();
 	println!("Would you like to properly sign it? (true/false)");
 	let signature: Signature = 
-		if text_io::try_read!().unwrap() {
+		if text_io::try_read!("{}\n").unwrap() {
 			keypair.sign(message.as_bytes())
 		} else {
 			bad_keypair.sign(message.as_bytes())
@@ -45,7 +45,7 @@ fn get_messages_from_user(
 	write_data.push(new_element);
 
 	println!("Would you like to enter another message? (true/false)");
-	let res: bool = text_io::try_read!().unwrap();
+	let res: bool = text_io::try_read!("{}\n").unwrap();
 	if !res {
 		return write_data;
 	}
