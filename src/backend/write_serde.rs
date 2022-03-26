@@ -1,6 +1,6 @@
 use crate::{Error, SerdeParser, SignatureMessage};
 
-pub fn write_to_smile(
+pub fn write_to_serde(
 	file: &str,
 	file_slice: &Vec<u8>,
 	parser: &SerdeParser,
@@ -13,7 +13,7 @@ pub fn write_to_smile(
 		Ok(i) => i,
 		Err(_) => Vec::<([u8; 32], String, [u8; 32], [u8; 32])>::new(),
 	};
-	// Concatenate messages
+	// Concatenate old and new messages
 	let write_data = [orig_messages, sig_message_to_vec(data)].concat();
 
 	// Convert into chosen format

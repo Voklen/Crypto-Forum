@@ -13,7 +13,7 @@ pub fn interactive_write(file: &str, file_slice: &Vec<u8>, parser: &SerdeParser,
 	};
 
 	let messages = get_messages_from_user(&keypair, write_data, bad_keypair);
-	match write_serde::write_to_smile(file, file_slice, &parser, messages) {
+	match write_serde::write_to_serde(file, file_slice, &parser, messages) {
 		Ok(()) => {}
 		Err(_) => {
 			println!("Failed to write to file");
