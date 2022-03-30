@@ -1,13 +1,14 @@
-use crate::{Error, SerdeParser, SignatureMessage};
+use crate::{read, Error, SerdeParser, SignatureMessage};
 
 pub fn write_to_serde(
 	file: &str,
-	file_slice: &Vec<u8>,
 	parser: &SerdeParser,
 	data: Vec<SignatureMessage>,
 ) -> Result<(), Error> {
 	use std::io::Write;
 
+	// Read file (see Decisions.md for explanation)
+	let (_, file_slice) = read::read_file_data(file).unwrap();
 	// Get messages already in file to concatenate
 	let orig_messages = match crate::read_serde::get_messages_vec(&file_slice, parser) {
 		Ok(i) => i,

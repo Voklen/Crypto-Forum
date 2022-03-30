@@ -1,7 +1,7 @@
 use crate::{write_serde, SerdeParser, SignatureMessage};
 use ed25519_dalek::*;
 
-pub fn interactive_write(file: &str, file_slice: &Vec<u8>, parser: &SerdeParser, keypair: Keypair) {
+pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair) {
 	let write_data = Vec::<SignatureMessage>::new();
 
 	// THIS BREAKS IF THEIR KEY SEED IS ALL 0'S
@@ -13,11 +13,11 @@ pub fn interactive_write(file: &str, file_slice: &Vec<u8>, parser: &SerdeParser,
 	};
 
 	let messages = get_messages_from_user(&keypair, write_data, bad_keypair);
-	match write_serde::write_to_serde(file, file_slice, &parser, messages) {
+	match write_serde::write_to_serde(file, &parser, messages) {
 		Ok(()) => {}
 		Err(_) => {
 			println!("Failed to write to file");
-			interactive_write(file, file_slice, parser, keypair)
+			interactive_write(file, parser, keypair)
 		}
 	}
 }
@@ -30,12 +30,11 @@ fn get_messages_from_user(
 	println!("Please enter desired message");
 	let message: String = text_io::try_read!("{}\n").unwrap();
 	println!("Would you like to properly sign it? (true/false)");
-	let signature: Signature = 
-		if text_io::try_read!("{}\n").unwrap() {
-			keypair.sign(message.as_bytes())
-		} else {
-			bad_keypair.sign(message.as_bytes())
-		};
+	let signature: Signature = if text_io::try_read!("{}\n").unwrap() {
+		keypair.sign(message.as_bytes())
+	} else {
+		bad_keypair.sign(message.as_bytes())
+	};
 
 	let new_element = SignatureMessage {
 		public_key: keypair.public,

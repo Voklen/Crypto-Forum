@@ -47,7 +47,7 @@ fn main() {
 	output_messages(messages);
 	
 	let keypair = user_keypair::get_keypair();
-	write::interactive_write(messages_file, &file_slice, &parser, keypair);
+	write::interactive_write(messages_file, &parser, keypair);
 }
 
 fn output_messages(messages: Vec<Message>) {
