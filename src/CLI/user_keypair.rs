@@ -1,5 +1,4 @@
 use ed25519_dalek::*;
-use text_io::try_read;
 
 pub fn get_keypair() -> Keypair {
 	let secret_seed = get_random_from_usr();
@@ -14,7 +13,7 @@ fn get_random_from_usr() -> [u8; 64] {
 	println!(
 		"Please type some random characters (this will be used for the initial key generation)"
 	);
-	let random_input: Result<String, _> = try_read!("{}\n");
+	let random_input: Result<String, _> = text_io::try_read!("{}\n");
 
 	match random_input {
 		Ok(res) => {

@@ -27,6 +27,9 @@ fn file_type(file_slice: &Vec<u8>) -> SerdeParser {
 	match &file_slice[..2] {
 		[58, 41] => SerdeParser::Smile,
 		[91, 91] => SerdeParser::Json,
-		i => panic!("{:?}", i)
+		_ => {
+			println!("Unknown file type");
+			std::process::exit(1);
+		}
 	}
 }
