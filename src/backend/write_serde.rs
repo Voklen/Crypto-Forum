@@ -10,10 +10,8 @@ pub fn write_to_serde(
 	// Read file (see Decisions.md for explanation)
 	let (_, file_slice) = read::read_file_data(file).unwrap();
 	// Get messages already in file to concatenate
-	let orig_messages = match crate::read_serde::get_messages_vec(&file_slice, parser) {
-		Ok(i) => i,
-		Err(_) => Vec::<([u8; 32], String, [u8; 32], [u8; 32])>::new(),
-	};
+	let orig_messages = crate::read_serde::get_messages_vec(&file_slice, parser)
+		.unwrap_or(Vec::<([u8; 32], String, [u8; 32], [u8; 32])>::new());
 	// Concatenate old and new messages
 	let write_data = [orig_messages, sig_message_to_vec(data)].concat();
 
@@ -30,11 +28,14 @@ pub fn write_to_serde(
 	};
 
 	// Write to file
-	let mut file = std::fs::File::create(file).unwrap();
-	match file.write_all(&value) {
-		Ok(_) => Ok(()),
-		Err(err) => Err(Error::StdIo(err.kind())),
-	}
+	let mut file = match std::fs::File::create(file) {
+		Ok(i) => i,
+		Err(err) => return Err(Error::StdIo(err.kind())),
+	};
+	file.write_all(&value)
+		.or_else(|err| {
+			Err(Error::StdIo(err.kind()))
+		})
 }
 
 fn sig_message_to_vec(data: Vec<SignatureMessage>) -> Vec<([u8; 32], String, [u8; 32], [u8; 32])> {

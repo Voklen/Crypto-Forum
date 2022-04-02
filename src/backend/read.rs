@@ -1,5 +1,3 @@
-use std::panic;
-
 use crate::{Error, SerdeParser};
 
 pub fn read_file_data(file: &str) -> Result<(SerdeParser, Vec<u8>), Error> {

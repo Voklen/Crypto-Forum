@@ -1,7 +1,6 @@
 use ed25519_dalek::*;
 use text_io::try_read;
 
-
 pub fn get_keypair() -> Keypair {
 	let secret_seed = get_random_from_usr();
 
@@ -12,24 +11,25 @@ pub fn get_keypair() -> Keypair {
 
 /* Get the user to enter some random characters, then hash whatever they give and return that hash as a byte array */
 fn get_random_from_usr() -> [u8; 64] {
-	loop {
-		println!(
-			"Please type some random characters (this will be used for the initial key generation)"
-		);
-		let random_input: Result<String, _> = try_read!("{}\n");
+	println!(
+		"Please type some random characters (this will be used for the initial key generation)"
+	);
+	let random_input: Result<String, _> = try_read!("{}\n");
 
-		match random_input {
-			Ok(res) => {
-				return {
-					let mut h: Sha512 = Sha512::new();
-					let mut hash: [u8; 64] = [0u8; 64];
+	match random_input {
+		Ok(res) => {
+			{
+				let mut h: Sha512 = Sha512::new();
+				let mut hash: [u8; 64] = [0u8; 64];
 
-					h.update(res.as_bytes());
-					hash.copy_from_slice(h.finalize().as_slice());
-					hash
-				}
+				h.update(res.as_bytes());
+				hash.copy_from_slice(h.finalize().as_slice());
+				hash
 			}
-			Err(_err) => println!("Sorry, couldn't read the input. Try again."),
-		};
+		}
+		Err(_err) => {
+			println!("Sorry, couldn't read the input. Try again.");
+			get_random_from_usr()
+		}
 	}
 }
