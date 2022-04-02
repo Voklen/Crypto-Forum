@@ -1,9 +1,9 @@
 use crate::{Error, SerdeParser};
 
-pub fn read_file_data(file: &str) -> Result<(SerdeParser, Vec<u8>), Error> {
+pub fn read_file_data(file: &str) -> Result<(Vec<u8>, SerdeParser), Error> {
 	let file_slice = read_file_to_slice(file)?;
 	let parser = file_type(&file_slice);
-	return Ok((parser, file_slice));
+	return Ok((file_slice, parser));
 }
 
 fn read_file_to_slice(file: &str) -> Result<Vec<u8>, Error> {

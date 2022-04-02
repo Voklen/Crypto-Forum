@@ -41,7 +41,11 @@ pub enum SerdeParser {
 fn main() {
 	let args: Vec<String> = std::env::args().collect();
 	let messages_file: &str = &args[1];
-	let (parser, file_slice) = read::read_file_data(messages_file).unwrap();
+	let (file_slice, parser) = match read::read_file_data(messages_file) {
+		Ok(i) => i,
+		Err(Error::StdIo(std::io::ErrorKind::NotFound)) => write::make_file(messages_file).unwrap(),
+		_ => std::panic!("error")
+	};
 
 	let messages = read_serde::get_messages(&file_slice, &parser).unwrap();
 	output_messages(messages);

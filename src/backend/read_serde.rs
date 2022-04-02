@@ -33,7 +33,14 @@ pub fn get_messages_vec(
 ) -> Result<Vec<([u8; 32], String, [u8; 32], [u8; 32])>, Error> {
 	match parser {
 		SerdeParser::Json => match serde_json::from_slice(&file_slice) {
-			Err(err) => Err(Error::JsonError(err)),
+			Err(err) => {
+				if file_slice == "[[]]".as_bytes() {
+					// If the error is due to the file being an empty json, return an empty vector
+					Ok(Vec::<([u8; 32], String, [u8; 32], [u8; 32])>::new())
+				} else {
+					Err(Error::JsonError(err))
+				}
+			}
 			Ok(i) => Ok(i),
 		},
 		SerdeParser::Smile => match serde_smile::from_slice(&file_slice) {

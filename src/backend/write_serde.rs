@@ -8,7 +8,11 @@ pub fn write_to_serde(
 	use std::io::Write;
 
 	// Read file (see Decisions.md for explanation)
-	let (_, file_slice) = read::read_file_data(file)?;
+	let file_slice = match read::read_file_data(file) {
+		Ok(i) => i.0,
+		Err(Error::StdIo(std::io::ErrorKind::NotFound)) => Vec::<u8>::new(),
+		Err(err) => return Err(err),
+	};
 	// Get messages already in file to concatenate
 	let orig_messages = crate::read_serde::get_messages_vec(&file_slice, parser)
 		.unwrap_or(Vec::<([u8; 32], String, [u8; 32], [u8; 32])>::new());

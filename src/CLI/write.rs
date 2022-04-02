@@ -12,9 +12,9 @@ pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair) {
 		public: bad_public,
 	};
 
-	let messages = get_messages_from_user(&keypair, write_data, bad_keypair);
+	let messages = get_messages_from_user(&keypair, write_data, [0; 64], bad_keypair);
 	match write_serde::write_to_serde(file, &parser, messages) {
-		Ok(()) => {}
+		Ok(_) => {}
 		Err(_) => {
 			println!("Failed to write to file");
 			interactive_write(file, parser, keypair)
@@ -49,4 +49,39 @@ fn get_messages_from_user(
 		return write_data;
 	}
 	get_messages_from_user(keypair, write_data, bad_keypair)
+}
+
+pub fn make_file(file: &str) -> Result<(Vec<u8>, SerdeParser), Error> {
+	use std::io::Write;
+
+	// Get user input
+	println!("Would you like to make a file? (true/false)");
+	let should_make_file: bool = match text_io::try_read!("{}\n") {
+		Ok(i) => i,
+		Err(_) => {
+			println!("Please type either true or false");
+			return make_file(file);
+		}
+	};
+
+	// Exit if user says so
+	if !should_make_file {
+		println!("No file made");
+		std::process::exit(0);
+	}
+
+	let parser = SerdeParser::Json;
+	let slice = "[[]]".as_bytes();
+
+	// Write to file
+	let mut file = match std::fs::File::create(file) {
+		Ok(i) => i,
+		Err(err) => return Err(Error::StdIo(err.kind())),
+	};
+	match file.write_all(slice) {
+		Ok(_) => {},
+		Err(err) => return Err(Error::StdIo(err.kind())),
+	}
+
+	Ok((slice.to_vec(), parser))
 }
