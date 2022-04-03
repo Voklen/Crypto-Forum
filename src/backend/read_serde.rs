@@ -3,7 +3,7 @@ use ed25519_dalek::*;
 use crate::{Error, Message, SerdeParser};
 
 pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Message>, Error> {
-	fn to_message(x: ([u8; 32], String, [u8; 32], [u8; 32])) -> Option<Message> {
+	fn to_message(x: ([u8; 32], String, [u8; 32], [u8; 32], [u8; 32], [u8; 32])) -> Option<Message> {
 		let public_key = match PublicKey::from_bytes(&x.0) {
 			Ok(i) => i,
 			Err(_) => return None,
@@ -34,13 +34,13 @@ pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Me
 pub fn get_messages_vec(
 	file_slice: &Vec<u8>,
 	parser: &SerdeParser,
-) -> Result<Vec<([u8; 32], String, [u8; 32], [u8; 32])>, Error> {
+) -> Result<Vec<([u8; 32], String, [u8; 32], [u8; 32], [u8; 32], [u8; 32])>, Error> {
 	match parser {
 		SerdeParser::Json => match serde_json::from_slice(&file_slice) {
 			Err(err) => {
 				if file_slice == "[[]]".as_bytes() {
 					// If the error is due to the file being an empty json, return an empty vector
-					Ok(Vec::<([u8; 32], String, [u8; 32], [u8; 32])>::new())
+					Ok(Vec::<([u8; 32], String, [u8; 32], [u8; 32], [u8; 32], [u8; 32])>::new())
 				} else {
 					Err(Error::JsonError(err))
 				}

@@ -15,7 +15,7 @@ pub fn write_to_serde(
 	};
 	// Get messages already in file to concatenate
 	let orig_messages = crate::read_serde::get_messages_vec(&file_slice, parser)
-		.unwrap_or(Vec::<([u8; 32], String, [u8; 32], [u8; 32])>::new());
+		.unwrap_or(Vec::<([u8; 32], String, [u8; 32], [u8; 32], [u8; 32], [u8; 32])>::new());
 	// Concatenate old and new messages
 	let write_data = [orig_messages, sig_message_to_vec(data)].concat();
 
@@ -42,14 +42,17 @@ pub fn write_to_serde(
 		})
 }
 
-fn sig_message_to_vec(data: Vec<SignatureMessage>) -> Vec<([u8; 32], String, [u8; 32], [u8; 32])> {
+fn sig_message_to_vec(data: Vec<SignatureMessage>) -> Vec<([u8; 32], String, [u8; 32], [u8; 32], [u8; 32], [u8; 32])> {
 	data.into_iter()
 		.map(|f| {
+			let hash = f.get_hash();
 			(
 				f.public_key.to_bytes(),
 				f.message,
 				to_32(f.signature.to_bytes(), true),
 				to_32(f.signature.to_bytes(), false),
+				to_32(hash, true),
+				to_32(hash, false),
 			)
 		})
 		.collect()

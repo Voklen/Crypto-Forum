@@ -3,10 +3,10 @@ mod user_keypair;
 #[path = "CLI/write.rs"]
 mod write;
 
-#[path = "backend/general_functions.rs"]
-mod useful_funcs;
 #[path = "backend/read_serde.rs"]
 mod read_serde;
+#[path = "backend/general_functions.rs"]
+mod useful_funcs;
 #[path = "backend/write_serde.rs"]
 mod write_serde;
 
@@ -34,6 +34,17 @@ pub struct SignatureMessage {
 	pub signature: ed25519_dalek::Signature,
 }
 
+impl SignatureMessage {
+	fn get_hash(&self) -> [u8; 64] {
+		let bytes = [
+			self.public_key.as_bytes(),
+			self.message.as_bytes(),
+			&self.signature.to_bytes(),
+		].concat();
+		useful_funcs::hash(&bytes)
+	}
+}
+
 #[derive(Debug)]
 pub enum SerdeParser {
 	Json,
@@ -51,7 +62,7 @@ fn main() {
 
 	let messages = read_serde::get_messages(&file_slice, &parser).unwrap();
 	output_messages(messages);
-	
+
 	let keypair = user_keypair::get_keypair();
 	write::interactive_write(messages_file, &parser, keypair);
 }
