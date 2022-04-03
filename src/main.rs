@@ -3,6 +3,8 @@ mod user_keypair;
 #[path = "CLI/write.rs"]
 mod write;
 
+#[path = "backend/general_functions.rs"]
+mod useful_funcs;
 #[path = "backend/read_serde.rs"]
 mod read_serde;
 #[path = "backend/write_serde.rs"]
@@ -44,7 +46,7 @@ fn main() {
 	let (file_slice, parser) = match read::read_file_data(messages_file) {
 		Ok(i) => i,
 		Err(Error::StdIo(std::io::ErrorKind::NotFound)) => write::make_file(messages_file).unwrap(),
-		_ => std::panic!("error")
+		_ => std::panic!("error"),
 	};
 
 	let messages = read_serde::get_messages(&file_slice, &parser).unwrap();
