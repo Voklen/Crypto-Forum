@@ -1,4 +1,4 @@
-use crate::{write_serde, SerdeParser, SignatureMessage};
+use crate::{write_serde, Error, SerdeParser, SignatureMessage};
 use ed25519_dalek::*;
 
 pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair) {
@@ -25,15 +25,17 @@ pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair) {
 fn get_messages_from_user(
 	keypair: &Keypair,
 	mut write_data: Vec<SignatureMessage>,
+	prev_hash: [u8; 64],
 	bad_keypair: Keypair,
 ) -> Vec<SignatureMessage> {
 	println!("Please enter desired message");
 	let message: String = text_io::try_read!("{}\n").unwrap();
+	let to_sign = &[message.as_bytes(), &prev_hash].concat();
 	println!("Would you like to properly sign it? (true/false)");
 	let signature: Signature = if text_io::try_read!("{}\n").unwrap() {
-		keypair.sign(message.as_bytes())
+		keypair.sign(to_sign)
 	} else {
-		bad_keypair.sign(message.as_bytes())
+		bad_keypair.sign(to_sign)
 	};
 
 	let new_element = SignatureMessage {
@@ -48,7 +50,7 @@ fn get_messages_from_user(
 	if !res {
 		return write_data;
 	}
-	get_messages_from_user(keypair, write_data, bad_keypair)
+	get_messages_from_user(keypair, write_data, prev_hash, bad_keypair)
 }
 
 pub fn make_file(file: &str) -> Result<(Vec<u8>, SerdeParser), Error> {

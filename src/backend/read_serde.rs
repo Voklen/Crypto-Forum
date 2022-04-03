@@ -8,10 +8,14 @@ pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Me
 			Ok(i) => i,
 			Err(_) => return None,
 		};
+		let prev_hash = [0; 64];
 		let message = x.1;
 		let signed = match Signature::from_bytes(&[x.2, x.3].concat()) {
 			// Combine the two parts of the signature back into one
-			Ok(signature) => public_key.verify(message.as_bytes(), &signature).is_ok(),
+			Ok(signature) => {
+				let to_verify = &[message.as_bytes(), &prev_hash].concat();
+				public_key.verify(to_verify, &signature).is_ok()
+			}
 			Err(_) => false, // If the signature bytes are not a valid signature, it's not properly signed
 		};
 		Some(Message {
