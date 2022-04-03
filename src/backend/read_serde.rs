@@ -3,14 +3,14 @@ use ed25519_dalek::*;
 use crate::{Error, Message, SerdeParser};
 
 pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Message>, Error> {
-	fn to_message(x: ([u8; 32], String, [u8; 32], [u8; 32], [u8; 32], [u8; 32])) -> Option<Message> {
-		let public_key = match PublicKey::from_bytes(&x.0) {
+	fn to_message(f: ([u8; 32],[u8; 32],[u8; 32],String,[u8; 32],[u8; 32])) -> Option<Message> {
+		let prev_hash: [u8; 64] = our_append(f.0, f.1);
+		let public_key = match PublicKey::from_bytes(&f.2) {
 			Ok(i) => i,
 			Err(_) => return None,
 		};
-		let prev_hash = [0; 64];
-		let message = x.1;
-		let signed = match Signature::from_bytes(&[x.2, x.3].concat()) {
+		let message = f.3;
+		let signed = match Signature::from_bytes(&[f.4, f.5].concat()) {
 			// Combine the two parts of the signature back into one
 			Ok(signature) => {
 				let to_verify = &[message.as_bytes(), &prev_hash].concat();
@@ -19,6 +19,7 @@ pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Me
 			Err(_) => false, // If the signature bytes are not a valid signature, it's not properly signed
 		};
 		Some(Message {
+			prev_hash,
 			public_key,
 			message,
 			signed,
@@ -34,13 +35,13 @@ pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Me
 pub fn get_messages_vec(
 	file_slice: &Vec<u8>,
 	parser: &SerdeParser,
-) -> Result<Vec<([u8; 32], String, [u8; 32], [u8; 32], [u8; 32], [u8; 32])>, Error> {
+) -> Result<Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>, Error> {
 	match parser {
 		SerdeParser::Json => match serde_json::from_slice(&file_slice) {
 			Err(err) => {
 				if file_slice == "[[]]".as_bytes() {
 					// If the error is due to the file being an empty json, return an empty vector
-					Ok(Vec::<([u8; 32], String, [u8; 32], [u8; 32], [u8; 32], [u8; 32])>::new())
+					Ok(Vec::<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>::new())
 				} else {
 					Err(Error::JsonError(err))
 				}
@@ -52,4 +53,13 @@ pub fn get_messages_vec(
 			Ok(i) => Ok(i),
 		},
 	}
+}
+
+fn our_append(first: [u8; 32], second: [u8; 32]) -> [u8; 64] {
+	let mut output = [0; 64];
+	output[..32].copy_from_slice(first.as_slice());
+	for (index, i) in second.into_iter().enumerate() {
+		output[index + 32] = i;
+	}
+	output
 }

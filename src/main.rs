@@ -22,6 +22,7 @@ pub enum Error {
 
 #[derive(Debug)]
 pub struct Message {
+	pub prev_hash: [u8; 64],
 	pub public_key: ed25519_dalek::PublicKey,
 	pub message: String,
 	pub signed: bool,
