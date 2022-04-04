@@ -26,6 +26,7 @@ pub struct Message {
 	pub public_key: ed25519_dalek::PublicKey,
 	pub message: String,
 	pub signed: bool,
+	pub hash: [u8; 64],
 }
 
 #[derive(Debug)]
@@ -75,8 +76,34 @@ fn output_messages(messages: Vec<Message>) {
 			println!("!!!WARNING: INVALID SIGNATURE!!!");
 			println!("!!!WE HAVE NO PROOF THIS PUBLIC KEY EVER POSTED THIS!!!");
 		}
-		println!("Public key: {:?}", i.public_key.as_bytes());
+		println!("Public key: {}", bytes_to_hex(i.public_key.as_bytes()));
+		println!("Replying to message with hash: {}", bytes_to_hex(&i.prev_hash));
 		println!("Message: \n{}", i.message);
+		println!("Hash: {}", bytes_to_hex(&i.hash));
 		println!("--------")
 	}
+}
+
+fn bytes_to_hex(bytes: &[u8]) -> String {
+	let mut out = String::new();
+    for i in bytes {
+        fn hex_from_digit(num: u8) -> char {
+            if num < 10 {
+                (b'0' + num) as char
+            } else {
+                (b'A' + num - 10) as char
+            }
+        }
+		/*
+		Amazing, goes from 0 -> 00:
+		println!("1: {}", hex_from_digit(0 / 16));
+		println!("2: {}", hex_from_digit(0 % 16));
+		all the way to the u8 limit of 255 -> FF (Just like colours! I'm getting way to exited about this…):
+		println!("1: {}", hex_from_digit(255 / 16));
+		println!("2: {}", hex_from_digit(255 % 16));
+		*/
+        out.push(hex_from_digit(i / 16));
+        out.push(hex_from_digit(i % 16));
+    }
+	out
 }
