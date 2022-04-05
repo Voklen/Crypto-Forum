@@ -1,3 +1,4 @@
+use crate::useful_funcs;
 use ed25519_dalek::*;
 
 pub fn get_keypair() -> Keypair {
@@ -16,16 +17,7 @@ fn get_random_from_usr() -> [u8; 64] {
 	let random_input: Result<String, _> = text_io::try_read!("{}\n");
 
 	match random_input {
-		Ok(res) => {
-			{
-				let mut h: Sha512 = Sha512::new();
-				let mut hash: [u8; 64] = [0u8; 64];
-
-				h.update(res.as_bytes());
-				hash.copy_from_slice(h.finalize().as_slice());
-				hash
-			}
-		}
+		Ok(res) => useful_funcs::hash(res.as_bytes()),
 		Err(_err) => {
 			println!("Sorry, couldn't read the input. Try again.");
 			get_random_from_usr()
