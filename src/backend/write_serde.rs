@@ -42,12 +42,12 @@ pub fn write_to_serde(
 		})
 }
 
-fn sig_message_to_vec(data: Vec<SignatureMessage>) -> Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])> {
+pub fn sig_message_to_vec(data: Vec<SignatureMessage>) -> Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])> {
 	data.into_iter()
 		.map(|f| {
 			(
-				[0; 32],
-				[0; 32],
+				to_32(f.prev_hash, true),
+				to_32(f.prev_hash, false),
 				f.public_key.to_bytes(),
 				f.message,
 				to_32(f.signature.to_bytes(), true),

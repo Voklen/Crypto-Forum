@@ -31,6 +31,7 @@ pub struct Message {
 
 #[derive(Debug)]
 pub struct SignatureMessage {
+	pub prev_hash: [u8; 64],
 	pub public_key: ed25519_dalek::PublicKey,
 	pub message: String,
 	pub signature: ed25519_dalek::Signature,
@@ -38,12 +39,13 @@ pub struct SignatureMessage {
 
 impl SignatureMessage {
 	fn get_hash(&self) -> [u8; 64] {
-		let bytes = [
-			self.public_key.as_bytes(),
-			self.message.as_bytes(),
-			&self.signature.to_bytes(),
-		].concat();
-		useful_funcs::hash(&bytes)
+		let mut collection_vector = Vec::<u8>::new();
+		collection_vector.extend_from_slice(&self.prev_hash);
+		collection_vector.extend_from_slice(&self.public_key.to_bytes());
+		collection_vector.extend_from_slice(self.message.as_bytes());
+		collection_vector.extend_from_slice(&self.signature.to_bytes());
+	
+		useful_funcs::hash(&collection_vector)
 	}
 }
 
@@ -63,13 +65,17 @@ fn main() {
 	};
 
 	let messages = read_serde::get_messages(&file_slice, &parser).unwrap();
-	output_messages(messages);
+	output_messages(&messages);
 
 	let keypair = user_keypair::get_keypair();
-	write::interactive_write(messages_file, &parser, keypair);
+	let last_hash = match messages.last() {
+		Some(i) => i.hash,
+		None => [0; 64]
+	};
+	write::interactive_write(messages_file, &parser, keypair, last_hash);
 }
 
-fn output_messages(messages: Vec<Message>) {
+fn output_messages(messages: &Vec<Message>) {
 	for i in messages {
 		println!("--------");
 		if !i.signed {
