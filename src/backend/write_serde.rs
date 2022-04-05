@@ -37,9 +37,7 @@ pub fn write_to_serde(
 		Err(err) => return Err(Error::StdIo(err.kind())),
 	};
 	file.write_all(&value)
-		.or_else(|err| {
-			Err(Error::StdIo(err.kind()))
-		})
+		.or_else(|err| Err(Error::StdIo(err.kind())))
 }
 
 pub fn sig_message_to_vec(data: Vec<SignatureMessage>) -> Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])> {

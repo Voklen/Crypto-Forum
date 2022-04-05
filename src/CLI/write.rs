@@ -1,7 +1,7 @@
 use crate::{write_serde, Error, SerdeParser, SignatureMessage};
 use ed25519_dalek::*;
 
-pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, last_hash: [u8; 64] ) {
+pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, last_hash: [u8; 64]) {
 	let write_data = Vec::<SignatureMessage>::new();
 
 	// THIS BREAKS IF THEIR KEY SEED IS ALL 0'S

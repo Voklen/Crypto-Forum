@@ -44,7 +44,7 @@ impl SignatureMessage {
 		collection_vector.extend_from_slice(&self.public_key.to_bytes());
 		collection_vector.extend_from_slice(self.message.as_bytes());
 		collection_vector.extend_from_slice(&self.signature.to_bytes());
-	
+
 		useful_funcs::hash(&collection_vector)
 	}
 }
@@ -70,7 +70,7 @@ fn main() {
 	let keypair = user_keypair::get_keypair();
 	let last_hash = match messages.last() {
 		Some(i) => i.hash,
-		None => [0; 64]
+		None => [0; 64],
 	};
 	write::interactive_write(messages_file, &parser, keypair, last_hash);
 }
