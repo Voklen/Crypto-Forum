@@ -1,10 +1,9 @@
 Now⌨:
-Arguments
 
 Soon⌚:
 Multiple threads (as in forum threads): refinements {
 	Implement reference.json
-	if argument is a directory search and display metadata
+	if argument is a directory, loop through files and display header if valid messages file
 }
 Account with encrypted private key
 Unit tests
@@ -22,3 +21,4 @@ Search
 
 Done🎉:
 Blockchain
+Arguments
