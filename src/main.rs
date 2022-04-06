@@ -55,16 +55,71 @@ pub enum SerdeParser {
 	Smile,
 }
 
-fn main() {
-	let args: Vec<String> = std::env::args().collect();
-	let messages_file: &str = &args[1];
-	let (file_slice, parser) = match read::read_file_data(messages_file) {
-		Ok(i) => i,
-		Err(Error::StdIo(std::io::ErrorKind::NotFound)) => write::make_file(messages_file).unwrap(),
-		_ => std::panic!("error"),
-	};
+pub struct Command {
+	pub interactive: bool,
+	pub files: Vec<String>,
+}
 
-	let messages = read_serde::get_messages(&file_slice, &parser).unwrap();
+fn main() {
+	let args: Vec<String> = std::env::args().skip(1).collect();
+	let command = get_commands(args);
+	for messages_file in &command.files {
+		// Read & parse data from file
+		let (file_slice, parser) = match read::read_file_data(messages_file) {
+			Ok(i) => i,
+			Err(Error::StdIo(std::io::ErrorKind::NotFound)) => write::make_file(messages_file).unwrap(),
+			_ => std::panic!("error"),
+		};
+		let messages = read_serde::get_messages(&file_slice, &parser).unwrap();
+
+		// Run either interactively or display output
+		if command.interactive {
+			interactive_session(messages_file, parser, messages)
+		} else {
+			output_messages(&messages)
+		}
+	}
+
+}
+
+fn get_commands(args: Vec<String>) -> Command {
+	if args.len() < 1 {
+		println!("{program_name}: missing operand", program_name=env!("CARGO_PKG_NAME"));
+		std::process::exit(1)
+	}
+	let mut interactive = false;
+	let mut files = Vec::<String>::new();
+	for arg in args {
+		if &arg[..1] == "-" {
+			interactive = process_dash_argument(arg)
+		} else {
+			// If there is no "-" at the start of the argument, it's a file that's being passed
+			files.push(arg);
+		}
+	};
+	Command {
+		interactive,
+		files,
+	}
+}
+
+// Currently only returns a boolean because the only argument right now is "-i"
+fn process_dash_argument(arg: String) -> bool {
+	match arg.as_str() {
+		"-i" => return true,
+		"--version" => {
+			println!("{program_name} {program_ver}", program_name=env!("CARGO_PKG_NAME"), program_ver=env!("CARGO_PKG_VERSION"));
+			println!("Copyright (C) 2022 Alexander Gorichev\nLicense GPL-3.0-only: GNU GPL version 3.0 only <https://gnu.org/licenses/gpl-3.0.html>.\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.\n\nWritten by Alexander Gorichev.");
+			std::process::exit(1)
+		}
+		_ => {
+			println!("{program_name}: invalid option -- '{argument}'", program_name=env!("CARGO_PKG_NAME"), argument=arg);
+			std::process::exit(1)
+		}
+	}
+}
+
+fn interactive_session(messages_file: &str, parser: SerdeParser, messages: Vec<Message>) {
 	output_messages(&messages);
 
 	let keypair = user_keypair::get_keypair();

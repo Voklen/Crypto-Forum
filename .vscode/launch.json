@@ -20,7 +20,8 @@
 				}
 			},
 			"args": [
-				"messages.json"
+				"-i",
+				"test_data/messages.json"
 			],
 			"cwd": "${workspaceFolder}"
 		},

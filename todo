@@ -1,7 +1,11 @@
 Now⌨:
+Arguments
 
 Soon⌚:
-Multiple threads (as in forum threads)
+Multiple threads (as in forum threads): refinements {
+	Implement reference.json
+	if argument is a directory search and display metadata
+}
 Account with encrypted private key
 Unit tests
 Improve last hash: refinements {
