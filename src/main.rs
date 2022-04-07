@@ -16,7 +16,7 @@ mod read;
 #[derive(Debug)]
 pub enum Error {
 	StdIo(std::io::ErrorKind),
-	SmileError,
+	SmileError(serde_smile::Error),
 	JsonError(serde_json::Error),
 }
 
@@ -62,8 +62,7 @@ pub enum Argument {
 }
 
 fn main() {
-	let args: Vec<String> = std::env::args().skip(1).collect();
-	let (files, arguments) = get_commands(args);
+	let (files, arguments) = get_arguments();
 	for messages_file in &files {
 		println!("File: {}", messages_file);
 		// Read & parse data from file
@@ -94,7 +93,8 @@ fn main() {
 	}
 }
 
-fn get_commands(args: Vec<String>) -> (Vec<String>, Vec<Argument>) {
+fn get_arguments() -> (Vec<String>, Vec<Argument>) {
+	let args: Vec<String> = std::env::args().skip(1).collect();
 	if args.len() < 1 {
 		println!(
 			"{program_name}: missing operand",
@@ -115,9 +115,7 @@ fn get_commands(args: Vec<String>) -> (Vec<String>, Vec<Argument>) {
 	(files, arguments)
 }
 
-// Currently only returns a boolean because the only argument right now is "-i"
 fn process_dash_argument(arg: String) -> Argument {
-	// Return enum with which value is changed, then take that value and append it to an vector if it's not already there
 	match arg.as_str() {
 		"-i" => return Argument::Interactive,
 		"-m" => return Argument::MachineOutput,
@@ -127,7 +125,7 @@ fn process_dash_argument(arg: String) -> Argument {
 				program_ver = env!("CARGO_PKG_VERSION")
 			);
 			println!("Copyright (C) 2022 Alexander Gorichev\nLicense GPL-3.0-only: GNU GPL version 3.0 only <https://gnu.org/licenses/gpl-3.0.html>.\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.\n\nWritten by Alexander Gorichev.");
-			std::process::exit(1)
+			std::process::exit(0)
 		}
 		_ => {
 			println!("{program_name}: invalid option -- '{argument}'",

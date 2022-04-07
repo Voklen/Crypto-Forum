@@ -14,8 +14,7 @@ pub fn write_to_serde(
 		Err(err) => return Err(err),
 	};
 	// Get messages already in file to concatenate
-	let orig_messages = crate::read_serde::get_messages_vec(&file_slice, parser)
-		.unwrap_or(Vec::<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>::new());
+	let orig_messages = crate::read_serde::get_messages_vec(&file_slice, parser).unwrap();
 	// Concatenate old and new messages
 	let write_data = [orig_messages, sig_message_to_vec(data)].concat();
 
@@ -27,7 +26,7 @@ pub fn write_to_serde(
 		},
 		&SerdeParser::Smile => match serde_smile::to_vec(&write_data) {
 			Ok(i) => i,
-			Err(_) => return Err(Error::SmileError),
+			Err(err) => return Err(Error::SmileError(err)),
 		},
 	};
 

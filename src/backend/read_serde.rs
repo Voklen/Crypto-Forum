@@ -40,21 +40,17 @@ pub fn get_messages_vec(
 	file_slice: &Vec<u8>,
 	parser: &SerdeParser,
 ) -> Result<Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>, Error> {
+	if file_slice.len() <= 0 {
+		return Ok(Vec::<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>::new());
+	}
 	match parser {
 		SerdeParser::Json => match serde_json::from_slice(&file_slice) {
-			Err(err) => {
-				if file_slice == "[[]]".as_bytes() {
-					// If the error is due to the file being an empty json, return an empty vector
-					Ok(Vec::<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>::new())
-				} else {
-					Err(Error::JsonError(err))
-				}
-			}
 			Ok(i) => Ok(i),
+			Err(err) => {Err(Error::JsonError(err))}
 		},
 		SerdeParser::Smile => match serde_smile::from_slice(&file_slice) {
-			Err(_) => Err(Error::SmileError), // serde_smile unfortunately does not expose the ErrorKind enum as public so we cannot specify the error
 			Ok(i) => Ok(i),
+			Err(err) => Err(Error::SmileError(err)),
 		},
 	}
 }
