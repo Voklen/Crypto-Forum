@@ -5,11 +5,9 @@ pub fn write_to_serde(
 	parser: &SerdeParser,
 	data: Vec<SignatureMessage>,
 ) -> Result<(), Error> {
-	use std::io::Write;
-
 	// Read file (see Decisions.md for explanation)
 	let file_slice = match read::read_file_data(file) {
-		Ok(i) => i.0,
+		Ok((slice, _)) => slice,
 		Err(Error::StdIo(std::io::ErrorKind::NotFound)) => Vec::<u8>::new(),
 		Err(err) => return Err(err),
 	};
@@ -31,11 +29,7 @@ pub fn write_to_serde(
 	};
 
 	// Write to file
-	let mut file = match std::fs::File::create(file) {
-		Ok(i) => i,
-		Err(err) => return Err(Error::StdIo(err.kind())),
-	};
-	file.write_all(&value)
+	std::fs::write(file, value)
 		.or_else(|err| Err(Error::StdIo(err.kind())))
 }
 
@@ -58,9 +52,9 @@ pub fn sig_message_to_vec(data: Vec<SignatureMessage>) -> Vec<([u8; 32], [u8; 32
 fn to_32(input: [u8; 64], first_32: bool) -> [u8; 32] {
 	let offset = if first_32 { 0 } else { 32 };
 	let mut out = [0; 32];
-	for (i, element) in input.iter().enumerate() {
+	for (i, element) in input.into_iter().enumerate() {
 		if offset <= i && i < (32 + offset) {
-			out[i - offset] = *element;
+			out[i - offset] = element;
 		}
 	}
 	out
