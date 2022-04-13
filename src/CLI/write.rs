@@ -13,7 +13,7 @@ pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, las
 	};
 
 	let messages = get_messages_from_user(&keypair, write_data, last_hash, bad_keypair);
-	match write_serde::write_to_serde(file, &parser, messages) {
+	match write_serde::write_messages(file, &parser, messages) {
 		Ok(_) => {}
 		Err(_) => {
 			println!("Failed to write to file");

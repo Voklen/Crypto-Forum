@@ -1,6 +1,6 @@
 use crate::{read, Error, SerdeParser, SignatureMessage};
 
-pub fn write_to_serde(
+pub fn write_messages(
 	file: &str,
 	parser: &SerdeParser,
 	data: Vec<SignatureMessage>,
