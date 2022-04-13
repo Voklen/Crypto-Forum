@@ -16,8 +16,11 @@ mod read;
 #[derive(Debug)]
 pub enum Error {
 	StdIo(std::io::ErrorKind),
+	Encryption(chacha20poly1305::aead::Error),
 	SmileError(serde_smile::Error),
 	JsonError(serde_json::Error),
+	InvalidFileData(String),
+	SignatureError(ed25519_dalek::SignatureError)
 }
 
 #[derive(Debug)]
@@ -144,7 +147,7 @@ fn interactive_session(messages_file: &str, parser: SerdeParser, messages: Vec<M
 		output_for_human(&messages)
 	}
 
-	let keypair = user_keypair::get_keypair();
+	let keypair = user_keypair::login().unwrap();
 	let last_hash = match messages.last() {
 		Some(i) => i.hash,
 		None => [0; 64],
