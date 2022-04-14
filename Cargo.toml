@@ -10,9 +10,9 @@ text_io = "0.1"
 json = "0.12"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-serde-smile = "0.1.0"
-chacha20poly1305 = "0.9.0"
-rand = "0.8.5"
+serde-smile = "0.1"
+chacha20poly1305 = "0.9"
+rand = "^0.8.5"
 
 [dependencies.ed25519-dalek]
 version = "1.0"
