@@ -26,14 +26,16 @@ pub fn encrypt_and_write(file: &str, data_to_encrypt: &[u8], key: &[u8; 32]) -> 
 }
 
 pub fn read_and_decrypt(file: &str, key: &[u8; 32]) -> Result<Vec<u8>, Error> {
-
+	// Read file
 	let file_data = std::fs::read(file).map_err(|err| Error::StdIo(err))?;
 
+	// Extract the first 24 bytes as the nonce
 	if file_data.len() <= 24 {
 		return Err(Error::InvalidFileData(file.to_string()));
 	}
 	let (nonce, encrypted_data) = file_data.split_at(24);
 
+	// Decrypt
 	XChaCha20Poly1305::new(key.into())
 		.decrypt(nonce.into(), encrypted_data)
 		.map_err(|err| Error::Encryption(err))

@@ -5,32 +5,28 @@ pub fn write_messages(
 	parser: &SerdeParser,
 	data: Vec<SignatureMessage>,
 ) -> Result<(), Error> {
-	// Read file (see Decisions.md for explanation)
+	let write_data = get_write_data(file, parser, data)?;
+	// Convert into chosen format
+	let value = match parser {
+		&SerdeParser::Json => serde_json::to_vec(&write_data).map_err(|err| Error::JsonError(err))?,
+		&SerdeParser::Smile => serde_smile::to_vec(&write_data).map_err(|err| Error::SmileError(err))?,
+	};
+	// Write to file
+	std::fs::write(file, value)
+		.or_else(|err| Err(Error::StdIo(err)))
+}
+
+fn get_write_data(file: &str, parser: &SerdeParser, data: Vec<SignatureMessage>) -> Result<Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>, Error> {
+    // Read file (see Decisions.md for explanation)
 	let file_slice = match read::read_file_data(file) {
 		Ok((slice, _)) => slice,
-		Err(Error::StdIo(std::io::ErrorKind::NotFound)) => Vec::<u8>::new(),
+		Err(Error::StdIo(err)) if err.kind() == std::io::ErrorKind::NotFound => Vec::<u8>::new(),
 		Err(err) => return Err(err),
 	};
 	// Get messages already in file to concatenate
 	let orig_messages = crate::read_serde::get_messages_vec(&file_slice, parser).unwrap();
 	// Concatenate old and new messages
-	let write_data = [orig_messages, sig_message_to_vec(data)].concat();
-
-	// Convert into chosen format
-	let value = match parser {
-		&SerdeParser::Json => match serde_json::to_vec(&write_data) {
-			Ok(i) => i,
-			Err(err) => return Err(Error::JsonError(err)),
-		},
-		&SerdeParser::Smile => match serde_smile::to_vec(&write_data) {
-			Ok(i) => i,
-			Err(err) => return Err(Error::SmileError(err)),
-		},
-	};
-
-	// Write to file
-	std::fs::write(file, value)
-		.or_else(|err| Err(Error::StdIo(err)))
+	Ok([orig_messages, sig_message_to_vec(data)].concat())
 }
 
 pub fn sig_message_to_vec(data: Vec<SignatureMessage>) -> Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])> {

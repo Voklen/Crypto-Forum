@@ -3,8 +3,7 @@ use ed25519_dalek::*;
 use crate::{Error, Message, SerdeParser, useful_funcs};
 
 pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Message>, Error> {
-	fn to_message(f: ([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])) -> Option<Message> {
-		// Calculate hash by borrowing values before they're moved (rust memory management)
+	fn vec_to_message(f: ([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])) -> Option<Message> {
 		let hash = useful_funcs::hash(&[&f.0, &f.1, &f.2, f.3.as_bytes(), &f.4, &f.5].concat());
 
 		let prev_hash: [u8; 64] = our_append(f.0, f.1);
@@ -32,7 +31,7 @@ pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Me
 
 	Ok(get_messages_vec(file_slice, parser)?
 		.into_iter()
-		.filter_map(to_message)
+		.filter_map(vec_to_message)
 		.collect())
 }
 

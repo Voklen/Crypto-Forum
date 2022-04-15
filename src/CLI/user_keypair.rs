@@ -5,17 +5,14 @@ use crate::{
 use ed25519_dalek::*;
 use sha2::{Digest, Sha256};
 
-pub fn login() -> Result<Keypair, Error> {
-	let accounts_dir = "accounts/";
-
-	// User input stuff
+pub fn login(accounts_dir: &str) -> Result<Keypair, Error> {
 	println!("Do you want to create a new account? (true/false)");
 	match text_io::try_read!() {
 		Ok(true) => create_account(accounts_dir),
-		Ok(false) => open_account(accounts_dir),
+		Ok(false) => get_existing_account(accounts_dir),
 		Err(_) => {
 			println!("Please only type true or false");
-			return login();
+			return login(accounts_dir);
 		}
 	}
 }
@@ -26,7 +23,7 @@ pub fn create_account(accounts_dir: &str) -> Result<Keypair, Error> {
 	println!("Please repeat that password");
 	if first_password != get_password() {
 		println!("Passwords do not match.");
-		return create_account(accounts_dir)
+		return create_account(accounts_dir);
 	}
 	let name = accounts_dir.to_owned() + &get_account_name();
 	let keypair = new_keypair();
@@ -45,21 +42,31 @@ fn get_account_name() -> String {
 	}
 }
 
-fn open_account(accounts_dir: &str) -> Result<Keypair, Error> {
+fn get_existing_account(accounts_dir: &str) -> Result<Keypair, Error> {
+	// Print all accounts
 	println!("Accounts:");
 	let account_files: Vec<String> = std::fs::read_dir(accounts_dir)
 		.map_err(|err| Error::StdIo(err))?
 		.filter_map(get_and_print_str)
 		.collect();
+
+	// Select & open account
+	println!("What account would you like to use?");
 	let selection: String = text_io::try_read!().unwrap();
 	if account_files.contains(&selection) {
-		println!("Please type in the password for {}", selection);
-		let file_data = read_and_decrypt(&(accounts_dir.to_owned() + &selection), &get_password())?;
-		Keypair::from_bytes(&file_data).map_err(|err| Error::SignatureError(err))
+		open_account(selection, accounts_dir)
 	} else {
 		println!("Invalid selection, please pick an account");
-		open_account(accounts_dir)
+		get_existing_account(accounts_dir)
 	}
+}
+
+fn open_account(selection: String, accounts_dir: &str) -> Result<Keypair, Error> {
+	println!("Please type in the password for {}", selection);
+	let password = get_password();
+	let full_path = accounts_dir.to_owned() + &selection;
+	let file_data = read_and_decrypt(&full_path, &password)?;
+	Keypair::from_bytes(&file_data).map_err(|err| Error::SignatureError(err))
 }
 
 fn get_and_print_str(input: Result<std::fs::DirEntry, std::io::Error>) -> Option<String> {
@@ -102,7 +109,7 @@ fn get_password() -> [u8; 32] {
 		Ok(i) => i,
 		Err(_) => {
 			println!("Sorry, couldn't read the input. Try again.");
-			return get_password()
+			return get_password();
 		}
 	};
 

@@ -13,13 +13,10 @@ pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, las
 	};
 
 	let messages = get_messages_from_user(&keypair, write_data, last_hash, bad_keypair);
-	match write_serde::write_messages(file, &parser, messages) {
-		Ok(_) => {}
-		Err(_) => {
-			println!("Failed to write to file");
-			interactive_write(file, parser, keypair, last_hash)
-		}
-	}
+	write_serde::write_messages(file, &parser, messages).unwrap_or_else(|_| {
+		println!("Failed to write to file");
+		interactive_write(file, parser, keypair, last_hash)
+	})
 }
 
 fn get_messages_from_user(
@@ -31,6 +28,7 @@ fn get_messages_from_user(
 	println!("Please enter desired message");
 	let message: String = text_io::try_read!("{}\n").unwrap();
 	let to_sign = &[message.as_bytes(), &prev_hash].concat();
+	
 	println!("Would you like to properly sign it? (true/false)");
 	let signature: Signature = if text_io::try_read!("{}\n").unwrap() {
 		keypair.sign(to_sign)
@@ -83,7 +81,7 @@ pub fn make_file(file: &str) -> Result<(Vec<u8>, SerdeParser), Error> {
 		Err(err) => return Err(Error::StdIo(err)),
 	};
 	match file.write_all(slice) {
-		Ok(_) => {},
+		Ok(_) => {}
 		Err(err) => return Err(Error::StdIo(err)),
 	}
 
