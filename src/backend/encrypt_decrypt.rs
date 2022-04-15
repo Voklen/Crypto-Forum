@@ -22,12 +22,12 @@ pub fn encrypt_and_write(file: &str, data_to_encrypt: &[u8], key: &[u8; 32]) -> 
 	output.append(&mut encrypted_data);
 
 	// Write to file
-	std::fs::write(file, output).map_err(|err| Error::StdIo(err.kind()))
+	std::fs::write(file, output).map_err(|err| Error::StdIo(err))
 }
 
 pub fn read_and_decrypt(file: &str, key: &[u8; 32]) -> Result<Vec<u8>, Error> {
 
-	let file_data = std::fs::read(file).map_err(|err| Error::StdIo(err.kind()))?;
+	let file_data = std::fs::read(file).map_err(|err| Error::StdIo(err))?;
 
 	if file_data.len() <= 24 {
 		return Err(Error::InvalidFileData(file.to_string()));

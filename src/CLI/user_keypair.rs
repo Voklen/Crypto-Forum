@@ -48,7 +48,7 @@ fn get_account_name() -> String {
 fn open_account(accounts_dir: &str) -> Result<Keypair, Error> {
 	println!("Accounts:");
 	let account_files: Vec<String> = std::fs::read_dir(accounts_dir)
-		.map_err(|err| Error::StdIo(err.kind()))?
+		.map_err(|err| Error::StdIo(err))?
 		.filter_map(get_and_print_str)
 		.collect();
 	let selection: String = text_io::try_read!().unwrap();

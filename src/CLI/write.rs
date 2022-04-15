@@ -80,11 +80,11 @@ pub fn make_file(file: &str) -> Result<(Vec<u8>, SerdeParser), Error> {
 	// Write to file
 	let mut file = match std::fs::File::create(file) {
 		Ok(i) => i,
-		Err(err) => return Err(Error::StdIo(err.kind())),
+		Err(err) => return Err(Error::StdIo(err)),
 	};
 	match file.write_all(slice) {
 		Ok(_) => {},
-		Err(err) => return Err(Error::StdIo(err.kind())),
+		Err(err) => return Err(Error::StdIo(err)),
 	}
 
 	Ok((slice.to_vec(), parser))

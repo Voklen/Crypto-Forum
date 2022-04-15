@@ -21,7 +21,7 @@ mod unit;
 
 #[derive(Debug)]
 pub enum Error {
-	StdIo(std::io::ErrorKind),
+	StdIo(std::io::Error),
 	Encryption(chacha20poly1305::aead::Error),
 	SmileError(serde_smile::Error),
 	JsonError(serde_json::Error),
@@ -77,7 +77,7 @@ fn main() {
 		// Read & parse data from file
 		let (file_slice, parser) = match read::read_file_data(messages_file) {
 			Ok(i) => i,
-			Err(Error::StdIo(std::io::ErrorKind::NotFound)) => {
+			Err(Error::StdIo(ref err)) if err.kind() == std::io::ErrorKind::NotFound => {
 				write::make_file(messages_file).unwrap()
 			}
 			_ => std::panic!("error"),

@@ -30,7 +30,7 @@ pub fn write_messages(
 
 	// Write to file
 	std::fs::write(file, value)
-		.or_else(|err| Err(Error::StdIo(err.kind())))
+		.or_else(|err| Err(Error::StdIo(err)))
 }
 
 pub fn sig_message_to_vec(data: Vec<SignatureMessage>) -> Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])> {
