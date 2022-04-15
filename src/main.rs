@@ -12,6 +12,12 @@ mod write_serde;
 
 #[path = "backend/read.rs"]
 mod read;
+#[path = "backend/encrypt_decrypt.rs"]
+mod encrypt_decrypt;
+
+#[cfg(test)]
+#[path ="tests/unit_tests/mod.rs"]
+mod unit;
 
 #[derive(Debug)]
 pub enum Error {
