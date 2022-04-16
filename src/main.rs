@@ -29,8 +29,8 @@ fn main() {
 }
 
 fn get_arguments() -> (Vec<String>, Vec<Argument>) {
-	let args: Vec<String> = std::env::args().skip(1).collect();
-	if args.len() < 1 {
+	let arguments_as_string: Vec<String> = std::env::args().skip(1).collect();
+	if arguments_as_string.len() < 1 {
 		println!(
 			"{program_name}: missing operand",
 			program_name = env!("CARGO_PKG_NAME")
@@ -39,8 +39,8 @@ fn get_arguments() -> (Vec<String>, Vec<Argument>) {
 	}
 	let mut files = Vec::<String>::new();
 	let mut arguments = Vec::<Argument>::new();
-	for arg in args {
-		if &arg[..1] == "-" {
+	for arg in arguments_as_string {
+		if arg.starts_with("-") {
 			arguments.push(parse_dash_argument(arg))
 		} else {
 			// If there is no "-" at the start of the argument, it's a file that's being passed

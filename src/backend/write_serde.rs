@@ -24,7 +24,7 @@ fn get_write_data(file: &str, parser: &SerdeParser, data: Vec<MessageForWriting>
 		Err(err) => return Err(err),
 	};
 	// Get messages already in file to concatenate
-	let orig_messages = crate::read_serde::get_messages_vec(&file_slice, parser).unwrap();
+	let orig_messages = crate::read_serde::get_messages_vec(&file_slice, parser)?;
 	// Concatenate old and new messages
 	Ok([orig_messages, sig_message_to_vec(data)].concat())
 }
@@ -32,26 +32,16 @@ fn get_write_data(file: &str, parser: &SerdeParser, data: Vec<MessageForWriting>
 pub fn sig_message_to_vec(data: Vec<MessageForWriting>) -> Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])> {
 	data.into_iter()
 		.map(|f| {
+			let (hash_part_1, hash_part_2) = f.prev_hash.split_at(32);
+			let (signature_part_1, signature_part_2) = f.signature.split_at(32);
 			(
-				to_32(f.prev_hash, true),
-				to_32(f.prev_hash, false),
+				hash_part_1,
+				hash_part_2,
 				f.public_key.to_bytes(),
 				f.message,
-				to_32(f.signature.to_bytes(), true),
-				to_32(f.signature.to_bytes(), false),
+				signature_part_1,
+				signature_part_2,
 			)
 		})
 		.collect()
-}
-
-/* Hope to eventually replace this with a better way, probably including slices */
-fn to_32(input: [u8; 64], first_32: bool) -> [u8; 32] {
-	let offset = if first_32 { 0 } else { 32 };
-	let mut out = [0; 32];
-	for (i, element) in input.into_iter().enumerate() {
-		if offset <= i && i < (32 + offset) {
-			out[i - offset] = element;
-		}
-	}
-	out
 }

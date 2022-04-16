@@ -4,7 +4,7 @@
 
 ## backend/write_serde.rs
 
-### Beginning of `write_to_serde`:
+### Beginning of `get_write_data`:
 
 The file is read again in this function because it may have been modified since last read and if we just used the one at first write it would overwrite any modifications. 
 
