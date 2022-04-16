@@ -1,8 +1,8 @@
-use crate::{write_serde, Error, SerdeParser, SignatureMessage};
+use crate::{write_serde, Error, SerdeParser, MessageForWriting};
 use ed25519_dalek::*;
 
 pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, last_hash: [u8; 64]) {
-	let write_data = Vec::<SignatureMessage>::new();
+	let write_data = Vec::<MessageForWriting>::new();
 
 	// THIS BREAKS IF THEIR KEY SEED IS ALL 0'S
 	let bad_secret: SecretKey = SecretKey::from_bytes(&[0; SECRET_KEY_LENGTH]).unwrap();
@@ -21,10 +21,10 @@ pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, las
 
 fn get_messages_from_user(
 	keypair: &Keypair,
-	mut write_data: Vec<SignatureMessage>,
+	mut write_data: Vec<MessageForWriting>,
 	prev_hash: [u8; 64],
 	bad_keypair: Keypair,
-) -> Vec<SignatureMessage> {
+) -> Vec<MessageForWriting> {
 	println!("Please enter desired message");
 	let message: String = text_io::try_read!("{}\n").unwrap();
 	let to_sign = &[message.as_bytes(), &prev_hash].concat();
@@ -36,7 +36,7 @@ fn get_messages_from_user(
 		bad_keypair.sign(to_sign)
 	};
 
-	let new_element = SignatureMessage {
+	let new_element = MessageForWriting {
 		prev_hash,
 		public_key: keypair.public,
 		message,
@@ -54,8 +54,6 @@ fn get_messages_from_user(
 }
 
 pub fn make_file(file: &str) -> Result<(Vec<u8>, SerdeParser), Error> {
-	use std::io::Write;
-
 	// Get user input
 	println!("Would you like to make a file? (true/false)");
 	let should_make_file: bool = match text_io::try_read!("{}\n") {
@@ -76,14 +74,8 @@ pub fn make_file(file: &str) -> Result<(Vec<u8>, SerdeParser), Error> {
 	let slice = "[[]]".as_bytes();
 
 	// Write to file
-	let mut file = match std::fs::File::create(file) {
-		Ok(i) => i,
-		Err(err) => return Err(Error::StdIo(err)),
-	};
-	match file.write_all(slice) {
-		Ok(_) => {}
-		Err(err) => return Err(Error::StdIo(err)),
-	}
+	std::fs::write(file, slice)
+		.map_err(|err| Error::StdIo(err))?;
 
 	Ok((slice.to_vec(), parser))
 }

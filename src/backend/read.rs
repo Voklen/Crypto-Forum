@@ -2,7 +2,7 @@ use crate::{Error, SerdeParser};
 
 pub fn read_file_data(file: &str) -> Result<(Vec<u8>, SerdeParser), Error> {
 	let file_slice = std::fs::read(file)
-		.or_else(|err| Err(Error::StdIo(err)))?;
+		.map_err(|err| Error::StdIo(err))?;
 	let parser = file_type(&file_slice);
 	Ok((file_slice, parser))
 }

@@ -1,9 +1,9 @@
-use crate::{read, Error, SerdeParser, SignatureMessage};
+use crate::{read, Error, SerdeParser, MessageForWriting};
 
 pub fn write_messages(
 	file: &str,
 	parser: &SerdeParser,
-	data: Vec<SignatureMessage>,
+	data: Vec<MessageForWriting>,
 ) -> Result<(), Error> {
 	let write_data = get_write_data(file, parser, data)?;
 	// Convert into chosen format
@@ -16,7 +16,7 @@ pub fn write_messages(
 		.or_else(|err| Err(Error::StdIo(err)))
 }
 
-fn get_write_data(file: &str, parser: &SerdeParser, data: Vec<SignatureMessage>) -> Result<Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>, Error> {
+fn get_write_data(file: &str, parser: &SerdeParser, data: Vec<MessageForWriting>) -> Result<Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>, Error> {
     // Read file (see Decisions.md for explanation)
 	let file_slice = match read::read_file_data(file) {
 		Ok((slice, _)) => slice,
@@ -29,7 +29,7 @@ fn get_write_data(file: &str, parser: &SerdeParser, data: Vec<SignatureMessage>)
 	Ok([orig_messages, sig_message_to_vec(data)].concat())
 }
 
-pub fn sig_message_to_vec(data: Vec<SignatureMessage>) -> Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])> {
+pub fn sig_message_to_vec(data: Vec<MessageForWriting>) -> Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])> {
 	data.into_iter()
 		.map(|f| {
 			(

@@ -20,14 +20,14 @@ pub struct Message { // Message for display and internal logic
 }
 
 #[derive(Debug)]
-pub struct SignatureMessage { // Message stored in the file
+pub struct MessageForWriting { // Message stored in the file
 	pub prev_hash: [u8; 64],
 	pub public_key: ed25519_dalek::PublicKey,
 	pub message: String,
 	pub signature: ed25519_dalek::Signature,
 }
 
-impl SignatureMessage {
+impl MessageForWriting {
 	pub fn get_hash(&self) -> [u8; 64] {
 		let mut collection_vector = Vec::<u8>::new();
 		collection_vector.extend_from_slice(&self.prev_hash);

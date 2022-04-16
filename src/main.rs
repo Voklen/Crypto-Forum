@@ -6,16 +6,16 @@ mod user_keypair;
 #[path = "CLI/write.rs"]
 mod write;
 
+#[path = "backend/encrypt_decrypt.rs"]
+mod encrypt_decrypt;
+#[path = "backend/read.rs"]
+mod read;
 #[path = "backend/read_serde.rs"]
 mod read_serde;
 #[path = "backend/general_functions.rs"]
 mod useful_funcs;
 #[path = "backend/write_serde.rs"]
 mod write_serde;
-#[path = "backend/encrypt_decrypt.rs"]
-mod encrypt_decrypt;
-#[path = "backend/read.rs"]
-mod read;
 
 #[cfg(test)]
 #[path = "tests/unit_tests/mod.rs"]
@@ -81,40 +81,26 @@ fn process_file(messages_file: &String, arguments: &Vec<Argument>) {
 		Ok(i) => i,
 		Err(Error::StdIo(err)) => match err.kind() {
 			std::io::ErrorKind::NotFound => write::make_file(messages_file).unwrap(),
-			_ => std::panic!("error")
+			_ => std::panic!("error"),
 		},
 		_ => std::panic!("error"),
 	};
 
-
 	let messages = read_serde::get_messages(&file_slice, &parser).unwrap();
-	// Set argument variables
+
 	let output_for_machines = arguments.contains(&Argument::MachineOutput);
-	// Either run interactively and exit...
-	if arguments.contains(&Argument::Interactive) {
-		interactive_session(messages_file, parser, messages, output_for_machines);
-		return;
-	}
-	// ...Otherwise, display the messages
 	if output_for_machines {
 		output_for_machine(&messages)
 	} else {
 		output_for_human(&messages)
+	}
+
+	if arguments.contains(&Argument::Interactive) {
+		interactive_session(messages_file, parser, messages);
 	}
 }
 
-fn interactive_session(
-	messages_file: &str,
-	parser: SerdeParser,
-	messages: Vec<Message>,
-	output_for_machines: bool,
-) {
-	if output_for_machines {
-		output_for_machine(&messages)
-	} else {
-		output_for_human(&messages)
-	}
-
+fn interactive_session(messages_file: &str, parser: SerdeParser, messages: Vec<Message>) {
 	let keypair = user_keypair::login("accounts/").unwrap();
 	let last_hash = match messages.last() {
 		Some(i) => i.hash,
@@ -156,7 +142,7 @@ fn output_for_machine(messages: &Vec<Message>) {
 }
 
 fn bytes_to_hex(bytes: &[u8]) -> String {
-	let mut out = String::new();
+	let mut hex_string = String::new();
 	for i in bytes {
 		fn hex_from_digit(num: u8) -> char {
 			if num < 10 {
@@ -173,8 +159,8 @@ fn bytes_to_hex(bytes: &[u8]) -> String {
 		println!("1: {}", hex_from_digit(255 / 16));
 		println!("2: {}", hex_from_digit(255 % 16));
 		*/
-		out.push(hex_from_digit(i / 16));
-		out.push(hex_from_digit(i % 16));
+		hex_string.push(hex_from_digit(i / 16));
+		hex_string.push(hex_from_digit(i % 16));
 	}
-	out
+	hex_string
 }
