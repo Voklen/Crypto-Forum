@@ -29,11 +29,26 @@ fn get_write_data(file: &str, parser: &SerdeParser, data: Vec<MessageForWriting>
 	Ok([orig_messages, sig_message_to_vec(data)].concat())
 }
 
+macro_rules! split_in_half {
+    ($e:expr, $size:expr) => ({
+		fn to_32(input: [u8; $size*2], offset: usize) -> [u8; $size] {
+			let mut out = [0; $size];
+			for (i, element) in input.into_iter().enumerate() {
+				if offset <= i && i < ($size + offset) {
+					out[i - offset] = element;
+				}
+			}
+			out
+		}
+		(to_32($e, 0), to_32($e, $size))
+	});
+}
+
 pub fn sig_message_to_vec(data: Vec<MessageForWriting>) -> Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])> {
 	data.into_iter()
 		.map(|f| {
-			let (hash_part_1, hash_part_2) = f.prev_hash.split_at(32);
-			let (signature_part_1, signature_part_2) = f.signature.split_at(32);
+			let (hash_part_1, hash_part_2) = split_in_half!(f.prev_hash, 32);
+			let (signature_part_1, signature_part_2) = split_in_half!(f.signature.to_bytes(), 32);
 			(
 				hash_part_1,
 				hash_part_2,
