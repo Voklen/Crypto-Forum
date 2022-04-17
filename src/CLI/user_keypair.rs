@@ -25,9 +25,9 @@ pub fn create_account(accounts_dir: &str) -> Result<Keypair, Error> {
 		println!("Passwords do not match.");
 		return create_account(accounts_dir);
 	}
-	let name = accounts_dir.to_owned() + &get_account_name();
+	let file_path = [accounts_dir, &get_account_name()].concat();
 	let keypair = new_keypair();
-	encrypt_and_write(&name, &keypair.to_bytes(), &first_password)?;
+	encrypt_and_write(&file_path, &keypair.to_bytes(), &first_password)?;
 	Ok(keypair)
 }
 
