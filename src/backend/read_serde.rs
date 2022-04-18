@@ -1,5 +1,6 @@
-use crate::{useful_funcs, Error, Message, SerdeParser};
+use crate::{Error, Message, SerdeParser};
 use ed25519_dalek::*;
+use sha2::{Digest, Sha512};
 
 pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Message>, Error> {
 	Ok(get_messages_vec(file_slice, parser)?
@@ -9,7 +10,8 @@ pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Me
 }
 
 fn vec_to_message(f: ([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])) -> Option<Message> {
-	let hash = useful_funcs::hash(&[&f.0, &f.1, &f.2, f.3.as_bytes(), &f.4, &f.5].concat());
+	let to_hash = [&f.0, &f.1, &f.2, f.3.as_bytes(), &f.4, &f.5].concat();
+	let hash = Sha512::digest(to_hash).into();
 
 	let prev_hash: [u8; 64] = our_append(f.0, f.1);
 	let public_key = PublicKey::from_bytes(&f.2).ok()?;

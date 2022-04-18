@@ -12,8 +12,6 @@ mod encrypt_decrypt;
 mod read;
 #[path = "backend/read_serde.rs"]
 mod read_serde;
-#[path = "backend/general_functions.rs"]
-mod useful_funcs;
 #[path = "backend/write_serde.rs"]
 mod write_serde;
 

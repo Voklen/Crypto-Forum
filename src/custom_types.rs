@@ -1,4 +1,4 @@
-use crate::useful_funcs;
+use sha2::{Digest, Sha512};
 
 #[derive(Debug)]
 pub enum Error {
@@ -35,7 +35,8 @@ impl MessageForWriting {
 		collection_vector.extend_from_slice(self.message.as_bytes());
 		collection_vector.extend_from_slice(&self.signature.to_bytes());
 
-		useful_funcs::hash(&collection_vector)
+		let hash = Sha512::digest(&collection_vector);
+		hash.into()
 	}
 }
 

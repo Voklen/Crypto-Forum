@@ -13,11 +13,11 @@ pub fn write_messages(
 	};
 	// Write to file
 	std::fs::write(file, value)
-		.or_else(|err| Err(Error::StdIo(err)))
+		.map_err(|err| Error::StdIo(err))
 }
 
 fn get_write_data(file: &str, parser: &SerdeParser, data: Vec<MessageForWriting>) -> Result<Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>, Error> {
-    // Read file (see Decisions.md for explanation)
+	// Read file (see Decisions.md for explanation)
 	let file_slice = match read::read_file_data(file) {
 		Ok((slice, _)) => slice,
 		Err(Error::StdIo(err)) if err.kind() == std::io::ErrorKind::NotFound => Vec::<u8>::new(),
@@ -30,7 +30,7 @@ fn get_write_data(file: &str, parser: &SerdeParser, data: Vec<MessageForWriting>
 }
 
 macro_rules! split_in_half {
-    ($e:expr, $size:expr) => ({
+	($e:expr, $size:expr) => ({
 		fn to_32(input: [u8; $size*2], offset: usize) -> [u8; $size] {
 			let mut out = [0; $size];
 			for (i, element) in input.into_iter().enumerate() {

@@ -1,9 +1,9 @@
 use crate::{
 	encrypt_decrypt::{encrypt_and_write, read_and_decrypt},
-	useful_funcs, Error,
+	Error,
 };
 use ed25519_dalek::*;
-use sha2::{Digest, Sha256};
+use sha2::{Digest, Sha256, Sha512};
 
 pub fn login(accounts_dir: &str) -> Result<Keypair, Error> {
 	println!("Do you want to create a new account? (true/false)");
@@ -87,24 +87,28 @@ fn new_keypair() -> Keypair {
 	Keypair {secret, public}
 }
 
-/* Get the user to enter some random characters, then hash whatever they give and return that hash as a byte array */
+/// Get the user to enter some random characters, then hash whatever they give and return that hash as a byte array
 fn get_random_from_usr() -> [u8; 64] {
+	// Ask for input
 	println!(
 		"Please type some random characters (this will be used for the initial key generation)"
 	);
-	let random_input: Result<String, _> = text_io::try_read!("{}\n");
-
-	match random_input {
-		Ok(res) => useful_funcs::hash(res.as_bytes()),
+	// Read input
+	let random_input: String = match text_io::try_read!("{}\n") {
+		Ok(res) => res,
 		Err(_) => {
 			println!("Sorry, couldn't read the input. Try again.");
-			get_random_from_usr()
+			return get_random_from_usr()
 		}
-	}
+	};
+	// Hash input
+	let hash = Sha512::digest(random_input.as_bytes());
+	hash.into()
 }
 
+/// A line asking the user to type a password should be printed before this function is called
 fn get_password() -> [u8; 32] {
-	// A line asking the user to type a password should be printed before this function is called
+	// Read input or retry on error
 	let data: String = match text_io::try_read!() {
 		Ok(i) => i,
 		Err(_) => {
@@ -112,11 +116,7 @@ fn get_password() -> [u8; 32] {
 			return get_password();
 		}
 	};
-
-	let mut hasher = Sha256::new();
-	hasher.update(data);
-	hasher.update("Some extra stuff so it's not just a plain sha256");
-	// Note that calling `finalize()` consumes hasher
-	let hash = hasher.finalize();
+	
+	let hash = Sha256::digest(data);
 	hash.into()
 }
