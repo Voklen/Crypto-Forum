@@ -1,4 +1,4 @@
-use crate::{Error, Message, SerdeParser};
+use crate::custom_types::{Error, Message, SerdeParser};
 use ed25519_dalek::*;
 use sha2::{Digest, Sha512};
 

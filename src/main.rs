@@ -1,23 +1,9 @@
-mod custom_types;
-use custom_types::*;
+use crypto_forum::{custom_types::*, *};
 
 #[path = "CLI/user_keypair.rs"]
 mod user_keypair;
 #[path = "CLI/write.rs"]
 mod write;
-
-#[path = "backend/encrypt_decrypt.rs"]
-mod encrypt_decrypt;
-#[path = "backend/read.rs"]
-mod read;
-#[path = "backend/read_serde.rs"]
-mod read_serde;
-#[path = "backend/write_serde.rs"]
-mod write_serde;
-
-#[cfg(test)]
-#[path = "tests/unit_tests/mod.rs"]
-mod unit;
 
 fn main() {
 	let (files, arguments) = get_arguments();

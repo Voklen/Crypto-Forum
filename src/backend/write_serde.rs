@@ -1,4 +1,7 @@
-use crate::{read, Error, SerdeParser, MessageForWriting};
+use crate::{
+	custom_types::{Error, MessageForWriting, SerdeParser},
+	read,
+};
 
 pub fn write_messages(
 	file: &str,
@@ -16,7 +19,11 @@ pub fn write_messages(
 		.map_err(|err| Error::StdIo(err))
 }
 
-fn get_write_data(file: &str, parser: &SerdeParser, data: Vec<MessageForWriting>) -> Result<Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>, Error> {
+fn get_write_data(
+	file: &str,
+	parser: &SerdeParser,
+	data: Vec<MessageForWriting>,
+) -> Result<Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>, Error> {
 	// Read file (see Decisions.md for explanation)
 	let file_slice = match read::read_file_data(file) {
 		Ok((slice, _)) => slice,
@@ -44,7 +51,9 @@ macro_rules! split_in_half {
 	});
 }
 
-pub fn sig_message_to_vec(data: Vec<MessageForWriting>) -> Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])> {
+pub fn sig_message_to_vec(
+	data: Vec<MessageForWriting>,
+) -> Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])> {
 	data.into_iter()
 		.map(|f| {
 			let (hash_part_1, hash_part_2) = split_in_half!(f.prev_hash, 32);

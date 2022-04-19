@@ -1,4 +1,4 @@
-use crate::{Error, SerdeParser};
+use crate::custom_types::{Error, SerdeParser};
 
 pub fn read_file_data(file: &str) -> Result<(Vec<u8>, SerdeParser), Error> {
 	let file_slice = std::fs::read(file)
