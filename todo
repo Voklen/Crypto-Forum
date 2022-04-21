@@ -1,21 +1,21 @@
 Now⌨:
-
-Soon⌚:
 Multiple threads (as in forum threads): refinements {
 	Implement reference.json
 	if argument is a directory, loop through files and display header if valid messages file
 }
+
+Soon⌚:
 Unit tests
+User flies to get username
+
+Later🗓️:
+Binary
 Improve last hash: refinements {
 	get all chains of exclusively valid messages
 	display these to user
 	ask user to select one
 	Set last_hash to selection
 }
-
-Later🗓️:
-Binary
-User flies to get username
 Search
 
 Done🎉:

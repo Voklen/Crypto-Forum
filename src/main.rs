@@ -13,7 +13,10 @@ fn main() {
 }
 
 fn get_arguments() -> (Vec<String>, Vec<Argument>) {
+	// Skip the first argument because it's just the executable path
 	let arguments_as_string: Vec<String> = std::env::args().skip(1).collect();
+
+	// Exit if no arguments
 	if arguments_as_string.len() < 1 {
 		println!(
 			"{program_name}: missing operand",
@@ -21,6 +24,8 @@ fn get_arguments() -> (Vec<String>, Vec<Argument>) {
 		);
 		std::process::exit(1)
 	}
+
+	// Loop through and parse every argument
 	let mut files = Vec::<String>::new();
 	let mut arguments = Vec::<Argument>::new();
 	for arg in arguments_as_string {
@@ -113,7 +118,8 @@ fn output_for_human(messages: &Vec<Message>) {
 
 fn output_for_machine(messages: &Vec<Message>) {
 	for i in messages {
-		// Print the message at the end because the message could contain spaces, keywords, and who know what (and has an unknown size) which would make anything after it harder to parse
+		// Print `message` at the end because it could contain spaces, keywords, and who-knows-what (and has an unknown size)
+		// Which would make it hard to know when `message` ends meaning anything after it on the same line is harder to parse
 		println!(
 			"Public_key {public_key} Replying_to_hash {prev_hash} Hash {hash} Properly_signed {signed} Message {message}",
 			public_key = bytes_to_hex(i.public_key.as_bytes()),
