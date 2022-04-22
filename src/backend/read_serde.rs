@@ -9,14 +9,37 @@ pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Me
 		.collect())
 }
 
-fn vec_to_message(f: ([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])) -> Option<Message> {
-	let to_hash = [&f.0, &f.1, &f.2, f.3.as_bytes(), &f.4, &f.5].concat();
+#[derive(serde::Serialize, serde::Deserialize)]
+struct Header {
+	name: String,
+	thread_number: u32,
+	tags: Vec<String>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct MessageInFile {
+	prev_hash_pt1: [u8; 32],
+	prev_hash_pt2: [u8; 32],
+	public_key: [u8; 32],
+	message: String,
+	signature_pt1: [u8; 32],
+	signature_pt2: [u8; 32],
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+struct FullFile {
+	header: Header,
+	messages: Vec<MessageInFile>,
+}
+
+fn vec_to_message(f: MessageInFile) -> Option<Message> {
+	let to_hash = [&f.prev_hash_pt1, &f.prev_hash_pt2, &f.public_key, f.message.as_bytes(), &f.signature_pt1, &f.signature_pt2].concat();
 	let hash = Sha512::digest(to_hash).into();
 
-	let prev_hash: [u8; 64] = our_append(f.0, f.1);
-	let public_key = PublicKey::from_bytes(&f.2).ok()?;
-	let message = f.3;
-	let signed = match Signature::from_bytes(&[f.4, f.5].concat()) {
+	let prev_hash: [u8; 64] = our_append(f.prev_hash_pt1, f.prev_hash_pt2);
+	let public_key = PublicKey::from_bytes(&f.public_key).ok()?;
+	let message = f.message;
+	let signed = match Signature::from_bytes(&[f.signature_pt1, f.signature_pt2].concat()) {
 		// Combine the two parts of the signature back into one
 		Ok(signature) => {
 			let to_verify = &[message.as_bytes(), &prev_hash].concat();
@@ -36,14 +59,15 @@ fn vec_to_message(f: ([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32]))
 pub fn get_messages_vec(
 	file_slice: &Vec<u8>,
 	parser: &SerdeParser,
-) -> Result<Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>, Error> {
+) -> Result<Vec<MessageInFile>, Error> {
 	if file_slice.len() <= 0 {
-		return Ok(Vec::<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>::new());
+		return Ok(Vec::<MessageInFile>::new());
 	}
-	match parser {
+	let file_data: FullFile = match parser {
 		SerdeParser::Json => serde_json::from_slice(&file_slice).map_err(|err|Error::JsonError(err)),
 		SerdeParser::Smile => serde_smile::from_slice(&file_slice).map_err(|err| Error::SmileError(err)),
-	}
+	}?;
+	Ok(file_data.messages)
 }
 
 fn our_append(first: [u8; 32], second: [u8; 32]) -> [u8; 64] {
