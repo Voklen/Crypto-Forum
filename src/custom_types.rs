@@ -10,7 +10,7 @@ pub enum Error {
 	SignatureError(ed25519_dalek::SignatureError),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Message { // Message for display and internal logic
 	pub prev_hash: [u8; 64],
 	pub public_key: ed25519_dalek::PublicKey,
