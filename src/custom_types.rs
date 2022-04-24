@@ -19,7 +19,7 @@ pub struct Message { // Message for display and internal logic
 	pub hash: [u8; 64],
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct MessageForWriting { // Message stored in the file
 	pub prev_hash: [u8; 64],
 	pub public_key: ed25519_dalek::PublicKey,

@@ -65,16 +65,11 @@ fn parse_dash_argument(arg: String) -> Argument {
 
 fn process_file(messages_file: &String, arguments: &Vec<Argument>) {
 	println!("File: {}", messages_file);
-	// Read file & handle errors
-	let (file_slice, parser) = match read::read_file_data(messages_file) {
-		Ok(i) => i,
-		Err(Error::StdIo(err)) => match err.kind() {
-			std::io::ErrorKind::NotFound => write::make_file(messages_file).unwrap(),
-			_ => std::panic!("error"),
-		},
-		_ => std::panic!("error"),
-	};
-
+	let file_slice = read_file(messages_file);
+	let parser = read::file_type(&file_slice).unwrap_or_else(|| {
+		println!("Unknown file type");
+		std::process::exit(1)
+	});
 	let messages = read_serde::get_messages(&file_slice, &parser).unwrap();
 
 	let output_for_machines = arguments.contains(&Argument::MachineOutput);
@@ -87,6 +82,15 @@ fn process_file(messages_file: &String, arguments: &Vec<Argument>) {
 	if arguments.contains(&Argument::Interactive) {
 		interactive_session(messages_file, parser, messages);
 	}
+}
+
+fn read_file(messages_file: &String) -> Vec<u8> {
+	std::fs::read(messages_file)
+		.unwrap_or_else(|err| match err.kind() {
+			std::io::ErrorKind::NotFound => write::make_file(messages_file),
+			_ => panic!(),
+		}
+	)
 }
 
 fn interactive_session(messages_file: &str, parser: SerdeParser, messages: Vec<Message>) {

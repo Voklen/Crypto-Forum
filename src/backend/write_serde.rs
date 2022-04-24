@@ -25,15 +25,20 @@ fn get_write_data(
 	data: Vec<MessageForWriting>,
 ) -> Result<Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>, Error> {
 	// Read file (see Decisions.md for explanation)
-	let file_slice = match read::read_file_data(file) {
-		Ok((slice, _)) => slice,
-		Err(Error::StdIo(err)) if err.kind() == std::io::ErrorKind::NotFound => Vec::<u8>::new(),
-		Err(err) => return Err(err),
-	};
+	let file_slice = std::fs::read(file).or_else(handle_error)?;
+	let parser = &read::file_type(&file_slice).unwrap();
 	// Get messages already in file to concatenate
 	let orig_messages = crate::read_serde::get_messages_vec(&file_slice, parser)?;
 	// Concatenate old and new messages
 	Ok([orig_messages, sig_message_to_vec(data)].concat())
+}
+
+fn handle_error(err: std::io::Error) -> Result<Vec<u8>, Error> {
+	if err.kind() == std::io::ErrorKind::NotFound {
+		Ok(Vec::<u8>::new())
+	} else {
+		Err(Error::StdIo(err))
+	}
 }
 
 macro_rules! split_in_half {
