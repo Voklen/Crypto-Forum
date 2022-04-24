@@ -210,4 +210,6 @@ fn read_write() {
 	let actual = read_serde::get_messages(&file_slice, &parser).unwrap();
 
 	assert_eq!(actual, expected);
+	
+	std::fs::remove_file(test_file).unwrap();
 }

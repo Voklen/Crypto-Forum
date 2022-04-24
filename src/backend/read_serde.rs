@@ -3,17 +3,28 @@ use ed25519_dalek::*;
 use sha2::{Digest, Sha512};
 
 pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Message>, Error> {
-	Ok(get_full_file(file_slice, parser)?.messages
+	Ok(parse_full_file(file_slice, parser)?
+		.messages
 		.into_iter()
 		.filter_map(vec_to_message)
 		.collect())
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Default)]
 pub struct Header {
 	pub name: String,
 	pub thread_number: u32,
 	pub tags: Vec<String>,
+}
+
+impl Header {
+	pub fn new() -> Self {
+		Self {
+			name: String::new(),
+			thread_number: 0,
+			tags: Vec::<String>::new(),
+		}
+	}
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -26,10 +37,19 @@ pub struct MessageInFile {
 	pub signature_pt2: [u8; 32],
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Default)]
 pub struct FullFile {
 	pub header: Header,
 	pub messages: Vec<MessageInFile>,
+}
+
+impl FullFile {
+	pub fn new() -> Self {
+		Self {
+			header: Header::new(),
+			messages: Vec::<MessageInFile>::new(),
+		}
+	}
 }
 
 fn vec_to_message(f: MessageInFile) -> Option<Message> {
@@ -56,10 +76,7 @@ fn vec_to_message(f: MessageInFile) -> Option<Message> {
 	})
 }
 
-pub fn get_full_file(
-	file_slice: &Vec<u8>,
-	parser: &SerdeParser,
-) -> Result<FullFile, Error> {
+pub fn parse_full_file(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<FullFile, Error> {
 	// if file_slice.len() <= 0 {
 	// 	return Ok(MessageInFile::new());
 	// }

@@ -22,14 +22,10 @@ pub fn write_messages(
 
 fn get_write_data(
 	file: &str,
-	parser: &SerdeParser, //TODO make optional argument
+	parser: &SerdeParser,
 	data: Vec<MessageForWriting>,
 ) -> Result<FullFile, Error> {
-	// Read file (see Decisions.md for explanation)
-	let file_slice = std::fs::read(file).or_else(handle_error)?;
-	let parser = &read::file_type(&file_slice).unwrap();
-	// Get messages already in file to concatenate
-	let existing_file = crate::read_serde::get_full_file(&file_slice, parser)?;
+	let existing_file = get_full_file(file, parser)?;
 	// Concatenate old and new messages
 	let mut messages = existing_file.messages;
 	messages.append(&mut sig_message_to_vec(data));
@@ -40,9 +36,17 @@ fn get_write_data(
 	})
 }
 
-fn handle_error(err: std::io::Error) -> Result<Vec<u8>, Error> {
+fn get_full_file(file: &str, parser: &SerdeParser) -> Result<FullFile, Error> {
+	// Read file (see Decisions.md for explanation)
+	match std::fs::read(file) {
+		Ok(file_slice) => crate::read_serde::parse_full_file(&file_slice, parser),
+		Err(err) => handle_error(err),
+	}
+}
+
+fn handle_error(err: std::io::Error) -> Result<FullFile, Error> {
 	if err.kind() == std::io::ErrorKind::NotFound {
-		Ok(Vec::<u8>::new())
+		Ok(FullFile::new())
 	} else {
 		Err(Error::StdIo(err))
 	}
