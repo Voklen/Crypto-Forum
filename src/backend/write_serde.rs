@@ -1,6 +1,7 @@
 use crate::{
 	custom_types::{Error, MessageForWriting, SerdeParser},
 	read,
+	read_serde::{FullFile, MessageInFile},
 };
 
 pub fn write_messages(
@@ -23,17 +24,32 @@ fn get_write_data(
 	file: &str,
 	parser: &SerdeParser,
 	data: Vec<MessageForWriting>,
-) -> Result<Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])>, Error> {
-	// Read file (see Decisions.md for explanation)
-	let file_slice = match read::read_file_data(file) {
-		Ok((slice, _)) => slice,
-		Err(Error::StdIo(err)) if err.kind() == std::io::ErrorKind::NotFound => Vec::<u8>::new(),
-		Err(err) => return Err(err),
-	};
-	// Get messages already in file to concatenate
-	let orig_messages = crate::read_serde::get_messages_vec(&file_slice, parser)?;
+) -> Result<FullFile, Error> {
+	let existing_file = get_full_file(file, parser)?;
 	// Concatenate old and new messages
-	Ok([orig_messages, sig_message_to_vec(data)].concat())
+	let mut messages = existing_file.messages;
+	messages.append(&mut sig_message_to_vec(data));
+
+	Ok(FullFile {
+		header: existing_file.header,
+		messages,
+	})
+}
+
+fn get_full_file(file: &str, parser: &SerdeParser) -> Result<FullFile, Error> {
+	// Read file (see Decisions.md for explanation)
+	match std::fs::read(file) {
+		Ok(file_slice) => crate::read_serde::parse_full_file(&file_slice, parser),
+		Err(err) => handle_error(err),
+	}
+}
+
+fn handle_error(err: std::io::Error) -> Result<FullFile, Error> {
+	if err.kind() == std::io::ErrorKind::NotFound {
+		Ok(FullFile::new())
+	} else {
+		Err(Error::StdIo(err))
+	}
 }
 
 macro_rules! split_in_half {
@@ -51,21 +67,21 @@ macro_rules! split_in_half {
 	});
 }
 
-pub fn sig_message_to_vec(
-	data: Vec<MessageForWriting>,
-) -> Vec<([u8; 32], [u8; 32], [u8; 32], String, [u8; 32], [u8; 32])> {
+pub fn sig_message_to_vec(data: Vec<MessageForWriting>) -> Vec<MessageInFile> {
 	data.into_iter()
 		.map(|f| {
-			let (hash_part_1, hash_part_2) = split_in_half!(f.prev_hash, 32);
-			let (signature_part_1, signature_part_2) = split_in_half!(f.signature.to_bytes(), 32);
-			(
-				hash_part_1,
-				hash_part_2,
-				f.public_key.to_bytes(),
-				f.message,
-				signature_part_1,
-				signature_part_2,
-			)
+			let (prev_hash_pt1, prev_hash_pt2) = split_in_half!(f.prev_hash, 32);
+			let (signature_pt1, signature_pt2) = split_in_half!(f.signature.to_bytes(), 32);
+			let public_key = f.public_key.to_bytes();
+			let message = f.message;
+			MessageInFile {
+				prev_hash_pt1,
+				prev_hash_pt2,
+				public_key,
+				message,
+				signature_pt1,
+				signature_pt2,
+			}
 		})
 		.collect()
 }

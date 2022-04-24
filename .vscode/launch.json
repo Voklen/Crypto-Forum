@@ -7,6 +7,25 @@
 		{
 			"type": "lldb",
 			"request": "launch",
+			"name": "Debug unit tests in library 'crypto_forum'",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--lib",
+					"--package=crypto_forum"
+				],
+				"filter": {
+					"name": "crypto_forum",
+					"kind": "lib"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
 			"name": "Debug executable 'crypto_forum'",
 			"cargo": {
 				"args": [
@@ -19,10 +38,7 @@
 					"kind": "bin"
 				}
 			},
-			"args": [
-				"-i",
-				"test_data/messages.json"
-			],
+			"args": [],
 			"cwd": "${workspaceFolder}"
 		},
 		{
