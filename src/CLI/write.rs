@@ -1,4 +1,4 @@
-use crate::{write_serde, Error, SerdeParser, MessageForWriting};
+use crate::{write_serde, SerdeParser, MessageForWriting};
 use ed25519_dalek::*;
 
 pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, last_hash: [u8; 64]) {
@@ -70,7 +70,7 @@ pub fn make_file(file: &str) -> Vec<u8> {
 		std::process::exit(0);
 	}
 
-	let parser = SerdeParser::Json;
+	//TODO Change empty file based on parser type
 	let slice = "[[]]".as_bytes();
 
 	// Write to file
