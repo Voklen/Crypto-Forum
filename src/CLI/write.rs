@@ -12,7 +12,7 @@ pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, las
 		public: bad_public,
 	};
 
-	let messages = get_messages_from_user(&keypair, write_data, last_hash, bad_keypair);
+	let messages = get_messages_from_user(&keypair, write_data, last_hash, &bad_keypair);
 	write_serde::write_messages(file, &parser, messages).unwrap_or_else(|_| {
 		println!("Failed to write to file");
 		interactive_write(file, parser, keypair, last_hash)
@@ -23,14 +23,16 @@ fn get_messages_from_user(
 	keypair: &Keypair,
 	mut write_data: Vec<MessageForWriting>,
 	prev_hash: [u8; 64],
-	bad_keypair: Keypair,
+	bad_keypair: &Keypair,
 ) -> Vec<MessageForWriting> {
 	println!("Please enter desired message");
-	let message: String = text_io::try_read!("{}\n").unwrap();
+	let message: String = match text_io::try_read!("{}\n") {
+		Ok(i) => i,
+		Err(_) => return get_messages_from_user(keypair, write_data, prev_hash, bad_keypair),
+	};
 	let to_sign = &[message.as_bytes(), &prev_hash].concat();
 
-	println!("Would you like to properly sign it? (true/false)");
-	let signature: Signature = if text_io::try_read!("{}\n").unwrap() {
+	let signature = if ask_for_bool("Would you like to properly sign it?") {
 		keypair.sign(to_sign)
 	} else {
 		bad_keypair.sign(to_sign)
@@ -45,26 +47,26 @@ fn get_messages_from_user(
 	let new_hash = new_element.get_hash(); // This line is here so we can get the hash before it's moved into write_data
 	write_data.push(new_element);
 
-	println!("Would you like to enter another message? (true/false)");
-	let res: bool = text_io::try_read!("{}\n").unwrap();
-	if !res {
+	if !ask_for_bool("Would you like to enter another message?") {
 		return write_data;
 	}
 	get_messages_from_user(keypair, write_data, new_hash, bad_keypair)
 }
 
-pub fn make_file(file: &str) -> Vec<u8> {
-	// Get user input
-	println!("Would you like to make a file? (true/false)");
-	let should_make_file: bool = match text_io::try_read!("{}\n") {
-		Ok(i) => i,
+pub fn ask_for_bool(message: &str) -> bool {
+	println!("{} (true/false)", message);
+	match text_io::try_read!("{}\n") {
+		Ok(true) => true,
+		Ok(false) => false,
 		Err(_) => {
-			println!("Please type either true or false");
-			return make_file(file);
+			println!("Please only type true or false");
+			ask_for_bool(message)
 		}
-	};
+	}
+}
 
-	// Exit if user says so
+pub fn make_file(file: &str) -> Vec<u8> {
+	let should_make_file = ask_for_bool("Would you like to make a file?");
 	if !should_make_file {
 		println!("No file made");
 		std::process::exit(0);
@@ -73,7 +75,6 @@ pub fn make_file(file: &str) -> Vec<u8> {
 	//TODO Change empty file based on parser type
 	let slice = "[[]]".as_bytes();
 
-	// Write to file
 	match std::fs::write(file, slice) {
 		Ok(_) => {}
 		Err(err) => {

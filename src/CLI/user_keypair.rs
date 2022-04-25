@@ -1,19 +1,17 @@
 use crate::{
 	encrypt_decrypt::{encrypt_and_write, read_and_decrypt},
+	write::ask_for_bool,
 	Error,
 };
 use ed25519_dalek::*;
 use sha2::{Digest, Sha256, Sha512};
 
 pub fn login(accounts_dir: &str) -> Result<Keypair, Error> {
-	println!("Do you want to create a new account? (true/false)");
-	match text_io::try_read!() {
-		Ok(true) => create_account(accounts_dir),
-		Ok(false) => get_existing_account(accounts_dir),
-		Err(_) => {
-			println!("Please only type true or false");
-			return login(accounts_dir);
-		}
+	let create_new_account = ask_for_bool("Do you want to create a new account?");
+	if create_new_account {
+		create_account(accounts_dir)
+	} else {
+		get_existing_account(accounts_dir)
 	}
 }
 
@@ -52,7 +50,7 @@ fn get_existing_account(accounts_dir: &str) -> Result<Keypair, Error> {
 
 	// Select & open account
 	println!("What account would you like to use?");
-	let selection: String = text_io::try_read!().unwrap();
+	let selection: String = text_io::try_read!("{}\n").unwrap();
 	if account_files.contains(&selection) {
 		open_account(selection, accounts_dir)
 	} else {
@@ -109,7 +107,7 @@ fn get_random_from_usr() -> [u8; 64] {
 /// A line asking the user to type a password should be printed before this function is called
 fn get_password() -> [u8; 32] {
 	// Read input or retry on error
-	let data: String = match text_io::try_read!() {
+	let data: String = match text_io::try_read!("{}\n") {
 		Ok(i) => i,
 		Err(_) => {
 			println!("Sorry, couldn't read the input. Try again.");

@@ -24,10 +24,12 @@ fn get_write_data(
 	parser: &SerdeParser,
 	data: Vec<MessageForWriting>,
 ) -> Result<FullFile, Error> {
+	let mut new_messages = sig_message_to_vec(data);
+
+	// Read existing messages (see Decisions.md for explanation)
 	let existing_file = get_full_file(file, parser)?;
-	// Concatenate old and new messages
 	let mut messages = existing_file.messages;
-	messages.append(&mut sig_message_to_vec(data));
+	messages.append(&mut new_messages);
 
 	Ok(FullFile {
 		header: existing_file.header,
@@ -36,7 +38,6 @@ fn get_write_data(
 }
 
 fn get_full_file(file: &str, parser: &SerdeParser) -> Result<FullFile, Error> {
-	// Read file (see Decisions.md for explanation)
 	match std::fs::read(file) {
 		Ok(file_slice) => crate::read_serde::parse_full_file(&file_slice, parser),
 		Err(err) => handle_error(err),
