@@ -53,7 +53,15 @@ impl FullFile {
 }
 
 fn vec_to_message(f: MessageInFile) -> Option<Message> {
-	let to_hash = [&f.prev_hash_pt1, &f.prev_hash_pt2, &f.public_key, f.message.as_bytes(), &f.signature_pt1, &f.signature_pt2].concat();
+	let to_hash = [
+		&f.prev_hash_pt1,
+		&f.prev_hash_pt2,
+		&f.public_key,
+		f.message.as_bytes(),
+		&f.signature_pt1,
+		&f.signature_pt2,
+	]
+	.concat();
 	let hash = Sha512::digest(to_hash).into();
 
 	let prev_hash: [u8; 64] = our_append(f.prev_hash_pt1, f.prev_hash_pt2);

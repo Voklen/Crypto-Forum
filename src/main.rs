@@ -85,12 +85,10 @@ fn process_file(messages_file: &String, arguments: &Vec<Argument>) {
 }
 
 fn read_file(messages_file: &String) -> Vec<u8> {
-	std::fs::read(messages_file)
-		.unwrap_or_else(|err| match err.kind() {
-			std::io::ErrorKind::NotFound => write::make_file(messages_file),
-			_ => panic!(),
-		}
-	)
+	std::fs::read(messages_file).unwrap_or_else(|err| match err.kind() {
+		std::io::ErrorKind::NotFound => write::make_file(messages_file),
+		_ => panic!(),
+	})
 }
 
 fn interactive_session(messages_file: &str, parser: SerdeParser, messages: Vec<Message>) {

@@ -98,7 +98,7 @@ fn get_random_from_usr() -> [u8; 64] {
 		Ok(res) => res,
 		Err(_) => {
 			println!("Sorry, couldn't read the input. Try again.");
-			return get_random_from_usr()
+			return get_random_from_usr();
 		}
 	};
 	// Hash input
@@ -116,7 +116,7 @@ fn get_password() -> [u8; 32] {
 			return get_password();
 		}
 	};
-	
+
 	let hash = Sha256::digest(data);
 	hash.into()
 }

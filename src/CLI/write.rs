@@ -1,4 +1,4 @@
-use crate::{write_serde, SerdeParser, MessageForWriting};
+use crate::{write_serde, MessageForWriting, SerdeParser};
 use ed25519_dalek::*;
 
 pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, last_hash: [u8; 64]) {
@@ -28,7 +28,7 @@ fn get_messages_from_user(
 	println!("Please enter desired message");
 	let message: String = text_io::try_read!("{}\n").unwrap();
 	let to_sign = &[message.as_bytes(), &prev_hash].concat();
-	
+
 	println!("Would you like to properly sign it? (true/false)");
 	let signature: Signature = if text_io::try_read!("{}\n").unwrap() {
 		keypair.sign(to_sign)
@@ -75,7 +75,7 @@ pub fn make_file(file: &str) -> Vec<u8> {
 
 	// Write to file
 	match std::fs::write(file, slice) {
-		Ok(_) => {},
+		Ok(_) => {}
 		Err(err) => {
 			println!("Could not write to file: {}", err);
 			return make_file(file);

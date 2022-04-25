@@ -11,7 +11,8 @@ pub enum Error {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Message { // Message for display and internal logic
+pub struct Message {
+	// Message for display and internal logic
 	pub prev_hash: [u8; 64],
 	pub public_key: ed25519_dalek::PublicKey,
 	pub message: String,
@@ -20,7 +21,8 @@ pub struct Message { // Message for display and internal logic
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct MessageForWriting { // Message stored in the file
+pub struct MessageForWriting {
+	// Message stored in the file
 	pub prev_hash: [u8; 64],
 	pub public_key: ed25519_dalek::PublicKey,
 	pub message: String,
