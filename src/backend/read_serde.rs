@@ -1,4 +1,4 @@
-use crate::custom_types::{Error, Message, SerdeParser};
+use crate::custom_types::*;
 use ed25519_dalek::*;
 use sha2::{Digest, Sha512};
 
@@ -8,48 +8,6 @@ pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Me
 		.into_iter()
 		.filter_map(vec_to_message)
 		.collect())
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Default)]
-pub struct Header {
-	pub name: String,
-	pub thread_number: u32,
-	pub tags: Vec<String>,
-}
-
-impl Header {
-	pub fn new() -> Self {
-		Self {
-			name: String::new(),
-			thread_number: 0,
-			tags: Vec::<String>::new(),
-		}
-	}
-}
-
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct MessageInFile {
-	pub prev_hash_pt1: [u8; 32],
-	pub prev_hash_pt2: [u8; 32],
-	pub public_key: [u8; 32],
-	pub message: String,
-	pub signature_pt1: [u8; 32],
-	pub signature_pt2: [u8; 32],
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Default)]
-pub struct FullFile {
-	pub header: Header,
-	pub messages: Vec<MessageInFile>,
-}
-
-impl FullFile {
-	pub fn new() -> Self {
-		Self {
-			header: Header::new(),
-			messages: Vec::<MessageInFile>::new(),
-		}
-	}
 }
 
 fn vec_to_message(f: MessageInFile) -> Option<Message> {
@@ -85,9 +43,9 @@ fn vec_to_message(f: MessageInFile) -> Option<Message> {
 }
 
 pub fn parse_full_file(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<FullFile, Error> {
-	// if file_slice.len() <= 0 {
-	// 	return Ok(MessageInFile::new());
-	// }
+	if file_slice.len() == 0 {
+		return Ok(FullFile::new());
+	}
 	match parser {
 		SerdeParser::Json => serde_json::from_slice(&file_slice).map_err(|err|Error::JsonError(err)),
 		SerdeParser::Smile => serde_smile::from_slice(&file_slice).map_err(|err| Error::SmileError(err)),

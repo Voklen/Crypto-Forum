@@ -53,3 +53,45 @@ pub enum Argument {
 	Interactive,
 	MachineOutput,
 }
+
+#[derive(serde::Serialize, serde::Deserialize, Default)]
+pub struct Header {
+	pub name: String,
+	pub thread_number: u32,
+	pub tags: Vec<String>,
+}
+
+impl Header {
+	pub fn new() -> Self {
+		Self {
+			name: String::new(),
+			thread_number: 0,
+			tags: Vec::<String>::new(),
+		}
+	}
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct MessageInFile {
+	pub prev_hash_pt1: [u8; 32],
+	pub prev_hash_pt2: [u8; 32],
+	pub public_key: [u8; 32],
+	pub message: String,
+	pub signature_pt1: [u8; 32],
+	pub signature_pt2: [u8; 32],
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Default)]
+pub struct FullFile {
+	pub header: Header,
+	pub messages: Vec<MessageInFile>,
+}
+
+impl FullFile {
+	pub fn new() -> Self {
+		Self {
+			header: Header::new(),
+			messages: Vec::<MessageInFile>::new(),
+		}
+	}
+}

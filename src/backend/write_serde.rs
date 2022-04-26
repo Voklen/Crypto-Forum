@@ -1,7 +1,5 @@
-use crate::{
-	custom_types::{Error, MessageForWriting, SerdeParser},
-	read_serde::{FullFile, MessageInFile},
-};
+use crate::custom_types::*;
+use std::fs;
 
 pub fn write_messages(
 	file: &str,
@@ -14,9 +12,8 @@ pub fn write_messages(
 		&SerdeParser::Json => serde_json::to_vec(&write_data).map_err(|err| Error::JsonError(err))?,
 		&SerdeParser::Smile => serde_smile::to_vec(&write_data).map_err(|err| Error::SmileError(err))?,
 	};
-	// Write to file
-	std::fs::write(file, value)
-		.map_err(|err| Error::StdIo(err))
+
+	fs::write(file, value).map_err(|err| Error::StdIo(err))
 }
 
 fn get_write_data(
@@ -38,7 +35,7 @@ fn get_write_data(
 }
 
 fn get_full_file(file: &str, parser: &SerdeParser) -> Result<FullFile, Error> {
-	match std::fs::read(file) {
+	match fs::read(file) {
 		Ok(file_slice) => crate::read_serde::parse_full_file(&file_slice, parser),
 		Err(err) => handle_error(err),
 	}

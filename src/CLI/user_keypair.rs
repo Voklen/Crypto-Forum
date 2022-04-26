@@ -41,12 +41,8 @@ fn get_account_name() -> String {
 }
 
 fn get_existing_account(accounts_dir: &str) -> Result<Keypair, Error> {
-	// Print all accounts
 	println!("Accounts:");
-	let account_files: Vec<String> = std::fs::read_dir(accounts_dir)
-		.map_err(|err| Error::StdIo(err))?
-		.filter_map(get_and_print_str)
-		.collect();
+	let account_files = get_and_print_accounts(accounts_dir)?;
 
 	// Select & open account
 	println!("What account would you like to use?");
@@ -65,6 +61,14 @@ fn open_account(selection: String, accounts_dir: &str) -> Result<Keypair, Error>
 	let full_path = accounts_dir.to_owned() + &selection;
 	let file_data = read_and_decrypt(&full_path, &password)?;
 	Keypair::from_bytes(&file_data).map_err(|err| Error::SignatureError(err))
+}
+
+fn get_and_print_accounts(accounts_dir: &str) -> Result<Vec<String>, Error> {
+    let account_files: Vec<String> = std::fs::read_dir(accounts_dir)
+		    .map_err(|err| Error::StdIo(err))?
+		    .filter_map(get_and_print_str)
+		    .collect();
+    Ok(account_files)
 }
 
 fn get_and_print_str(input: Result<std::fs::DirEntry, std::io::Error>) -> Option<String> {
