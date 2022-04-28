@@ -155,3 +155,30 @@ fn bytes_to_hex(bytes: &[u8]) -> String {
 	}
 	hex_string
 }
+
+pub fn read() -> Option<String> {
+	let mut input = String::new();
+  	std::io::stdin().read_line(&mut input).ok()?;
+	Some(input.trim().into())
+}
+
+pub fn ask_for_bool(message: &str) -> bool {
+	println!("{} (true/false)", message);
+
+	let mut input = String::new();
+	let read_result = std::io::stdin().read_line(&mut input);
+
+  	if read_result.is_err() {
+		println!("Could not read input, try again");
+		return ask_for_bool(message)
+	}
+
+	match input.trim() {
+		"true" => true,
+		"false" => false,
+		_ => {
+			println!("Please only type true or false");
+			ask_for_bool(message)
+		}
+	}
+}

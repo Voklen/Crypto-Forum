@@ -1,7 +1,7 @@
 use crate::{
+	ask_for_bool,
 	encrypt_decrypt::{encrypt_and_write, read_and_decrypt},
-	write::ask_for_bool,
-	Error,
+	read, Error,
 };
 use ed25519_dalek::*;
 use sha2::{Digest, Sha256, Sha512};
@@ -31,9 +31,9 @@ pub fn create_account(accounts_dir: &str) -> Result<Keypair, Error> {
 
 fn get_account_name() -> String {
 	println!("Enter new account name:");
-	match text_io::try_read!("{}\n") {
-		Ok(i) => i,
-		Err(_) => {
+	match read() {
+		Some(i) => i,
+		None => {
 			println!("Sorry, couldn't read the input. Try again.");
 			get_account_name()
 		}
@@ -46,7 +46,7 @@ fn get_existing_account(accounts_dir: &str) -> Result<Keypair, Error> {
 
 	// Select & open account
 	println!("What account would you like to use?");
-	let selection: String = text_io::try_read!("{}\n").unwrap();
+	let selection: String = read().unwrap();
 	if account_files.contains(&selection) {
 		open_account(selection, accounts_dir)
 	} else {
@@ -64,11 +64,11 @@ fn open_account(selection: String, accounts_dir: &str) -> Result<Keypair, Error>
 }
 
 fn get_and_print_accounts(accounts_dir: &str) -> Result<Vec<String>, Error> {
-    let account_files: Vec<String> = std::fs::read_dir(accounts_dir)
-		    .map_err(|err| Error::StdIo(err))?
-		    .filter_map(get_and_print_str)
-		    .collect();
-    Ok(account_files)
+	let account_files: Vec<String> = std::fs::read_dir(accounts_dir)
+		.map_err(|err| Error::StdIo(err))?
+		.filter_map(get_and_print_str)
+		.collect();
+	Ok(account_files)
 }
 
 fn get_and_print_str(input: Result<std::fs::DirEntry, std::io::Error>) -> Option<String> {
@@ -96,9 +96,9 @@ fn get_random_from_usr() -> [u8; 64] {
 		"Please type some random characters (this will be used for the initial key generation)"
 	);
 	// Read input
-	let random_input: String = match text_io::try_read!("{}\n") {
-		Ok(res) => res,
-		Err(_) => {
+	let random_input: String = match read() {
+		Some(i) => i,
+		None => {
 			println!("Sorry, couldn't read the input. Try again.");
 			return get_random_from_usr();
 		}
@@ -111,9 +111,9 @@ fn get_random_from_usr() -> [u8; 64] {
 /// A line asking the user to type a password should be printed before this function is called
 fn get_password() -> [u8; 32] {
 	// Read input or retry on error
-	let data: String = match text_io::try_read!("{}\n") {
-		Ok(i) => i,
-		Err(_) => {
+	let data: String = match read() {
+		Some(i) => i,
+		None => {
 			println!("Sorry, couldn't read the input. Try again.");
 			return get_password();
 		}
