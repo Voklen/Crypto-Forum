@@ -38,7 +38,10 @@
 					"kind": "bin"
 				}
 			},
-			"args": [],
+			"args": [
+				"-i",
+				"test_data/messages.json"
+			],
 			"cwd": "${workspaceFolder}"
 		},
 		{
