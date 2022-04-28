@@ -156,10 +156,17 @@ fn bytes_to_hex(bytes: &[u8]) -> String {
 	hex_string
 }
 
-pub fn read() -> Option<String> {
-	let mut input = String::new();
-  	std::io::stdin().read_line(&mut input).ok()?;
-	Some(input.trim().into())
+pub fn input(prompt: &str) -> String {
+	println!("{}", prompt);
+
+	let mut input_string = String::new();
+  	let read_line_result = std::io::stdin().read_line(&mut input_string);
+	
+	if read_line_result.is_err() {
+		println!("Sorry, couldn't read the input. Try again.");
+		return input(prompt)
+	};
+	input_string.trim().into()
 }
 
 pub fn ask_for_bool(message: &str) -> bool {

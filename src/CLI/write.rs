@@ -1,4 +1,4 @@
-use crate::{ask_for_bool, read, write_serde, MessageForWriting, SerdeParser};
+use crate::{ask_for_bool, input, write_serde, MessageForWriting, SerdeParser};
 use ed25519_dalek::*;
 
 pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, last_hash: [u8; 64]) {
@@ -25,11 +25,7 @@ fn get_messages_from_user(
 	prev_hash: [u8; 64],
 	bad_keypair: &Keypair,
 ) -> Vec<MessageForWriting> {
-	println!("Please enter desired message");
-	let message: String = match read() {
-		Some(i) => i,
-		None => return get_messages_from_user(keypair, write_data, prev_hash, bad_keypair),
-	};
+	let message = input("Please enter desired message");
 	let to_sign = &[message.as_bytes(), &prev_hash].concat();
 
 	let signature = if ask_for_bool("Would you like to properly sign it?") {

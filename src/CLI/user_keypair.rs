@@ -1,7 +1,7 @@
 use crate::{
 	ask_for_bool,
 	encrypt_decrypt::{encrypt_and_write, read_and_decrypt},
-	read, Error,
+	input, Error,
 };
 use ed25519_dalek::*;
 use sha2::{Digest, Sha256, Sha512};
@@ -16,28 +16,19 @@ pub fn login(accounts_dir: &str) -> Result<Keypair, Error> {
 }
 
 pub fn create_account(accounts_dir: &str) -> Result<Keypair, Error> {
-	println!("Please create a password");
-	let first_password = get_password();
-	println!("Please repeat that password");
-	if first_password != get_password() {
+	let account_name = input("Enter new account name:");
+
+	let first_password = get_password("Please create a password");
+	let second_password = get_password("Please repeat that password");
+	if first_password != second_password {
 		println!("Passwords do not match.");
 		return create_account(accounts_dir);
 	}
-	let file_path = [accounts_dir, &get_account_name()].concat();
+	
+	let file_path = [accounts_dir, &account_name].concat();
 	let keypair = new_keypair();
 	encrypt_and_write(&file_path, &keypair.to_bytes(), &first_password)?;
 	Ok(keypair)
-}
-
-fn get_account_name() -> String {
-	println!("Enter new account name:");
-	match read() {
-		Some(i) => i,
-		None => {
-			println!("Sorry, couldn't read the input. Try again.");
-			get_account_name()
-		}
-	}
 }
 
 fn get_existing_account(accounts_dir: &str) -> Result<Keypair, Error> {
@@ -45,8 +36,7 @@ fn get_existing_account(accounts_dir: &str) -> Result<Keypair, Error> {
 	let account_files = get_and_print_accounts(accounts_dir)?;
 
 	// Select & open account
-	println!("What account would you like to use?");
-	let selection: String = read().unwrap();
+	let selection = input("What account would you like to use?");
 	if account_files.contains(&selection) {
 		open_account(selection, accounts_dir)
 	} else {
@@ -56,8 +46,7 @@ fn get_existing_account(accounts_dir: &str) -> Result<Keypair, Error> {
 }
 
 fn open_account(selection: String, accounts_dir: &str) -> Result<Keypair, Error> {
-	println!("Please type in the password for {}", selection);
-	let password = get_password();
+	let password = get_password(&format!("Please enter the password for {}", selection));
 	let full_path = accounts_dir.to_owned() + &selection;
 	let file_data = read_and_decrypt(&full_path, &password)?;
 	Keypair::from_bytes(&file_data).map_err(|err| Error::SignatureError(err))
@@ -91,34 +80,13 @@ fn new_keypair() -> Keypair {
 
 /// Get the user to enter some random characters, then hash whatever they give and return that hash as a byte array
 fn get_random_from_usr() -> [u8; 64] {
-	// Ask for input
-	println!(
-		"Please type some random characters (this will be used for the initial key generation)"
-	);
-	// Read input
-	let random_input: String = match read() {
-		Some(i) => i,
-		None => {
-			println!("Sorry, couldn't read the input. Try again.");
-			return get_random_from_usr();
-		}
-	};
-	// Hash input
-	let hash = Sha512::digest(random_input.as_bytes());
+	let random_input = input("Please type some random characters (this will be used for the initial key generation)");
+	let hash = Sha512::digest(random_input);
 	hash.into()
 }
 
-/// A line asking the user to type a password should be printed before this function is called
-fn get_password() -> [u8; 32] {
-	// Read input or retry on error
-	let data: String = match read() {
-		Some(i) => i,
-		None => {
-			println!("Sorry, couldn't read the input. Try again.");
-			return get_password();
-		}
-	};
-
-	let hash = Sha256::digest(data);
+fn get_password(prompt: &str) -> [u8; 32] {
+	let user_input = input(prompt);
+	let hash = Sha256::digest(user_input);
 	hash.into()
 }
