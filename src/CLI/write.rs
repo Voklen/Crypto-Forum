@@ -13,10 +13,11 @@ pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, las
 	};
 
 	let messages = get_messages_from_user(&keypair, write_data, last_hash, &bad_keypair);
-	write_serde::write_messages(file, &parser, messages).unwrap_or_else(|_| {
+	let write_result = write_serde::write_messages(file, &parser, messages);
+	if write_result.is_err() {
 		println!("Failed to write to file");
 		interactive_write(file, parser, keypair, last_hash)
-	})
+	};
 }
 
 fn get_messages_from_user(
@@ -56,16 +57,46 @@ pub fn make_file(file: &str) -> Vec<u8> {
 		std::process::exit(0);
 	}
 
-	//TODO Change empty file based on parser type
-	let slice = "[[]]".as_bytes();
+	let parser = ask_for_parser();
+	let slice = write_serde::write_messages(file, &parser, Vec::<MessageForWriting>::new());
 
-	match std::fs::write(file, slice) {
-		Ok(_) => {}
+	match slice {
+		Ok(i) => i,
 		Err(err) => {
-			println!("Could not write to file: {}", err);
-			return make_file(file);
+			println!("Could not write to file: {:?}", err);
+			make_file(file)
 		}
 	}
+}
 
-	slice.to_vec()
+// See Decisions.md for explanation
+fn ask_for_parser() -> SerdeParser {
+	use strum::IntoEnumIterator;
+	println!("Possible file types:");
+	let result_vec: Vec<SerdeParser> = SerdeParser::iter()
+		.enumerate()
+		.map(|(index, file_type)| {
+			println!("{}) {}", index + 1, file_type);
+			file_type
+		})
+		.collect();
+
+	let input_usize = ask_for_usize();
+	match result_vec.into_iter().nth(input_usize) {
+		Some(i) => i,
+		None => {
+			println!("Please pick a number on the list");
+			ask_for_parser()
+		}
+	}
+}
+
+fn ask_for_usize() -> usize {
+	match input("Select an option (enter the number)").parse::<usize>() {
+		Ok(i) => i,
+		Err(_) => {
+			println!("Please enter a positive number");
+			ask_for_usize()
+		}
+	}
 }

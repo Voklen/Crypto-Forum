@@ -5,7 +5,7 @@ pub fn write_messages(
 	file: &str,
 	parser: &SerdeParser,
 	data: Vec<MessageForWriting>,
-) -> Result<(), Error> {
+) -> Result<Vec<u8>, Error> {
 	let write_data = get_write_data(file, parser, data)?;
 	// Convert into chosen format
 	let value = match parser {
@@ -13,7 +13,8 @@ pub fn write_messages(
 		&SerdeParser::Smile => serde_smile::to_vec(&write_data).map_err(|err| Error::SmileError(err))?,
 	};
 
-	fs::write(file, value).map_err(|err| Error::StdIo(err))
+	fs::write(file, &value).map_err(|err| Error::StdIo(err))?;
+	Ok(value)
 }
 
 fn get_write_data(

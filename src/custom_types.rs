@@ -42,10 +42,20 @@ impl MessageForWriting {
 	}
 }
 
-#[derive(Debug)]
+use strum_macros::EnumIter;
+#[derive(Debug, EnumIter)]
 pub enum SerdeParser {
 	Json,
 	Smile,
+}
+use std::fmt;
+impl fmt::Display for SerdeParser {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		match self {
+			SerdeParser::Json => write!(f, "Json"),
+			SerdeParser::Smile => write!(f, "Smile"),
+		}
+	}
 }
 
 #[derive(PartialEq)]
