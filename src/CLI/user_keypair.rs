@@ -24,11 +24,22 @@ pub fn create_account(accounts_dir: &str) -> Result<Keypair, Error> {
 		println!("Passwords do not match.");
 		return create_account(accounts_dir);
 	}
-	
+
 	let file_path = [accounts_dir, &account_name].concat();
 	let keypair = new_keypair();
+	create_dir(accounts_dir)?;
 	encrypt_and_write(&file_path, &keypair.to_bytes(), &first_password)?;
 	Ok(keypair)
+}
+
+fn create_dir(accounts_dir: &str) -> Result<(), Error> {
+	std::fs::create_dir(accounts_dir).or_else(|err| {
+		if err.kind() == std::io::ErrorKind::AlreadyExists {
+			Ok(())
+		} else {
+			Err(Error::StdIo(err))
+		}
+	})
 }
 
 fn get_existing_account(accounts_dir: &str) -> Result<Keypair, Error> {
@@ -80,7 +91,9 @@ fn new_keypair() -> Keypair {
 
 /// Get the user to enter some random characters, then hash whatever they give and return that hash as a byte array
 fn get_random_from_usr() -> [u8; 64] {
-	let random_input = input("Please type some random characters (this will be used for the initial key generation)");
+	let random_input = input(
+		"Please type some random characters (this will be used for the initial key generation)",
+	);
 	let hash = Sha512::digest(random_input);
 	hash.into()
 }

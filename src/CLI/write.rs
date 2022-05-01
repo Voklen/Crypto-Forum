@@ -82,7 +82,7 @@ fn ask_for_parser() -> SerdeParser {
 		.collect();
 
 	let input_usize = ask_for_usize();
-	match result_vec.into_iter().nth(input_usize) {
+	match result_vec.into_iter().nth(input_usize + 1) {
 		Some(i) => i,
 		None => {
 			println!("Please pick a number on the list");
@@ -92,7 +92,7 @@ fn ask_for_parser() -> SerdeParser {
 }
 
 fn ask_for_usize() -> usize {
-	match input("Select an option (enter the number)").parse::<usize>() {
+	match input("Select an option (enter the number)").parse() {
 		Ok(i) => i,
 		Err(_) => {
 			println!("Please enter a positive number");
