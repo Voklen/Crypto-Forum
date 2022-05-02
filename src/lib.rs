@@ -8,7 +8,3 @@ pub mod read;
 pub mod read_serde;
 #[path = "backend/write_serde.rs"]
 pub mod write_serde;
-
-#[cfg(test)]
-#[path = "tests/unit_tests/mod.rs"]
-pub mod unit;

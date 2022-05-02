@@ -1,4 +1,4 @@
-use crate::{
+use crypto_forum::{
 	custom_types::{Message, MessageForWriting},
 	*,
 };

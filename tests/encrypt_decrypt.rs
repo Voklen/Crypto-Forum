@@ -1,4 +1,4 @@
-use crate::encrypt_decrypt::*;
+use crypto_forum::encrypt_decrypt::*;
 
 #[test]
 fn normal() {

@@ -62,6 +62,44 @@
 			},
 			"args": [],
 			"cwd": "${workspaceFolder}"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug integration test 'encrypt_decrypt'",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--test=encrypt_decrypt",
+					"--package=crypto_forum",
+				],
+				"filter": {
+					"name": "encrypt_decrypt",
+					"kind": "test"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug integration test 'read_write_json'",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--test=read_write_json",
+					"--package=crypto_forum"
+				],
+				"filter": {
+					"name": "read_write_json",
+					"kind": "test"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
 		}
 	]
 }
