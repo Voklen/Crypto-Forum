@@ -8,12 +8,12 @@ pub fn write_messages(
 ) -> Result<Vec<u8>, Error> {
 	let write_data = get_write_data(file, parser, data)?;
 	// Convert into chosen format
-	let value = match parser {
-		&SerdeParser::Json => serde_json::to_vec(&write_data).map_err(|err| Error::JsonError(err))?,
-		&SerdeParser::Smile => serde_smile::to_vec(&write_data).map_err(|err| Error::SmileError(err))?,
+	let value = match *parser {
+		SerdeParser::Json => serde_json::to_vec(&write_data).map_err(Error::JsonError)?,
+		SerdeParser::Smile => serde_smile::to_vec(&write_data).map_err(Error::SmileError)?,
 	};
 
-	fs::write(file, &value).map_err(|err| Error::StdIo(err))?;
+	fs::write(file, &value).map_err(Error::StdIo)?;
 	Ok(value)
 }
 

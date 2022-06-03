@@ -13,7 +13,7 @@ pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, las
 	};
 
 	let messages = get_messages_from_user(&keypair, write_data, last_hash, &bad_keypair);
-	let write_result = write_serde::write_messages(file, &parser, messages);
+	let write_result = write_serde::write_messages(file, parser, messages);
 	if write_result.is_err() {
 		println!("Failed to write to file");
 		interactive_write(file, parser, keypair, last_hash)
@@ -73,16 +73,15 @@ pub fn make_file(file: &str) -> Vec<u8> {
 fn ask_for_parser() -> SerdeParser {
 	use strum::IntoEnumIterator;
 	println!("Possible file types:");
-	let result_vec: Vec<SerdeParser> = SerdeParser::iter()
+	let mut result_vec = SerdeParser::iter()
 		.enumerate()
 		.map(|(index, file_type)| {
 			println!("{}) {}", index + 1, file_type);
 			file_type
-		})
-		.collect();
+		});
 
 	let input_usize = ask_for_usize();
-	match result_vec.into_iter().nth(input_usize + 1) {
+	match result_vec.nth(input_usize + 1) {
 		Some(i) => i,
 		None => {
 			println!("Please pick a number on the list");

@@ -16,8 +16,7 @@ fn get_arguments() -> (Vec<String>, Vec<Argument>) {
 	// Skip the first argument because it's just the executable path
 	let arguments_as_strings: Vec<String> = std::env::args().skip(1).collect();
 
-	let no_arguments = arguments_as_strings.len() < 1;
-	if no_arguments {
+	if arguments_as_strings.is_empty() {
 		println!(
 			"{program_name}: missing operand",
 			program_name = env!("CARGO_PKG_NAME")
@@ -28,7 +27,7 @@ fn get_arguments() -> (Vec<String>, Vec<Argument>) {
 	let mut files = Vec::<String>::new();
 	let mut arguments = Vec::<Argument>::new();
 	for arg in arguments_as_strings {
-		if arg.starts_with("-") {
+		if arg.starts_with('-') {
 			arguments.push(parse_dash_argument(arg))
 		} else {
 			// If there is no "-" at the start of the argument, it's a file that's being passed
@@ -40,8 +39,8 @@ fn get_arguments() -> (Vec<String>, Vec<Argument>) {
 
 fn parse_dash_argument(arg: String) -> Argument {
 	match arg.as_str() {
-		"-i" => return Argument::Interactive,
-		"-m" => return Argument::MachineOutput,
+		"-i" => Argument::Interactive,
+		"-m" => Argument::MachineOutput,
 		"--version" => {
 			println!(
 				"{program_name} {program_ver}",
@@ -62,7 +61,7 @@ fn parse_dash_argument(arg: String) -> Argument {
 	}
 }
 
-fn process_file(messages_file: &str, arguments: &Vec<Argument>) {
+fn process_file(messages_file: &str, arguments: &[Argument]) {
 	println!("File: {}", messages_file);
 	let file_slice = read_file(messages_file);
 	let parser = read::file_type(&file_slice).unwrap_or_else(|| {

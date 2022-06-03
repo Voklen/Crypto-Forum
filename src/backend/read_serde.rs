@@ -43,12 +43,12 @@ fn vec_to_message(f: MessageInFile) -> Option<Message> {
 }
 
 pub fn parse_full_file(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<FullFile, Error> {
-	if file_slice.len() == 0 {
+	if file_slice.is_empty() {
 		return Ok(FullFile::new());
 	}
 	match parser {
-		SerdeParser::Json => serde_json::from_slice(&file_slice).map_err(|err|Error::JsonError(err)),
-		SerdeParser::Smile => serde_smile::from_slice(&file_slice).map_err(|err| Error::SmileError(err)),
+		SerdeParser::Json => serde_json::from_slice(file_slice).map_err(Error::JsonError),
+		SerdeParser::Smile => serde_smile::from_slice(file_slice).map_err(Error::SmileError),
 	}
 }
 

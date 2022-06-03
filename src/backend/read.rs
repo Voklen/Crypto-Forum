@@ -1,6 +1,6 @@
 use crate::custom_types::SerdeParser;
 
-pub fn file_type(file_slice: &Vec<u8>) -> Option<SerdeParser> {
+pub fn file_type(file_slice: &[u8]) -> Option<SerdeParser> {
 	match &file_slice[..2] {
 		[58, 41] => Some(SerdeParser::Smile),
 		[123, 10] => Some(SerdeParser::Json),

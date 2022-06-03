@@ -60,12 +60,12 @@ fn open_account(selection: String, accounts_dir: &str) -> Result<Keypair, Error>
 	let password = get_password(&format!("Please enter the password for {}", selection));
 	let full_path = accounts_dir.to_owned() + &selection;
 	let file_data = read_and_decrypt(&full_path, &password)?;
-	Keypair::from_bytes(&file_data).map_err(|err| Error::SignatureError(err))
+	Keypair::from_bytes(&file_data).map_err(Error::SignatureError)
 }
 
 fn get_and_print_accounts(accounts_dir: &str) -> Result<Vec<String>, Error> {
 	let account_files: Vec<String> = std::fs::read_dir(accounts_dir)
-		.map_err(|err| Error::StdIo(err))?
+		.map_err(Error::StdIo)?
 		.filter_map(get_and_print_str)
 		.collect();
 	Ok(account_files)
