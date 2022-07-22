@@ -40,7 +40,7 @@
 			},
 			"args": [
 				"-i",
-				"test_data/messages.json"
+				"reference/reference.json"
 			],
 			"cwd": "${workspaceFolder}"
 		},
