@@ -71,31 +71,17 @@ pub fn make_file(file: &str) -> Vec<u8> {
 
 // See Decisions.md for explanation
 fn ask_for_parser() -> SerdeParser {
-	use strum::IntoEnumIterator;
 	println!("Possible file types:");
-	let mut result_vec = SerdeParser::iter()
-		.enumerate()
-		.map(|(index, file_type)| {
-			println!("{}) {}", index + 1, file_type);
-			file_type
-		});
+	println!("1) Json");
+	println!("2) Smile");
 
-	let input_usize = ask_for_usize();
-	match result_vec.nth(input_usize + 1) {
-		Some(i) => i,
-		None => {
+	let user_selection: &str = &input("Select an option (enter the number)");
+	match user_selection {
+		"1" => SerdeParser::Json,
+		"2" => SerdeParser::Smile,
+		_ => {
 			println!("Please pick a number on the list");
 			ask_for_parser()
-		}
-	}
-}
-
-fn ask_for_usize() -> usize {
-	match input("Select an option (enter the number)").parse() {
-		Ok(i) => i,
-		Err(_) => {
-			println!("Please enter a positive number");
-			ask_for_usize()
 		}
 	}
 }

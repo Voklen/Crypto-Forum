@@ -17,4 +17,7 @@ You will not be spamming messages and this function is only called when a messag
 ## CLI/write.rs
 
 ### `ask_for_parser`
-To print out every possible option of the parser I used the `strum` crate to iterate over every possible option and implemented std::fmt::Display for it (with a match statement). The reason for doing it this way is so that it's easier to maintain because one doesn't have to change far off bits of the code when modifying the enumerator (and the Display impl's match statement would give a warning when you modify it)
+I chose to hard code the options instead of iterating over every variant of the enumerator because:
+- It does not require an external crate
+- The enumerator variant names are the ones shown to the user (so cannot include spaces or non-ASCII characters)
+- The downside of having to modify other bits of code when adding a new parser shouldn't impact this too much as forgetting to modify this is easily spotted due to, well, not being able to use the new parser

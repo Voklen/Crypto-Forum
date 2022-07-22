@@ -1,5 +1,3 @@
-use std::fs;
-
 use crate::{
 	ask_for_bool,
 	encrypt_decrypt::{encrypt_and_write, read_and_decrypt},
@@ -7,6 +5,7 @@ use crate::{
 };
 use ed25519_dalek::*;
 use sha2::{Digest, Sha256, Sha512};
+use std::fs;
 
 pub fn login(accounts_dir: &str) -> Result<Keypair, Error> {
 	if dir_is_empty(accounts_dir) {
@@ -22,7 +21,7 @@ pub fn login(accounts_dir: &str) -> Result<Keypair, Error> {
 }
 
 fn dir_is_empty(directory: &str) -> bool {
-	match std::fs::read_dir(directory) {
+	match fs::read_dir(directory) {
 		Ok(mut files) => {
 			if files.next().is_none() {
 				true

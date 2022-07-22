@@ -42,8 +42,7 @@ impl MessageForWriting {
 	}
 }
 
-use strum_macros::EnumIter;
-#[derive(Debug, EnumIter)]
+#[derive(Debug)]
 pub enum SerdeParser {
 	Json,
 	Smile,
