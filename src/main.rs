@@ -159,32 +159,25 @@ pub fn input(prompt: &str) -> String {
 	println!("{}", prompt);
 
 	let mut input_string = String::new();
-  	let read_line_result = std::io::stdin().read_line(&mut input_string);
+  	let read_result = std::io::stdin().read_line(&mut input_string);
 	
-	if read_line_result.is_err() {
-		println!("Sorry, couldn't read the input. Try again.");
+	if read_result.is_err() {
+		println!("Could not read the input, try again.");
 		return input(prompt)
 	};
 	input_string.trim().into()
 }
 
-pub fn ask_for_bool(message: &str) -> bool {
-	println!("{} (true/false)", message);
-
-	let mut input = String::new();
-	let read_result = std::io::stdin().read_line(&mut input);
-
-  	if read_result.is_err() {
-		println!("Could not read input, try again");
-		return ask_for_bool(message)
-	}
+pub fn ask_for_bool(prompt: &str) -> bool {
+	let prompt = &format!("{prompt}, (true/false)");
+	let input = input(prompt);
 
 	match input.trim() {
 		"true" => true,
 		"false" => false,
 		_ => {
 			println!("Please only type true or false");
-			ask_for_bool(message)
+			ask_for_bool(prompt)
 		}
 	}
 }
