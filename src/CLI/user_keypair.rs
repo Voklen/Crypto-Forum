@@ -1,3 +1,5 @@
+use std::fs;
+
 use crate::{
 	ask_for_bool,
 	encrypt_decrypt::{encrypt_and_write, read_and_decrypt},
@@ -7,11 +9,28 @@ use ed25519_dalek::*;
 use sha2::{Digest, Sha256, Sha512};
 
 pub fn login(accounts_dir: &str) -> Result<Keypair, Error> {
+	if dir_is_empty(accounts_dir) {
+		return create_account(accounts_dir);
+	}
+
 	let create_new_account = ask_for_bool("Do you want to create a new account?");
 	if create_new_account {
 		create_account(accounts_dir)
 	} else {
 		get_existing_account(accounts_dir)
+	}
+}
+
+fn dir_is_empty(directory: &str) -> bool {
+	match std::fs::read_dir(directory) {
+		Ok(mut files) => {
+			if files.next().is_none() {
+				true
+			} else {
+				false
+			}
+		}
+		Err(_) => false,
 	}
 }
 
@@ -33,7 +52,7 @@ pub fn create_account(accounts_dir: &str) -> Result<Keypair, Error> {
 }
 
 fn create_dir(accounts_dir: &str) -> Result<(), Error> {
-	std::fs::create_dir(accounts_dir).or_else(|err| {
+	fs::create_dir(accounts_dir).or_else(|err| {
 		if err.kind() == std::io::ErrorKind::AlreadyExists {
 			Ok(())
 		} else {
@@ -64,14 +83,14 @@ fn open_account(selection: String, accounts_dir: &str) -> Result<Keypair, Error>
 }
 
 fn get_and_print_accounts(accounts_dir: &str) -> Result<Vec<String>, Error> {
-	let account_files: Vec<String> = std::fs::read_dir(accounts_dir)
+	let account_files: Vec<String> = fs::read_dir(accounts_dir)
 		.map_err(Error::StdIo)?
 		.filter_map(get_and_print_str)
 		.collect();
 	Ok(account_files)
 }
 
-fn get_and_print_str(input: Result<std::fs::DirEntry, std::io::Error>) -> Option<String> {
+fn get_and_print_str(input: Result<fs::DirEntry, std::io::Error>) -> Option<String> {
 	let file = input.ok()?;
 	if !file.path().is_file() {
 		return None;
@@ -86,7 +105,7 @@ fn new_keypair() -> Keypair {
 
 	let secret: SecretKey = SecretKey::from_bytes(&secret_seed[..SECRET_KEY_LENGTH]).unwrap();
 	let public: PublicKey = PublicKey::from(&secret);
-	Keypair {secret, public}
+	Keypair { secret, public }
 }
 
 /// Get the user to enter some random characters, then hash whatever they give and return that hash as a byte array

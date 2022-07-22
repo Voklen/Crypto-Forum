@@ -90,7 +90,7 @@ fn read_file(messages_file: &str) -> Vec<u8> {
 }
 
 fn interactive_session(messages_file: &str, parser: SerdeParser, messages: Vec<Message>) {
-	let keypair = user_keypair::login("accounts/").unwrap();
+	let keypair = user_keypair::login("reference/accounts/").unwrap();
 	let last_hash = match messages.last() {
 		Some(i) => i.hash,
 		None => [0; 64],
