@@ -1,4 +1,4 @@
-use crypto_forum::{custom_types::*, *};
+use crypto_forum::{custom_types::{*, hex::*}, *};
 
 #[path = "CLI/user_keypair.rs"]
 mod user_keypair;
@@ -129,30 +129,6 @@ fn output_for_machine(messages: &Vec<Message>) {
 			message = i.message,
 		);
 	}
-}
-
-fn bytes_to_hex(bytes: &[u8]) -> String {
-	let mut hex_string = String::new();
-	for i in bytes {
-		fn hex_from_digit(num: u8) -> char {
-			if num < 10 {
-				(b'0' + num) as char
-			} else {
-				(b'A' + num - 10) as char
-			}
-		}
-		/*
-		Amazing, goes from 0 -> 00:
-		println!("1: {}", hex_from_digit(0 / 16));
-		println!("2: {}", hex_from_digit(0 % 16));
-		all the way to the u8 limit of 255 -> FF (Just like colours! I'm getting way to exited about this…):
-		println!("1: {}", hex_from_digit(255 / 16));
-		println!("2: {}", hex_from_digit(255 % 16));
-		*/
-		hex_string.push(hex_from_digit(i / 16));
-		hex_string.push(hex_from_digit(i % 16));
-	}
-	hex_string
 }
 
 pub fn input(prompt: &str) -> String {

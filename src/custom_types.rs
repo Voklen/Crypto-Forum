@@ -1,3 +1,6 @@
+#[path = "backend/hex.rs"]
+pub mod hex;
+
 use sha2::{Digest, Sha512};
 
 #[derive(Debug)]
