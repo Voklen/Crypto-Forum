@@ -1,0 +1,16 @@
+There are two accounts in this example:
+
+Alice
+Public key: 28971F7AC9D058A78344A7AE89E278F64C2FA0705349FAC35BC028DCFF0CFE4D
+Key seed: aoeu
+Password: a
+
+Bob
+Public key: FD63DD46A0F5D0811914999940BAFEA28E15239A9C7055772E2F1A51DD3E195C
+Key seed: ueoa
+Password: b
+
+The messages are
+Alice: hello
+Alice(the message hasn't been signed so it's probably somebody trying to impersonate them): I don't like you
+Bob: hi

@@ -50,35 +50,18 @@ fn handle_error(err: std::io::Error) -> Result<FullFile, Error> {
 	}
 }
 
-macro_rules! split_in_half {
-	($e:expr, $size:expr) => ({
-		fn to_32(input: [u8; $size*2], offset: usize) -> [u8; $size] {
-			let mut out = [0; $size];
-			for (i, element) in input.into_iter().enumerate() {
-				if offset <= i && i < ($size + offset) {
-					out[i - offset] = element;
-				}
-			}
-			out
-		}
-		(to_32($e, 0), to_32($e, $size))
-	});
-}
-
 pub fn sig_message_to_vec(data: Vec<MessageForWriting>) -> Vec<MessageInFile> {
 	data.into_iter()
 		.map(|f| {
-			let (prev_hash_pt1, prev_hash_pt2) = split_in_half!(f.prev_hash, 32);
-			let (signature_pt1, signature_pt2) = split_in_half!(f.signature.to_bytes(), 32);
+			let prev_hash = hex::bytes_to_hex(&f.prev_hash);
+			let signature = hex::bytes_to_hex(&f.signature.to_bytes());
 			let public_key = f.public_key.to_bytes();
 			let message = f.message;
 			MessageInFile {
-				prev_hash_pt1,
-				prev_hash_pt2,
+				prev_hash,
 				public_key,
 				message,
-				signature_pt1,
-				signature_pt2,
+				signature,
 			}
 		})
 		.collect()

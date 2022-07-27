@@ -45,7 +45,7 @@ pub fn hex_to_bytes(hex_string: String) -> Vec<u8> {
 	bytes
 }
 
-pub fn hex_to_bytes64(hex_string: String) -> [u8; 64] {
+pub fn hex_to_bytes64(hex_string: &str) -> [u8; 64] {
 	fn digit_from_hex(character: char) -> u8 {
 		let num = character as u8;
 		if num < (b'0' + 10) {
@@ -77,7 +77,7 @@ fn normal() {
 		106, 73, 36, 252, 6,
 	];
 	let hex = bytes_to_hex(&input);
-	let result = hex_to_bytes64(hex);
+	let result = hex_to_bytes64(&hex);
 	assert_eq!(input, result);
 }
 
@@ -85,7 +85,7 @@ fn normal() {
 fn all_zeros() {
 	let input = [0; 64];
 	let hex = bytes_to_hex(&input);
-	let result = hex_to_bytes64(hex);
+	let result = hex_to_bytes64(&hex);
 	assert_eq!(input, result);
 }
 
@@ -93,6 +93,6 @@ fn all_zeros() {
 fn all_255() {
 	let input = [255; 64];
 	let hex = bytes_to_hex(&input);
-	let result = hex_to_bytes64(hex);
+	let result = hex_to_bytes64(&hex);
 	assert_eq!(input, result);
 }

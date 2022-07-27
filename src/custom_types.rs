@@ -85,12 +85,10 @@ impl Header {
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct MessageInFile {
-	pub prev_hash_pt1: [u8; 32],
-	pub prev_hash_pt2: [u8; 32],
+	pub prev_hash: String,
 	pub public_key: [u8; 32],
 	pub message: String,
-	pub signature_pt1: [u8; 32],
-	pub signature_pt2: [u8; 32],
+	pub signature: String,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Default)]
