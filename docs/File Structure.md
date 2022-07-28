@@ -1,2 +1,4 @@
-Each forum thread is it's own file in the "threads" directory with the file name being the title of the thread
-Each user's information (username, profile page etc.) is a file in the "users" directory with the file name being their public key
+Each forum thread is a file in the "threads" directory with the file name being the title of the thread [This folder should be synced to all computers accessing the forum]
+Each user's information (username, profile page etc.) is a file in the "users" directory with the file name being their public key [This folder should be synced to all computers accessing the forum]
+
+Each account you have on your computer is a file in the "accounts" directory encrypted with that accounts password [This folder does not need be synced to all computers as this would allow attackers to try and decrypt the password that a human has made (which is much easier than the private key generated)]

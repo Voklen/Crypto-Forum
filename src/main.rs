@@ -145,14 +145,14 @@ pub fn input(prompt: &str) -> String {
 }
 
 pub fn ask_for_bool(prompt: &str) -> bool {
-	let prompt = &format!("{prompt}, (true/false)");
+	let prompt = &format!("{prompt} (true/false)");
 	let input = input(prompt);
 
 	match input.trim() {
 		"true" => true,
 		"false" => false,
 		_ => {
-			println!("Please only type true or false");
+			println!("Please only enter true or false");
 			ask_for_bool(prompt)
 		}
 	}

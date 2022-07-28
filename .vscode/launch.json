@@ -72,7 +72,7 @@
 					"test",
 					"--no-run",
 					"--test=encrypt_decrypt",
-					"--package=crypto_forum",
+					"--package=crypto_forum"
 				],
 				"filter": {
 					"name": "encrypt_decrypt",

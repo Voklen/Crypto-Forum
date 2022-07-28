@@ -12,7 +12,7 @@ pub fn login(accounts_dir: &str) -> Result<Keypair, Error> {
 		return create_account(accounts_dir);
 	}
 
-	let create_new_account = ask_for_bool("Do you want to create a new account?");
+	let create_new_account = ask_for_bool("Would you like to create a new account?");
 	if create_new_account {
 		create_account(accounts_dir)
 	} else {
