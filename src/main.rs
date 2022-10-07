@@ -28,7 +28,7 @@ fn get_arguments() -> (Vec<String>, Vec<Argument>) {
 	let mut arguments = Vec::<Argument>::new();
 	for arg in arguments_as_strings {
 		if arg.starts_with('-') {
-			arguments.push(parse_dash_argument(arg))
+			arguments.push(parse_dash_argument(&arg))
 		} else {
 			// If there is no "-" at the start of the argument, it's a file that's being passed
 			files.push(arg);
@@ -37,8 +37,8 @@ fn get_arguments() -> (Vec<String>, Vec<Argument>) {
 	(files, arguments)
 }
 
-fn parse_dash_argument(arg: String) -> Argument {
-	match arg.as_str() {
+fn parse_dash_argument(arg: &str) -> Argument {
+	match arg {
 		"-i" => Argument::Interactive,
 		"-m" => Argument::MachineOutput,
 		"--version" => {

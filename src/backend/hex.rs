@@ -22,7 +22,7 @@ pub fn bytes_to_hex(bytes: &[u8]) -> String {
 	hex_string
 }
 
-pub fn hex_to_bytes(hex_string: String) -> Vec<u8> {
+pub fn hex_to_bytes(hex_string: &str) -> Vec<u8> {
 	fn digit_from_hex(character: char) -> u8 {
 		let num = character as u8;
 		if num < (b'0' + 10) {

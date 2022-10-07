@@ -67,14 +67,14 @@ fn get_existing_account(accounts_dir: &str) -> Result<Keypair, Error> {
 	// Select & open account
 	let selection = input("What account would you like to use?");
 	if account_files.contains(&selection) {
-		open_account(selection, accounts_dir)
+		open_account(&selection, accounts_dir)
 	} else {
 		println!("Invalid selection, please pick an account");
 		get_existing_account(accounts_dir)
 	}
 }
 
-fn open_account(selection: String, accounts_dir: &str) -> Result<Keypair, Error> {
+fn open_account(selection: &str, accounts_dir: &str) -> Result<Keypair, Error> {
 	let password = get_password(&format!("Please enter the password for {}", selection));
 	let full_path = accounts_dir.to_owned() + &selection;
 	let file_data = read_and_decrypt(&full_path, &password)?;
