@@ -22,7 +22,10 @@ pub fn bytes_to_hex(bytes: &[u8]) -> String {
 	hex_string
 }
 
-pub fn hex_to_bytes(hex_string: &str) -> Vec<u8> {
+/// Convert hex string to bytes of a generic array size
+/// # Panics
+/// If the string has out of range characters a panic will be triggered, for example hex_to_bytes("x")
+pub fn hex_to_bytes<const COUNT: usize>(hex_string: &str) -> [u8; COUNT] {
 	fn digit_from_hex(character: char) -> u8 {
 		let num = character as u8;
 		if num < (b'0' + 10) {
@@ -32,31 +35,8 @@ pub fn hex_to_bytes(hex_string: &str) -> Vec<u8> {
 		}
 	}
 	let mut chars = hex_string.chars();
-	let mut bytes = Vec::<u8>::new();
-	for _ in 0..(hex_string.len() / 2) {
-		let sixteens_digit = chars.next().unwrap();
-		let ones_digit = chars.next().unwrap();
-
-		let byte = digit_from_hex(sixteens_digit) * 16;
-		let second_byte = digit_from_hex(ones_digit);
-
-		bytes.push(byte + second_byte)
-	}
-	bytes
-}
-
-pub fn hex_to_bytes64(hex_string: &str) -> [u8; 64] {
-	fn digit_from_hex(character: char) -> u8 {
-		let num = character as u8;
-		if num < (b'0' + 10) {
-			num - b'0'
-		} else {
-			num - b'A' + 10
-		}
-	}
-	let mut chars = hex_string.chars();
-	let mut bytes = [0; 64];
-	for i in 0..64 {
+	let mut bytes = [0; COUNT];
+	for i in 0..COUNT {
 		let sixteens_digit = chars.next().unwrap();
 		let ones_digit = chars.next().unwrap();
 
@@ -77,7 +57,7 @@ fn normal() {
 		106, 73, 36, 252, 6,
 	];
 	let hex = bytes_to_hex(&input);
-	let result = hex_to_bytes64(&hex);
+	let result = hex_to_bytes(&hex);
 	assert_eq!(input, result);
 }
 
@@ -85,7 +65,7 @@ fn normal() {
 fn all_zeros() {
 	let input = [0; 64];
 	let hex = bytes_to_hex(&input);
-	let result = hex_to_bytes64(&hex);
+	let result = hex_to_bytes(&hex);
 	assert_eq!(input, result);
 }
 
@@ -93,6 +73,13 @@ fn all_zeros() {
 fn all_255() {
 	let input = [255; 64];
 	let hex = bytes_to_hex(&input);
-	let result = hex_to_bytes64(&hex);
+	let result = hex_to_bytes(&hex);
 	assert_eq!(input, result);
+}
+
+#[test]
+#[should_panic]
+fn non_hex_string() {
+	let hex = "x";
+	let _: [u8; 64] = hex_to_bytes(&hex);
 }
