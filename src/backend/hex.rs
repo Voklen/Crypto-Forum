@@ -25,21 +25,67 @@ pub fn bytes_to_hex(bytes: &[u8]) -> String {
 /// Convert hex string to bytes of a generic array size
 /// ```
 /// use crypto_forum::hex::hex_to_bytes;
-/// 
+///
 /// let result = hex_to_bytes("DF36");
 /// assert_eq!(result, Some([223, 54]))
 /// ```
 /// If there are not enough characters for the array size, it will return None
 /// ```
 /// use crypto_forum::hex::hex_to_bytes;
-/// 
+///
 /// let hex = "FFFFFFFF";
 /// let result: Option<[u8; 49]> = hex_to_bytes(&hex);
 /// assert_eq!(result, None)
 /// ```
-/// # Panics
-/// If the string has out of range characters a panic will be triggered, for example hex_to_bytes("x")
+/// If the string has out of range characters None will also be returned
+/// ```
+/// use crypto_forum::hex::hex_to_bytes;
+///
+/// let hex = "x";
+/// let result: Option<[u8; 64]> = hex_to_bytes(&hex);
+/// assert_eq!(result, None)
+/// ```
 pub fn hex_to_bytes<const COUNT: usize>(hex_string: &str) -> Option<[u8; COUNT]> {
+	fn digit_from_hex(character: char) -> u8 {
+		let num = character as u8;
+		if num < (b'0' + 10) {
+			num - b'0'
+		} else {
+			num - b'A' + 10
+		}
+	}
+	let mut chars = hex_string.chars();
+	let mut bytes = [0; COUNT];
+	for i in 0..COUNT {
+		let sixteens_digit = chars.next()?;
+		let ones_digit = chars.next()?;
+
+		let byte = digit_from_hex(sixteens_digit).checked_mul(16)?;
+		let second_byte = digit_from_hex(ones_digit);
+
+		bytes[i] = byte + second_byte
+	}
+	Some(bytes)
+}
+
+/// Convert hex string to bytes of a generic array size
+/// ```
+/// use crypto_forum::hex::unchecked_hex_to_bytes;
+///
+/// let result = unchecked_hex_to_bytes("DF36");
+/// assert_eq!(result, Some([223, 54]))
+/// ```
+/// If there are not enough characters for the array size, it will return None
+/// ```
+/// use crypto_forum::hex::unchecked_hex_to_bytes;
+///
+/// let hex = "FFFFFFFF";
+/// let result: Option<[u8; 49]> = unchecked_hex_to_bytes(&hex);
+/// assert_eq!(result, None)
+/// ```
+/// # Panics
+/// If the string has out of range characters a panic will be triggered, for example unchecked_hex_to_bytes("x")
+pub fn unchecked_hex_to_bytes<const COUNT: usize>(hex_string: &str) -> Option<[u8; COUNT]> {
 	fn digit_from_hex(character: char) -> u8 {
 		let num = character as u8;
 		if num < (b'0' + 10) {
@@ -60,19 +106,6 @@ pub fn hex_to_bytes<const COUNT: usize>(hex_string: &str) -> Option<[u8; COUNT]>
 		bytes[i] = byte + second_byte
 	}
 	Some(bytes)
-}
-
-#[test]
-fn normal() {
-	let input = [
-		223, 54, 208, 218, 182, 40, 43, 67, 126, 144, 234, 122, 188, 1, 244, 145, 178, 155, 128,
-		132, 104, 202, 56, 75, 182, 52, 30, 189, 85, 187, 212, 26, 209, 88, 143, 230, 22, 220, 153,
-		232, 13, 149, 168, 68, 222, 167, 36, 247, 218, 175, 31, 119, 94, 127, 94, 24, 41, 55, 251,
-		106, 73, 36, 252, 6,
-	];
-	let hex = bytes_to_hex(&input);
-	let result = hex_to_bytes(&hex).unwrap();
-	assert_eq!(input, result);
 }
 
 #[test]
@@ -125,8 +158,8 @@ fn all_255() {
 #[test]
 #[should_panic]
 fn non_hex_string() {
-	let hex = "x";
-	let _: [u8; 64] = hex_to_bytes(&hex).unwrap();
+	let hex = "XX";
+	let _: Option<[u8; 64]> = unchecked_hex_to_bytes(&hex);
 }
 
 #[test]
