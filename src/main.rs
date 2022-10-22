@@ -1,4 +1,4 @@
-use crypto_forum::{custom_types::{*, hex::*}, *};
+use crypto_forum::{custom_types::*, hex::*, *};
 
 #[path = "CLI/user_keypair.rs"]
 mod user_keypair;

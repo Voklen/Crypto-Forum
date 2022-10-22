@@ -24,14 +24,14 @@ pub fn bytes_to_hex(bytes: &[u8]) -> String {
 
 /// Convert hex string to bytes of a generic array size
 /// ```
-/// use crypto_forum::custom_types::hex::hex_to_bytes;
+/// use crypto_forum::hex::hex_to_bytes;
 /// 
 /// let result = hex_to_bytes("DF36");
 /// assert_eq!(result, Some([223, 54]))
 /// ```
 /// If there are not enough characters for the array size, it will return None
 /// ```
-/// use crypto_forum::custom_types::hex::hex_to_bytes;
+/// use crypto_forum::hex::hex_to_bytes;
 /// 
 /// let hex = "FFFFFFFF";
 /// let result: Option<[u8; 49]> = hex_to_bytes(&hex);

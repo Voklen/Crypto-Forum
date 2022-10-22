@@ -8,3 +8,5 @@ pub mod read;
 pub mod read_serde;
 #[path = "backend/write_serde.rs"]
 pub mod write_serde;
+#[path = "backend/hex.rs"]
+pub mod hex;

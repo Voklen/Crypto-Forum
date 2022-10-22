@@ -1,4 +1,4 @@
-use crate::custom_types::*;
+use crate::{custom_types::*, hex::*};
 use std::fs;
 
 pub fn write_messages(
@@ -53,8 +53,8 @@ fn handle_error(err: std::io::Error) -> Result<FullFile, Error> {
 pub fn sig_message_to_vec(data: Vec<MessageForWriting>) -> Vec<MessageInFile> {
 	data.into_iter()
 		.map(|f| {
-			let prev_hash = hex::bytes_to_hex(&f.prev_hash);
-			let signature = hex::bytes_to_hex(&f.signature.to_bytes());
+			let prev_hash = bytes_to_hex(&f.prev_hash);
+			let signature = bytes_to_hex(&f.signature.to_bytes());
 			let public_key = f.public_key.to_bytes();
 			let message = f.message;
 			MessageInFile {
