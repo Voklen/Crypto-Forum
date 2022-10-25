@@ -1,11 +1,11 @@
 use std::path::Path;
 
-use crypto_forum::{custom_types::MessageForWriting, *};
+use crypto_forum::{custom_types::Message, *};
 
 macro_rules! setup {
 	($test_data:ident) => {
 		let $test_data = vec![
-			MessageForWriting {
+			Message {
 				prev_hash: [
 					0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 					0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -25,7 +25,7 @@ macro_rules! setup {
 				])
 				.unwrap(),
 			},
-			MessageForWriting {
+			Message {
 				prev_hash: [
 					23, 189, 24, 38, 108, 90, 212, 238, 197, 124, 125, 252, 172, 131, 189, 160,
 					150, 146, 57, 248, 122, 37, 169, 26, 54, 148, 253, 214, 156, 86, 84, 48, 213,
@@ -46,7 +46,7 @@ macro_rules! setup {
 				])
 				.unwrap(),
 			},
-			MessageForWriting {
+			Message {
 				prev_hash: [
 					149, 74, 32, 90, 143, 242, 25, 201, 57, 137, 140, 242, 192, 170, 44, 201, 164,
 					115, 234, 186, 69, 206, 68, 89, 53, 141, 43, 198, 174, 84, 201, 63, 163, 51,

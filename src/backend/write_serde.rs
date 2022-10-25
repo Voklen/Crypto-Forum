@@ -4,7 +4,7 @@ use std::fs;
 pub fn write_messages(
 	file: &str,
 	parser: &SerdeParser,
-	data: Vec<MessageForWriting>,
+	data: Vec<Message>,
 ) -> Result<Vec<u8>, Error> {
 	let write_data = get_write_data(file, parser, data)?;
 	// Convert into chosen format
@@ -17,11 +17,7 @@ pub fn write_messages(
 	Ok(value)
 }
 
-fn get_write_data(
-	file: &str,
-	parser: &SerdeParser,
-	data: Vec<MessageForWriting>,
-) -> Result<FullFile, Error> {
+fn get_write_data(file: &str, parser: &SerdeParser, data: Vec<Message>) -> Result<FullFile, Error> {
 	let mut new_messages = sig_message_to_vec(data);
 
 	// Read existing messages (see Decisions.md for explanation)
@@ -50,7 +46,7 @@ fn handle_error(err: std::io::Error) -> Result<FullFile, Error> {
 	}
 }
 
-pub fn sig_message_to_vec(data: Vec<MessageForWriting>) -> Vec<MessageInFile> {
+pub fn sig_message_to_vec(data: Vec<Message>) -> Vec<MessageInFile> {
 	data.into_iter()
 		.map(|f| {
 			let prev_hash = bytes_to_hex(&f.prev_hash);

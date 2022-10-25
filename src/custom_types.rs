@@ -12,7 +12,7 @@ pub enum Error {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct MessageForWriting {
+pub struct Message {
 	// Message stored in the file
 	pub prev_hash: [u8; 64],
 	pub public_key: ed25519_dalek::PublicKey,
@@ -20,7 +20,7 @@ pub struct MessageForWriting {
 	pub signature: ed25519_dalek::Signature,
 }
 
-impl MessageForWriting {
+impl Message {
 	pub fn get_hash(&self) -> [u8; 64] {
 		let mut collection_vector = Vec::<u8>::new();
 		collection_vector.extend_from_slice(&self.prev_hash);

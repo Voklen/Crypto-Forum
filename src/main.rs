@@ -89,7 +89,7 @@ fn read_file(messages_file: &str) -> Vec<u8> {
 	})
 }
 
-fn interactive_session(messages_file: &str, parser: SerdeParser, messages: Vec<MessageForWriting>) {
+fn interactive_session(messages_file: &str, parser: SerdeParser, messages: Vec<Message>) {
 	let keypair = user_keypair::login("reference/accounts/").unwrap();
 	let last_hash = match messages.last() {
 		Some(i) => i.get_hash(),
@@ -98,7 +98,7 @@ fn interactive_session(messages_file: &str, parser: SerdeParser, messages: Vec<M
 	write::interactive_write(messages_file, &parser, keypair, last_hash);
 }
 
-fn output_for_human(messages: &Vec<MessageForWriting>) {
+fn output_for_human(messages: &Vec<Message>) {
 	for i in messages {
 		println!("--------");
 		if !i.is_signed() {
@@ -116,7 +116,7 @@ fn output_for_human(messages: &Vec<MessageForWriting>) {
 	}
 }
 
-fn output_for_machine(messages: &Vec<MessageForWriting>) {
+fn output_for_machine(messages: &Vec<Message>) {
 	for i in messages {
 		// Print `message` at the end because it could contain spaces, keywords, and who-knows-what (and has an unknown size)
 		// Which would make it hard to know when `message` ends meaning anything after it on the same line is harder to parse

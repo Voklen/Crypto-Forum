@@ -2,10 +2,7 @@ use crate::{custom_types::*, hex::*};
 use ed25519_dalek::*;
 use sha2::{Digest, Sha512};
 
-pub fn get_messages(
-	file_slice: &Vec<u8>,
-	parser: &SerdeParser,
-) -> Result<Vec<MessageForWriting>, Error> {
+pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Message>, Error> {
 	Ok(parse_full_file(file_slice, parser)?
 		.messages
 		.into_iter()
@@ -13,7 +10,7 @@ pub fn get_messages(
 		.collect())
 }
 
-fn vec_to_message(f: MessageInFile) -> Option<MessageForWriting> {
+fn vec_to_message(f: MessageInFile) -> Option<Message> {
 	let to_hash = {
 		let mut result = Vec::<u8>::new();
 		let prev_hash_bytes: [u8; 64] = hex_to_bytes(&f.prev_hash)?;
@@ -33,7 +30,7 @@ fn vec_to_message(f: MessageInFile) -> Option<MessageForWriting> {
 		Ok(i) => Some(i),
 		Err(_) => None,
 	}?;
-	let message = MessageForWriting {
+	let message = Message {
 		prev_hash,
 		public_key,
 		message,

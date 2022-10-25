@@ -1,8 +1,8 @@
-use crate::{ask_for_bool, input, write_serde, MessageForWriting, SerdeParser};
+use crate::{ask_for_bool, input, write_serde, Message, SerdeParser};
 use ed25519_dalek::*;
 
 pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, last_hash: [u8; 64]) {
-	let write_data = Vec::<MessageForWriting>::new();
+	let write_data = Vec::<Message>::new();
 
 	// THIS BREAKS IF THEIR KEY SEED IS ALL 0'S
 	let bad_secret: SecretKey = SecretKey::from_bytes(&[0; SECRET_KEY_LENGTH]).unwrap();
@@ -22,10 +22,10 @@ pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, las
 
 fn get_messages_from_user(
 	keypair: &Keypair,
-	mut write_data: Vec<MessageForWriting>,
+	mut write_data: Vec<Message>,
 	prev_hash: [u8; 64],
 	bad_keypair: &Keypair,
-) -> Vec<MessageForWriting> {
+) -> Vec<Message> {
 	let message = input("Please enter desired message");
 	let to_sign = &[message.as_bytes(), &prev_hash].concat();
 
@@ -35,7 +35,7 @@ fn get_messages_from_user(
 		bad_keypair.sign(to_sign)
 	};
 
-	let new_element = MessageForWriting {
+	let new_element = Message {
 		prev_hash,
 		public_key: keypair.public,
 		message,
@@ -58,7 +58,7 @@ pub fn make_file(file: &str) -> Vec<u8> {
 	}
 
 	let parser = ask_for_parser();
-	let slice = write_serde::write_messages(file, &parser, Vec::<MessageForWriting>::new());
+	let slice = write_serde::write_messages(file, &parser, Vec::<Message>::new());
 
 	match slice {
 		Ok(i) => i,
