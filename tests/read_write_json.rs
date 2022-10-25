@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use crypto_forum::{custom_types::MessageForWriting, *};
 
 macro_rules! setup {
@@ -85,17 +87,27 @@ fn read_write() {
 	setup!(test_data);
 	let expected = test_data.clone();
 
-	let test_file = "test_data/read_write.json";
-	if std::path::Path::new(test_file).exists() {
-		std::fs::remove_file(test_file).unwrap();
+	const TEST_DIR: &str = "test_data/";
+	const TEST_FILE: &str = "read_write.json";
+	let test_path = &format!("{TEST_DIR}{TEST_FILE}");
+	if Path::new(test_path).exists() {
+		std::fs::remove_file(test_path).unwrap();
 	}
+	std::fs::create_dir_all(TEST_DIR).unwrap_or_else(dir_error);
 
 	let parser = &custom_types::SerdeParser::Json;
-	write_serde::write_messages(test_file, parser, test_data).unwrap();
-	let file_slice = std::fs::read(test_file).unwrap();
+	write_serde::write_messages(test_path, parser, test_data).unwrap();
+	let file_slice = std::fs::read(test_path).unwrap();
 	let parser = read::file_type(&file_slice).unwrap();
 	let actual = read_serde::get_messages(&file_slice, &parser).unwrap();
 	assert_eq!(actual, expected);
 
-	std::fs::remove_file(test_file).unwrap();
+	std::fs::remove_file(test_path).unwrap();
+}
+
+fn dir_error(error: std::io::Error) {
+	match error.kind() {
+		std::io::ErrorKind::AlreadyExists => {}
+		_ => panic!("Error creating test directory: {error}"),
+	}
 }
