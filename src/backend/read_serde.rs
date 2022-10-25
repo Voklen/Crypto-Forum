@@ -2,7 +2,10 @@ use crate::{custom_types::*, hex::*};
 use ed25519_dalek::*;
 use sha2::{Digest, Sha512};
 
-pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Message>, Error> {
+pub fn get_messages(
+	file_slice: &Vec<u8>,
+	parser: &SerdeParser,
+) -> Result<Vec<MessageForWriting>, Error> {
 	Ok(parse_full_file(file_slice, parser)?
 		.messages
 		.into_iter()
@@ -10,7 +13,7 @@ pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Me
 		.collect())
 }
 
-fn vec_to_message(f: MessageInFile) -> Option<Message> {
+fn vec_to_message(f: MessageInFile) -> Option<MessageForWriting> {
 	let to_hash = {
 		let mut result = Vec::<u8>::new();
 		let prev_hash_bytes: [u8; 64] = hex_to_bytes(&f.prev_hash)?;
@@ -21,27 +24,28 @@ fn vec_to_message(f: MessageInFile) -> Option<Message> {
 		result.extend_from_slice(&signature_bytes);
 		result
 	};
-	let hash = Sha512::digest(to_hash).into();
 
 	let prev_hash: [u8; 64] = hex_to_bytes(&f.prev_hash)?;
 	let public_key = PublicKey::from_bytes(&f.public_key).ok()?;
 	let message = f.message;
 	let signature_bytes: [u8; 64] = hex_to_bytes(&f.signature)?;
-	let signed = match Signature::from_bytes(&signature_bytes) {
-		// Combine the two parts of the signature back into one
-		Ok(signature) => {
-			let to_verify = &[message.as_bytes(), &prev_hash].concat();
-			public_key.verify(to_verify, &signature).is_ok()
-		}
-		Err(_) => false, // If the signature bytes are not a valid signature, it's not properly signed
-	};
-	Some(Message {
+	let signature = match Signature::from_bytes(&signature_bytes) {
+		Ok(i) => Some(i),
+		Err(_) => None,
+	}?;
+	let message = MessageForWriting {
 		prev_hash,
 		public_key,
 		message,
-		signed,
-		hash,
-	})
+		signature,
+	};
+
+	let hash: [u8; 64] = Sha512::digest(to_hash).into();
+	if message.get_hash() == hash {
+		Some(message)
+	} else {
+		None
+	}
 }
 
 pub fn parse_full_file(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<FullFile, Error> {

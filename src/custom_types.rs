@@ -1,3 +1,4 @@
+use ed25519_dalek::Verifier;
 use sha2::{Digest, Sha512};
 
 #[derive(Debug)]
@@ -8,16 +9,6 @@ pub enum Error {
 	JsonError(serde_json::Error),
 	InvalidFileData(String),
 	SignatureError(ed25519_dalek::SignatureError),
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct Message {
-	// Message for display and internal logic
-	pub prev_hash: [u8; 64],
-	pub public_key: ed25519_dalek::PublicKey,
-	pub message: String,
-	pub signed: bool,
-	pub hash: [u8; 64],
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -39,6 +30,13 @@ impl MessageForWriting {
 
 		let hash = Sha512::digest(&collection_vector);
 		hash.into()
+	}
+
+	pub fn is_signed(&self) -> bool {
+		let combined_data = &[self.message.as_bytes(), &self.prev_hash].concat();
+		self.public_key
+			.verify(combined_data, &self.signature)
+			.is_ok()
 	}
 }
 

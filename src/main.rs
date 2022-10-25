@@ -89,19 +89,19 @@ fn read_file(messages_file: &str) -> Vec<u8> {
 	})
 }
 
-fn interactive_session(messages_file: &str, parser: SerdeParser, messages: Vec<Message>) {
+fn interactive_session(messages_file: &str, parser: SerdeParser, messages: Vec<MessageForWriting>) {
 	let keypair = user_keypair::login("reference/accounts/").unwrap();
 	let last_hash = match messages.last() {
-		Some(i) => i.hash,
+		Some(i) => i.get_hash(),
 		None => [0; 64],
 	};
 	write::interactive_write(messages_file, &parser, keypair, last_hash);
 }
 
-fn output_for_human(messages: &Vec<Message>) {
+fn output_for_human(messages: &Vec<MessageForWriting>) {
 	for i in messages {
 		println!("--------");
-		if !i.signed {
+		if !i.is_signed() {
 			println!("!!!WARNING: INVALID SIGNATURE!!!");
 			println!("!!!WE HAVE NO PROOF THIS PUBLIC KEY EVER POSTED THIS!!!");
 		}
@@ -111,12 +111,12 @@ fn output_for_human(messages: &Vec<Message>) {
 			bytes_to_hex(&i.prev_hash)
 		);
 		println!("Message: \n{}", i.message);
-		println!("Hash: {}", bytes_to_hex(&i.hash));
+		println!("Hash: {}", bytes_to_hex(&i.get_hash()));
 		println!("--------")
 	}
 }
 
-fn output_for_machine(messages: &Vec<Message>) {
+fn output_for_machine(messages: &Vec<MessageForWriting>) {
 	for i in messages {
 		// Print `message` at the end because it could contain spaces, keywords, and who-knows-what (and has an unknown size)
 		// Which would make it hard to know when `message` ends meaning anything after it on the same line is harder to parse
@@ -124,8 +124,8 @@ fn output_for_machine(messages: &Vec<Message>) {
 			"Public_key {public_key} Replying_to_hash {prev_hash} Hash {hash} Properly_signed {signed} Message {message}",
 			public_key = bytes_to_hex(i.public_key.as_bytes()),
 			prev_hash = bytes_to_hex(&i.prev_hash),
-			hash = bytes_to_hex(&i.hash),
-			signed = i.signed,
+			hash = bytes_to_hex(&i.get_hash()),
+			signed = i.is_signed(),
 			message = i.message,
 		);
 	}
@@ -135,11 +135,11 @@ pub fn input(prompt: &str) -> String {
 	println!("{}", prompt);
 
 	let mut input_string = String::new();
-  	let read_result = std::io::stdin().read_line(&mut input_string);
-	
+	let read_result = std::io::stdin().read_line(&mut input_string);
+
 	if read_result.is_err() {
 		println!("Could not read the input, try again.");
-		return input(prompt)
+		return input(prompt);
 	};
 	input_string.trim().into()
 }
