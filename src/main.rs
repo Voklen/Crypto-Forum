@@ -1,4 +1,4 @@
-use crypto_forum::{custom_types::*, hex::*, *};
+use crypto_forum::{custom_types::*, *};
 
 #[path = "CLI/user_keypair.rs"]
 mod user_keypair;
@@ -105,13 +105,10 @@ fn output_for_human(messages: &Vec<Message>) {
 			println!("!!!WARNING: INVALID SIGNATURE!!!");
 			println!("!!!WE HAVE NO PROOF THIS PUBLIC KEY EVER POSTED THIS!!!");
 		}
-		println!("Public key: {}", bytes_to_hex(i.public_key.as_bytes()));
-		println!(
-			"Replying to message with hash: {}",
-			bytes_to_hex(&i.prev_hash)
-		);
+		println!("Public key: {}", i.hex_public_key());
+		println!("Replying to message with hash: {}", i.hex_prev_hash());
 		println!("Message: \n{}", i.message);
-		println!("Hash: {}", bytes_to_hex(&i.get_hash()));
+		println!("Hash: {}", i.hex_hash());
 		println!("--------")
 	}
 }
@@ -122,9 +119,9 @@ fn output_for_machine(messages: &Vec<Message>) {
 		// Which would make it hard to know when `message` ends meaning anything after it on the same line is harder to parse
 		println!(
 			"Public_key {public_key} Replying_to_hash {prev_hash} Hash {hash} Properly_signed {signed} Message {message}",
-			public_key = bytes_to_hex(i.public_key.as_bytes()),
-			prev_hash = bytes_to_hex(&i.prev_hash),
-			hash = bytes_to_hex(&i.get_hash()),
+			public_key = i.hex_public_key(),
+			prev_hash = i.hex_prev_hash(),
+			hash = i.hex_hash(),
 			signed = i.is_signed(),
 			message = i.message,
 		);
