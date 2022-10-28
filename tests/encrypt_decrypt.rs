@@ -1,9 +1,17 @@
+use std::path::Path;
+
 use crypto_forum::encrypt_decrypt::*;
 
 #[test]
 fn normal() {
 	// Definitions
-	let output_file = "test_data/encrypt_decrypt";
+	const TEST_DIR: &str = "test_data/";
+	const TEST_FILE: &str = "encrypt_decrypt";
+	let test_path = &format!("{TEST_DIR}{TEST_FILE}");
+	if Path::new(test_path).exists() {
+		std::fs::remove_file(test_path).unwrap();
+	}
+	std::fs::create_dir_all(TEST_DIR).unwrap_or_else(dir_error);
 	let test_data = [
 		94, 194, 233, 166, 33, 213, 39, 55, 208, 122, 71, 138, 180, 163, 54, 115, 81, 88, 96, 77,
 		175, 2, 237, 49, 125, 45, 184, 87, 27, 41, 151, 204, 67, 45, 212, 165, 145, 76, 113, 172,
@@ -16,10 +24,17 @@ fn normal() {
 	];
 
 	// Actual test code
-	encrypt_and_write(output_file, &test_data, key).unwrap();
-	let result = read_and_decrypt(output_file, key).unwrap();
+	encrypt_and_write(test_path, &test_data, key).unwrap();
+	let result = read_and_decrypt(test_path, key).unwrap();
 	assert_eq!(result, test_data);
 
 	// Clean up after test
-	std::fs::remove_file(output_file).unwrap();
+	std::fs::remove_file(test_path).unwrap();
+}
+
+fn dir_error(error: std::io::Error) {
+	match error.kind() {
+		std::io::ErrorKind::AlreadyExists => {}
+		_ => panic!("Error creating test directory: {error}"),
+	}
 }
