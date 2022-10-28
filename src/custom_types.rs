@@ -64,14 +64,15 @@ impl Message {
 		bytes_to_hex(bytes)
 	}
 
-	pub fn get_username(&self) -> String {
+	pub fn get_username(&self) -> Option<String> {
 		let public_key = self.hex_public_key();
 		let usernames_dir = "reference/usernames/";
 		let username_file = usernames_dir.to_owned() + &public_key;
-		fs::read_to_string(username_file)
-			.unwrap_or(public_key)
-			.trim()
-			.to_string()
+		let result = match fs::read_to_string(username_file) {
+			Ok(res) => res,
+			Err(_) => return None,
+		};
+		Some(result.trim().to_string())
 	}
 }
 

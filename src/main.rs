@@ -100,7 +100,7 @@ fn interactive_session(messages_file: &str, parser: SerdeParser, messages: Vec<M
 
 fn output_for_human(messages: &Vec<Message>) {
 	for i in messages {
-		let public_key = i.hex_public_key();
+		let username = i.get_username();
 		let prev_hash = i.hex_prev_hash();
 		let hash = i.hex_hash();
 		let message = &i.message;
@@ -109,7 +109,10 @@ fn output_for_human(messages: &Vec<Message>) {
 			println!("!!!WARNING: INVALID SIGNATURE!!!");
 			println!("!!!WE HAVE NO PROOF THIS PUBLIC KEY EVER POSTED THIS!!!");
 		}
-		println!("Public key: {public_key}");
+		match username {
+			Some(name) => println!("Public key: {name}"),
+			None => println!("Public key: {}", i.hex_public_key()),
+		}
 		println!("Replying to message with hash: {prev_hash}");
 		println!("Message: \n{message}");
 		println!("Hash: {hash}");
@@ -119,16 +122,22 @@ fn output_for_human(messages: &Vec<Message>) {
 
 fn output_for_machine(messages: &Vec<Message>) {
 	for i in messages {
-		let public_key = i.hex_public_key();
+		let public_key = i.get_username();
 		let prev_hash = i.hex_prev_hash();
 		let hash = i.hex_hash();
 		let signed = i.is_signed();
 		let message = &i.message;
 		// Print `message` at the end because it could contain spaces, keywords, and who-knows-what (and has an unknown size)
 		// Which would make it hard to know when `message` ends meaning anything after it on the same line is harder to parse
-		println!(
-			"Public_key {public_key} Replying_to_hash {prev_hash} Hash {hash} Properly_signed {signed} Message {message}"
-		);
+		match public_key {
+			Some(username) => println!(
+				"Username {username} Replying_to_hash {prev_hash} Hash {hash} Properly_signed {signed} Message {message}"
+			),
+			None => println!(
+				"Public_key {public} Replying_to_hash {prev_hash} Hash {hash} Properly_signed {signed} Message {message}",
+				public = i.hex_public_key()
+			),
+		}
 	}
 }
 

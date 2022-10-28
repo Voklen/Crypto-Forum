@@ -1,5 +1,4 @@
 Now⌨:
-User flies to get username
 
 Soon⌚:
 Binary
@@ -23,3 +22,4 @@ Multiple threads (as in forum threads): refinements {
 	if argument is a directory, loop through files and display header if valid messages file
 }
 Unit tests (kind of, it's a continuous process)
+User flies to get username
