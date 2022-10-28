@@ -100,30 +100,34 @@ fn interactive_session(messages_file: &str, parser: SerdeParser, messages: Vec<M
 
 fn output_for_human(messages: &Vec<Message>) {
 	for i in messages {
+		let public_key = i.hex_public_key();
+		let prev_hash = i.hex_prev_hash();
+		let hash = i.hex_hash();
+		let message = &i.message;
 		println!("--------");
 		if !i.is_signed() {
 			println!("!!!WARNING: INVALID SIGNATURE!!!");
 			println!("!!!WE HAVE NO PROOF THIS PUBLIC KEY EVER POSTED THIS!!!");
 		}
-		println!("Public key: {}", i.hex_public_key());
-		println!("Replying to message with hash: {}", i.hex_prev_hash());
-		println!("Message: \n{}", i.message);
-		println!("Hash: {}", i.hex_hash());
+		println!("Public key: {public_key}");
+		println!("Replying to message with hash: {prev_hash}");
+		println!("Message: \n{message}");
+		println!("Hash: {hash}");
 		println!("--------")
 	}
 }
 
 fn output_for_machine(messages: &Vec<Message>) {
 	for i in messages {
+		let public_key = i.hex_public_key();
+		let prev_hash = i.hex_prev_hash();
+		let hash = i.hex_hash();
+		let signed = i.is_signed();
+		let message = &i.message;
 		// Print `message` at the end because it could contain spaces, keywords, and who-knows-what (and has an unknown size)
 		// Which would make it hard to know when `message` ends meaning anything after it on the same line is harder to parse
 		println!(
-			"Public_key {public_key} Replying_to_hash {prev_hash} Hash {hash} Properly_signed {signed} Message {message}",
-			public_key = i.hex_public_key(),
-			prev_hash = i.hex_prev_hash(),
-			hash = i.hex_hash(),
-			signed = i.is_signed(),
-			message = i.message,
+			"Public_key {public_key} Replying_to_hash {prev_hash} Hash {hash} Properly_signed {signed} Message {message}"
 		);
 	}
 }
