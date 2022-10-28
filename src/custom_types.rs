@@ -2,7 +2,7 @@ use crate::hex::bytes_to_hex;
 
 use ed25519_dalek::Verifier;
 use sha2::{Digest, Sha512};
-use std::fmt;
+use std::{fmt, fs};
 
 #[derive(Debug)]
 pub enum Error {
@@ -62,6 +62,16 @@ impl Message {
 	pub fn hex_hash(&self) -> String {
 		let bytes = &self.get_hash();
 		bytes_to_hex(bytes)
+	}
+
+	pub fn get_username(&self) -> String {
+		let public_key = self.hex_public_key();
+		let usernames_dir = "reference/usernames/";
+		let username_file = usernames_dir.to_owned() + &public_key;
+		fs::read_to_string(username_file)
+			.unwrap_or(public_key)
+			.trim()
+			.to_string()
 	}
 }
 
