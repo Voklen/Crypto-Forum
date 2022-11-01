@@ -74,11 +74,13 @@ fn ask_for_parser() -> SerdeParser {
 	println!("Possible file types:");
 	println!("1) Json");
 	println!("2) Smile");
+	println!("3) MessagePack");
 
 	let user_selection: &str = &input("Select an option (enter the number)");
 	match user_selection {
 		"1" => SerdeParser::json(),
 		"2" => SerdeParser::smile(),
+		"3" => SerdeParser::message_pack(),
 		_ => {
 			println!("Please pick a number on the list");
 			ask_for_parser()

@@ -10,6 +10,8 @@ pub enum Error {
 	Encryption(chacha20poly1305::aead::Error),
 	SmileError(serde_smile::Error),
 	JsonError(serde_json::Error),
+	MessagePackEncode(rmp_serde::encode::Error),
+	MessagePackDecode(rmp_serde::decode::Error),
 	InvalidFileData(String),
 	SignatureError(ed25519_dalek::SignatureError),
 }
@@ -105,6 +107,18 @@ impl SerdeParser {
 		}
 	}
 
+	pub fn message_pack() -> Self {
+		let parser_name = "MessagePack".to_string();
+		let from_slice =
+			|slice: &[u8]| rmp_serde::decode::from_slice(slice).map_err(Error::MessagePackDecode);
+		let to_vec =
+			|file: &FullFile| rmp_serde::encode::to_vec(file).map_err(Error::MessagePackEncode);
+		SerdeParser {
+			parser_name,
+			from_slice,
+			to_vec,
+		}
+	}
 	pub fn from_slice(&self, slice: &[u8]) -> Result<FullFile, Error> {
 		let func = self.from_slice;
 		func(slice)
