@@ -49,8 +49,5 @@ pub fn parse_full_file(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Ful
 	if file_slice.is_empty() {
 		return Ok(FullFile::new());
 	}
-	match parser {
-		SerdeParser::Json => serde_json::from_slice(file_slice).map_err(Error::JsonError),
-		SerdeParser::Smile => serde_smile::from_slice(file_slice).map_err(Error::SmileError),
-	}
+	parser.from_slice(file_slice)
 }

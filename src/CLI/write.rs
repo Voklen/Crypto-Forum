@@ -77,8 +77,8 @@ fn ask_for_parser() -> SerdeParser {
 
 	let user_selection: &str = &input("Select an option (enter the number)");
 	match user_selection {
-		"1" => SerdeParser::Json,
-		"2" => SerdeParser::Smile,
+		"1" => SerdeParser::json(),
+		"2" => SerdeParser::smile(),
 		_ => {
 			println!("Please pick a number on the list");
 			ask_for_parser()

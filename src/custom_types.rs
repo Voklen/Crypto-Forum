@@ -76,18 +76,49 @@ impl Message {
 	}
 }
 
-#[derive(Debug)]
-pub enum SerdeParser {
-	Json,
-	Smile,
+pub struct SerdeParser {
+	parser_name: String,
+	from_slice: fn(&[u8]) -> Result<FullFile, Error>,
+	to_vec: fn(&FullFile) -> Result<Vec<u8>, Error>,
+}
+
+impl SerdeParser {
+	pub fn json() -> Self {
+		let parser_name = "Json".to_string();
+		let from_slice = |slice: &[u8]| serde_json::from_slice(slice).map_err(Error::JsonError);
+		let to_vec = |file: &FullFile| serde_json::to_vec(file).map_err(Error::JsonError);
+		SerdeParser {
+			parser_name,
+			from_slice,
+			to_vec,
+		}
+	}
+
+	pub fn smile() -> Self {
+		let parser_name = "Smile".to_string();
+		let from_slice = |slice: &[u8]| serde_smile::from_slice(slice).map_err(Error::SmileError);
+		let to_vec = |file: &FullFile| serde_smile::to_vec(file).map_err(Error::SmileError);
+		SerdeParser {
+			parser_name,
+			from_slice,
+			to_vec,
+		}
+	}
+
+	pub fn from_slice(&self, slice: &[u8]) -> Result<FullFile, Error> {
+		let func = self.from_slice;
+		func(slice)
+	}
+
+	pub fn to_vec(&self, file: &FullFile) -> Result<Vec<u8>, Error> {
+		let func = self.to_vec;
+		func(file)
+	}
 }
 
 impl fmt::Display for SerdeParser {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		match self {
-			SerdeParser::Json => write!(f, "Json"),
-			SerdeParser::Smile => write!(f, "Smile"),
-		}
+		write!(f, "{}", self.parser_name)
 	}
 }
 

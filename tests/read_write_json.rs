@@ -95,7 +95,7 @@ fn read_write() {
 	}
 	std::fs::create_dir_all(TEST_DIR).unwrap_or_else(dir_error);
 
-	let parser = &custom_types::SerdeParser::Json;
+	let parser = &custom_types::SerdeParser::json();
 	write_serde::write_messages(test_path, parser, test_data).unwrap();
 	let file_slice = std::fs::read(test_path).unwrap();
 	let parser = read::file_type(&file_slice).unwrap();
