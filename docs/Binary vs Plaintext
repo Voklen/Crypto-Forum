@@ -1,0 +1,22 @@
+Let's assume the reasonable limit for any repository is 50 000 open and closed issues.
+
+The contents of each of the messages is irrelevant, because it would be the same size in both binary and plaintext.
+
+The message
+{"prev_hash":"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000","public_key":[40,151,31,122,201,208,88,167,131,68,167,174,137,226,120,246,76,47,160,112,83,73,250,195,91,192,40,220,255,12,254,77],"message":"","signature":"DF36D0DAB6282B437E90EA7ABC01F491B29B808468CA384BB6341EBD55BBD41AD1588FE616DC99E80D95A844DEA724F7DAAF1F775E7F5E182937FB6A4924FC06"}
+in the https://msgpack.org/ Try! section says the binary format is 78 bytes (431 - 353) smaller. This means we save 78 bytes per message.
+Let's assume there are an average of 20 messages in an issue.
+This means per issue we save 20 * 78 = 1560 bytes in messages
+
+It also shrinks 
+{"header":{"name":"Example","thread_number":0,"tags":["exampletag","example","anexample","commonlyusedtagthathasnorelevancetotheactualthreadbecausewhynot"]},"messages":[]}
+down by 24 bytes (171 - 147)
+
+So in total per issue we save 1584 bytes per issue
+For all issues:
+1564 * 50 000 = 78200000 bytes = 78.2 Megabytes
+
+That… really isn't much
+
+These are just some rough estimations because the hex string will be stored as bytes but essentially it doesn't matter too much for a repository of this size so it should be okay.
+A database is not an option as individual files can be downloaded on IPFS so you'll only need to download the new issues when they're separate files.
