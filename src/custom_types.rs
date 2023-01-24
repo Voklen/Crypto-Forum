@@ -2,18 +2,19 @@ use crate::hex::bytes_to_hex;
 
 use ed25519_dalek::Verifier;
 use sha2::{Digest, Sha512};
-use std::{fmt, fs};
+use std::fs;
 
 #[derive(Debug)]
 pub enum Error {
 	StdIo(std::io::Error),
 	Encryption(chacha20poly1305::aead::Error),
-	SmileError(serde_smile::Error),
 	JsonError(serde_json::Error),
-	MessagePackEncode(rmp_serde::encode::Error),
-	MessagePackDecode(rmp_serde::decode::Error),
 	InvalidFileData(String),
 	SignatureError(ed25519_dalek::SignatureError),
+}
+
+pub fn from_json(error: serde_json::Error) -> Error {
+	Error::JsonError(error)
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -75,64 +76,6 @@ impl Message {
 			Err(_) => return None,
 		};
 		Some(result.trim().to_string())
-	}
-}
-
-pub struct SerdeParser {
-	parser_name: String,
-	from_slice: fn(&[u8]) -> Result<FullFile, Error>,
-	to_vec: fn(&FullFile) -> Result<Vec<u8>, Error>,
-}
-
-impl SerdeParser {
-	pub fn json() -> Self {
-		let parser_name = "Json".to_string();
-		let from_slice = |slice: &[u8]| serde_json::from_slice(slice).map_err(Error::JsonError);
-		let to_vec = |file: &FullFile| serde_json::to_vec(file).map_err(Error::JsonError);
-		SerdeParser {
-			parser_name,
-			from_slice,
-			to_vec,
-		}
-	}
-
-	pub fn smile() -> Self {
-		let parser_name = "Smile".to_string();
-		let from_slice = |slice: &[u8]| serde_smile::from_slice(slice).map_err(Error::SmileError);
-		let to_vec = |file: &FullFile| serde_smile::to_vec(file).map_err(Error::SmileError);
-		SerdeParser {
-			parser_name,
-			from_slice,
-			to_vec,
-		}
-	}
-
-	pub fn message_pack() -> Self {
-		let parser_name = "MessagePack".to_string();
-		let from_slice =
-			|slice: &[u8]| rmp_serde::decode::from_slice(slice).map_err(Error::MessagePackDecode);
-		let to_vec =
-			|file: &FullFile| rmp_serde::encode::to_vec(file).map_err(Error::MessagePackEncode);
-		SerdeParser {
-			parser_name,
-			from_slice,
-			to_vec,
-		}
-	}
-	pub fn from_slice(&self, slice: &[u8]) -> Result<FullFile, Error> {
-		let func = self.from_slice;
-		func(slice)
-	}
-
-	pub fn to_vec(&self, file: &FullFile) -> Result<Vec<u8>, Error> {
-		let func = self.to_vec;
-		func(file)
-	}
-}
-
-impl fmt::Display for SerdeParser {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		write!(f, "{}", self.parser_name)
 	}
 }
 

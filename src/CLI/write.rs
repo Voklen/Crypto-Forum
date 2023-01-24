@@ -1,7 +1,7 @@
-use crate::{ask_for_bool, input, write_serde, Message, SerdeParser};
+use crate::{ask_for_bool, input, write_serde, Message};
 use ed25519_dalek::*;
 
-pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, last_hash: [u8; 64]) {
+pub fn interactive_write(file: &str, keypair: Keypair, last_hash: [u8; 64]) {
 	let write_data = Vec::<Message>::new();
 
 	// THIS BREAKS IF THEIR KEY SEED IS ALL 0'S
@@ -13,10 +13,10 @@ pub fn interactive_write(file: &str, parser: &SerdeParser, keypair: Keypair, las
 	};
 
 	let messages = get_messages_from_user(&keypair, write_data, last_hash, &bad_keypair);
-	let write_result = write_serde::write_messages(file, parser, messages);
+	let write_result = write_serde::write_messages(file, messages);
 	if write_result.is_err() {
 		println!("Failed to write to file");
-		interactive_write(file, parser, keypair, last_hash)
+		interactive_write(file, keypair, last_hash)
 	};
 }
 
@@ -57,33 +57,13 @@ pub fn make_file(file: &str) -> Vec<u8> {
 		std::process::exit(0);
 	}
 
-	let parser = ask_for_parser();
-	let slice = write_serde::write_messages(file, &parser, Vec::<Message>::new());
+	let slice = write_serde::write_messages(file, Vec::<Message>::new());
 
 	match slice {
 		Ok(i) => i,
 		Err(err) => {
 			println!("Could not write to file: {:?}", err);
 			make_file(file)
-		}
-	}
-}
-
-// See Decisions.md for explanation
-fn ask_for_parser() -> SerdeParser {
-	println!("Possible file types:");
-	println!("1) Json");
-	println!("2) Smile");
-	println!("3) MessagePack");
-
-	let user_selection: &str = &input("Select an option (enter the number)");
-	match user_selection {
-		"1" => SerdeParser::json(),
-		"2" => SerdeParser::smile(),
-		"3" => SerdeParser::message_pack(),
-		_ => {
-			println!("Please pick a number on the list");
-			ask_for_parser()
 		}
 	}
 }

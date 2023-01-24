@@ -2,8 +2,8 @@ use crate::{custom_types::*, hex::*};
 use ed25519_dalek::*;
 use sha2::{Digest, Sha512};
 
-pub fn get_messages(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<Vec<Message>, Error> {
-	Ok(parse_full_file(file_slice, parser)?
+pub fn get_messages(file_slice: &Vec<u8>) -> serde_json::Result<Vec<Message>> {
+	Ok(parse_full_file(file_slice)?
 		.messages
 		.into_iter()
 		.filter_map(vec_to_message)
@@ -45,9 +45,9 @@ fn vec_to_message(f: MessageInFile) -> Option<Message> {
 	}
 }
 
-pub fn parse_full_file(file_slice: &Vec<u8>, parser: &SerdeParser) -> Result<FullFile, Error> {
+pub fn parse_full_file(file_slice: &Vec<u8>) -> serde_json::Result<FullFile> {
 	if file_slice.is_empty() {
 		return Ok(FullFile::new());
 	}
-	parser.from_slice(file_slice)
+	serde_json::from_slice(file_slice)
 }

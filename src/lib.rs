@@ -4,8 +4,6 @@ pub mod custom_types;
 pub mod encrypt_decrypt;
 #[path = "backend/hex.rs"]
 pub mod hex;
-#[path = "backend/read.rs"]
-pub mod read;
 #[path = "backend/read_serde.rs"]
 pub mod read_serde;
 #[path = "backend/write_serde.rs"]

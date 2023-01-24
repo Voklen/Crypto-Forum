@@ -1,24 +1,20 @@
-use crate::{custom_types::*, hex::*};
+use crate::{custom_types::*, hex::*, read_serde};
 use std::fs;
 
-pub fn write_messages(
-	file: &str,
-	parser: &SerdeParser,
-	data: Vec<Message>,
-) -> Result<Vec<u8>, Error> {
-	let write_data = get_write_data(file, parser, data)?;
+pub fn write_messages(file: &str, data: Vec<Message>) -> Result<Vec<u8>, Error> {
+	let write_data = get_write_data(file, data)?;
 	// Convert into chosen format
-	let value = parser.to_vec(&write_data)?;
+	let value = serde_json::to_vec(&write_data).map_err(from_json)?;
 
 	fs::write(file, &value).map_err(Error::StdIo)?;
 	Ok(value)
 }
 
-fn get_write_data(file: &str, parser: &SerdeParser, data: Vec<Message>) -> Result<FullFile, Error> {
+fn get_write_data(file: &str, data: Vec<Message>) -> Result<FullFile, Error> {
 	let mut new_messages = sig_message_to_vec(data);
 
 	// Read existing messages (see Decisions.md for explanation)
-	let existing_file = get_full_file(file, parser)?;
+	let existing_file = get_full_file(file)?;
 	let mut messages = existing_file.messages;
 	messages.append(&mut new_messages);
 
@@ -28,9 +24,9 @@ fn get_write_data(file: &str, parser: &SerdeParser, data: Vec<Message>) -> Resul
 	})
 }
 
-fn get_full_file(file: &str, parser: &SerdeParser) -> Result<FullFile, Error> {
+fn get_full_file(file: &str) -> Result<FullFile, Error> {
 	match fs::read(file) {
-		Ok(file_slice) => crate::read_serde::parse_full_file(&file_slice, parser),
+		Ok(file_slice) => read_serde::parse_full_file(&file_slice).map_err(from_json),
 		Err(err) => handle_error(err),
 	}
 }

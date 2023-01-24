@@ -64,11 +64,7 @@ fn parse_dash_argument(arg: &str) -> Argument {
 fn process_file(messages_file: &str, arguments: &[Argument]) {
 	println!("File: {}", messages_file);
 	let file_slice = read_file(messages_file);
-	let parser = read::file_type(&file_slice).unwrap_or_else(|| {
-		println!("Unknown file type");
-		std::process::exit(1)
-	});
-	let messages = read_serde::get_messages(&file_slice, &parser).unwrap();
+	let messages = read_serde::get_messages(&file_slice).unwrap();
 
 	let output_for_machines = arguments.contains(&Argument::MachineOutput);
 	if output_for_machines {
@@ -78,7 +74,7 @@ fn process_file(messages_file: &str, arguments: &[Argument]) {
 	}
 
 	if arguments.contains(&Argument::Interactive) {
-		interactive_session(messages_file, parser, messages);
+		interactive_session(messages_file, messages);
 	}
 }
 
@@ -89,13 +85,13 @@ fn read_file(messages_file: &str) -> Vec<u8> {
 	})
 }
 
-fn interactive_session(messages_file: &str, parser: SerdeParser, messages: Vec<Message>) {
+fn interactive_session(messages_file: &str, messages: Vec<Message>) {
 	let keypair = user_keypair::login("reference/accounts/").unwrap();
 	let last_hash = match messages.last() {
 		Some(i) => i.get_hash(),
 		None => [0; 64],
 	};
-	write::interactive_write(messages_file, &parser, keypair, last_hash);
+	write::interactive_write(messages_file, keypair, last_hash);
 }
 
 fn output_for_human(messages: &Vec<Message>) {
