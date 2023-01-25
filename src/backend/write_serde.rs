@@ -1,10 +1,10 @@
 use crate::{custom_types::*, hex::*, read_serde};
 use std::fs;
 
-pub fn write_messages(file: &str, data: Vec<Message>) -> Result<Vec<u8>, Error> {
+pub fn write_messages(file: &str, data: Vec<Message>) -> Result<String, Error> {
 	let write_data = get_write_data(file, data)?;
 	// Convert into chosen format
-	let value = serde_json::to_vec(&write_data).map_err(from_json)?;
+	let value = toml::to_string(&write_data).unwrap();
 
 	fs::write(file, &value).map_err(Error::StdIo)?;
 	Ok(value)
@@ -14,7 +14,7 @@ fn get_write_data(file: &str, data: Vec<Message>) -> Result<FullFile, Error> {
 	let mut new_messages = sig_message_to_vec(data);
 
 	// Read existing messages (see Decisions.md for explanation)
-	let existing_file = get_full_file(file)?;
+	let existing_file = get_full_file(file);
 	let mut messages = existing_file.messages;
 	messages.append(&mut new_messages);
 
@@ -24,10 +24,10 @@ fn get_write_data(file: &str, data: Vec<Message>) -> Result<FullFile, Error> {
 	})
 }
 
-fn get_full_file(file: &str) -> Result<FullFile, Error> {
-	match fs::read(file) {
-		Ok(file_slice) => read_serde::parse_full_file(&file_slice).map_err(from_json),
-		Err(err) => handle_error(err),
+fn get_full_file(file: &str) -> FullFile {
+	match fs::read_to_string(file) {
+		Ok(file_slice) => read_serde::parse_full_file(&file_slice),
+		Err(err) => handle_error(err).unwrap(),
 	}
 }
 

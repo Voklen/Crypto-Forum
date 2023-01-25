@@ -78,8 +78,8 @@ fn process_file(messages_file: &str, arguments: &[Argument]) {
 	}
 }
 
-fn read_file(messages_file: &str) -> Vec<u8> {
-	std::fs::read(messages_file).unwrap_or_else(|err| match err.kind() {
+fn read_file(messages_file: &str) -> String {
+	std::fs::read_to_string(messages_file).unwrap_or_else(|err| match err.kind() {
 		std::io::ErrorKind::NotFound => write::make_file(messages_file),
 		_ => panic!(),
 	})

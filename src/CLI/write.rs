@@ -50,7 +50,7 @@ fn get_messages_from_user(
 	get_messages_from_user(keypair, write_data, new_hash, bad_keypair)
 }
 
-pub fn make_file(file: &str) -> Vec<u8> {
+pub fn make_file(file: &str) -> String {
 	let should_make_file = ask_for_bool("Would you like to make a file?");
 	if !should_make_file {
 		println!("No file made");
