@@ -75,7 +75,7 @@ macro_rules! setup {
 fn read() {
 	setup!(expected);
 
-	let test_file = "reference/reference.json";
+	let test_file = "reference/reference.toml";
 	let file_slice = std::fs::read_to_string(test_file).unwrap();
 	let actual = read_serde::get_messages(&file_slice).unwrap();
 	assert_eq!(actual, expected);
@@ -87,7 +87,7 @@ fn read_write() {
 	let expected = test_data.clone();
 
 	const TEST_DIR: &str = "test_data/";
-	const TEST_FILE: &str = "read_write.json";
+	const TEST_FILE: &str = "read_write.toml";
 	let test_path = &format!("{TEST_DIR}{TEST_FILE}");
 	if Path::new(test_path).exists() {
 		std::fs::remove_file(test_path).unwrap();

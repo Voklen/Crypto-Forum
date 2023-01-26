@@ -40,7 +40,7 @@
 			},
 			"args": [
 				"-i",
-				"reference/reference.json"
+				"reference/reference.toml"
 			],
 			"cwd": "${workspaceFolder}"
 		},
@@ -85,16 +85,16 @@
 		{
 			"type": "lldb",
 			"request": "launch",
-			"name": "Debug integration test 'read_write_json'",
+			"name": "Debug integration test 'read_write_toml'",
 			"cargo": {
 				"args": [
 					"test",
 					"--no-run",
-					"--test=read_write_json",
+					"--test=read_write_toml",
 					"--package=crypto_forum"
 				],
 				"filter": {
-					"name": "read_write_json",
+					"name": "read_write_toml",
 					"kind": "test"
 				}
 			},
