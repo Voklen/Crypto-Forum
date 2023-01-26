@@ -4,7 +4,7 @@ use std::fs;
 pub fn write_messages(file: &str, data: Vec<Message>) -> Result<String, Error> {
 	let write_data = get_write_data(file, data)?;
 	// Convert into chosen format
-	let value = toml::to_string(&write_data).unwrap();
+	let value = toml::to_string(&write_data).map_err(toml_serialization)?;
 
 	fs::write(file, &value).map_err(Error::StdIo)?;
 	Ok(value)
@@ -14,7 +14,7 @@ fn get_write_data(file: &str, data: Vec<Message>) -> Result<FullFile, Error> {
 	let mut new_messages = sig_message_to_vec(data);
 
 	// Read existing messages (see Decisions.md for explanation)
-	let existing_file = get_full_file(file);
+	let existing_file = get_full_file(file)?;
 	let mut messages = existing_file.messages;
 	messages.append(&mut new_messages);
 
@@ -24,10 +24,10 @@ fn get_write_data(file: &str, data: Vec<Message>) -> Result<FullFile, Error> {
 	})
 }
 
-fn get_full_file(file: &str) -> FullFile {
+fn get_full_file(file: &str) -> Result<FullFile, Error> {
 	match fs::read_to_string(file) {
 		Ok(file_slice) => read_serde::parse_full_file(&file_slice),
-		Err(err) => handle_error(err).unwrap(),
+		Err(err) => handle_error(err),
 	}
 }
 

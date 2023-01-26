@@ -8,13 +8,18 @@ use std::fs;
 pub enum Error {
 	StdIo(std::io::Error),
 	Encryption(chacha20poly1305::aead::Error),
-	JsonError(serde_json::Error),
+	TomlSerialization(toml::ser::Error),
+	TomlDeserialization(toml::de::Error),
 	InvalidFileData(String),
 	SignatureError(ed25519_dalek::SignatureError),
 }
 
-pub fn from_json(error: serde_json::Error) -> Error {
-	Error::JsonError(error)
+pub fn toml_serialization(error: toml::ser::Error) -> Error {
+	Error::TomlSerialization(error)
+}
+
+pub fn toml_deserialization(error: toml::de::Error) -> Error {
+	Error::TomlDeserialization(error)
 }
 
 #[derive(Debug, PartialEq, Clone)]
