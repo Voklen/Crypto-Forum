@@ -1,6 +1,6 @@
 use crate::custom_types::Error;
 use chacha20poly1305::{
-	aead::{Aead, NewAead},
+	aead::{Aead, KeyInit},
 	XChaCha20Poly1305,
 };
 use std::fs;
