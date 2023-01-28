@@ -12,6 +12,12 @@ fn main() {
 	}
 }
 
+#[derive(PartialEq)]
+pub enum Argument {
+	Interactive,
+	MachineOutput,
+}
+
 fn get_arguments() -> (Vec<String>, Vec<Argument>) {
 	// Skip the first argument because it's just the executable path
 	let arguments_as_strings: Vec<String> = std::env::args().skip(1).collect();

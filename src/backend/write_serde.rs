@@ -4,7 +4,7 @@ use std::fs;
 pub fn write_messages(file: &str, data: Vec<Message>) -> Result<String, Error> {
 	let write_data = get_write_data(file, data)?;
 	// Convert into chosen format
-	let value = toml::to_string(&write_data).map_err(toml_serialization)?;
+	let value = toml::to_string(&write_data).map_err(Error::toml_serialization)?;
 
 	fs::write(file, &value).map_err(Error::StdIo)?;
 	Ok(value)

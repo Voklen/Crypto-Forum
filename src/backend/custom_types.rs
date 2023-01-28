@@ -14,12 +14,14 @@ pub enum Error {
 	SignatureError(ed25519_dalek::SignatureError),
 }
 
-pub fn toml_serialization(error: toml::ser::Error) -> Error {
-	Error::TomlSerialization(error)
-}
+impl Error {
+	pub fn toml_serialization(error: toml::ser::Error) -> Error {
+		Error::TomlSerialization(error)
+	}
 
-pub fn toml_deserialization(error: toml::de::Error) -> Error {
-	Error::TomlDeserialization(error)
+	pub fn toml_deserialization(error: toml::de::Error) -> Error {
+		Error::TomlDeserialization(error)
+	}
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -82,12 +84,6 @@ impl Message {
 		};
 		Some(result.trim().to_string())
 	}
-}
-
-#[derive(PartialEq)]
-pub enum Argument {
-	Interactive,
-	MachineOutput,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Default)]

@@ -49,5 +49,5 @@ pub fn parse_full_file(file_slice: &str) -> Result<FullFile, Error> {
 	if file_slice.is_empty() {
 		return Ok(FullFile::new());
 	}
-	toml::from_str(file_slice).map_err(toml_deserialization)
+	toml::from_str(file_slice).map_err(Error::toml_deserialization)
 }
