@@ -2,7 +2,7 @@ use crypto_forum::{custom_types::*, *};
 
 #[path = "CLI/user_keypair.rs"]
 mod user_keypair;
-#[path = "CLI/write.rs"]
+#[path = "CLI/interactive_write.rs"]
 mod write;
 
 fn main() {
