@@ -10,22 +10,23 @@ pub fn get_messages(file_slice: &str) -> Result<Vec<Message>, Error> {
 		.collect())
 }
 
-fn vec_to_message(f: MessageInFile) -> Option<Message> {
+fn vec_to_message(f: FileMessage) -> Option<Message> {
+	let prev_hash_bytes: [u8; 64] = hex_to_bytes(&f.prev_hash)?;
+	let public_key_bytes: [u8; PUBLIC_KEY_LENGTH] = hex_to_bytes(&f.public_key)?;
+	let signature_bytes: [u8; 64] = hex_to_bytes(&f.signature)?;
+
 	let to_hash = {
 		let mut result = Vec::<u8>::new();
-		let prev_hash_bytes: [u8; 64] = hex_to_bytes(&f.prev_hash)?;
 		result.extend_from_slice(&prev_hash_bytes);
-		result.extend_from_slice(&f.public_key);
+		result.extend_from_slice(&public_key_bytes);
 		result.extend_from_slice(f.message.as_bytes());
-		let signature_bytes: [u8; 64] = hex_to_bytes(&f.signature)?;
 		result.extend_from_slice(&signature_bytes);
 		result
 	};
 
 	let prev_hash: [u8; 64] = hex_to_bytes(&f.prev_hash)?;
-	let public_key = PublicKey::from_bytes(&f.public_key).ok()?;
+	let public_key = PublicKey::from_bytes(&public_key_bytes).ok()?;
 	let message = f.message;
-	let signature_bytes: [u8; 64] = hex_to_bytes(&f.signature)?;
 	let signature = match Signature::from_bytes(&signature_bytes) {
 		Ok(i) => Some(i),
 		Err(_) => None,

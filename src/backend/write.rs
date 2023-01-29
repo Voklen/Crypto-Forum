@@ -3,15 +3,13 @@ use std::fs;
 
 pub fn write_messages(file: &str, data: Vec<Message>) -> Result<String, Error> {
 	let write_data = get_write_data(file, data)?;
-	// Convert into chosen format
-	let value = toml::to_string(&write_data).map_err(Error::toml_serialization)?;
-
-	fs::write(file, &value).map_err(Error::StdIo)?;
-	Ok(value)
+	let data_as_toml = toml::to_string(&write_data).map_err(Error::toml_serialization)?;
+	fs::write(file, &data_as_toml).map_err(Error::StdIo)?;
+	Ok(data_as_toml)
 }
 
 fn get_write_data(file: &str, data: Vec<Message>) -> Result<FullFile, Error> {
-	let mut new_messages = sig_message_to_vec(data);
+	let mut new_messages = message_to_file_message(data);
 
 	// Read existing messages (see Decisions.md for explanation)
 	let existing_file = get_full_file(file)?;
@@ -39,14 +37,14 @@ fn handle_error(err: std::io::Error) -> Result<FullFile, Error> {
 	}
 }
 
-pub fn sig_message_to_vec(data: Vec<Message>) -> Vec<MessageInFile> {
+pub fn message_to_file_message(data: Vec<Message>) -> Vec<FileMessage> {
 	data.into_iter()
 		.map(|f| {
 			let prev_hash = bytes_to_hex(&f.prev_hash);
 			let signature = bytes_to_hex(&f.signature.to_bytes());
-			let public_key = f.public_key.to_bytes();
+			let public_key = bytes_to_hex(&f.public_key.to_bytes());
 			let message = f.message;
-			MessageInFile {
+			FileMessage {
 				prev_hash,
 				public_key,
 				message,

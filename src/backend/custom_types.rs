@@ -104,9 +104,9 @@ impl Header {
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
-pub struct MessageInFile {
+pub struct FileMessage {
 	pub prev_hash: String,
-	pub public_key: [u8; 32],
+	pub public_key: String,
 	pub message: String,
 	pub signature: String,
 }
@@ -114,14 +114,14 @@ pub struct MessageInFile {
 #[derive(serde::Serialize, serde::Deserialize, Default)]
 pub struct FullFile {
 	pub header: Header,
-	pub messages: Vec<MessageInFile>,
+	pub messages: Vec<FileMessage>,
 }
 
 impl FullFile {
 	pub fn new() -> Self {
 		Self {
 			header: Header::new(),
-			messages: Vec::<MessageInFile>::new(),
+			messages: Vec::<FileMessage>::new(),
 		}
 	}
 }
