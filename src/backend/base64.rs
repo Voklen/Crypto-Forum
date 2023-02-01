@@ -1,3 +1,82 @@
+fn encode(input: [u8; 64]) -> [u8; 86] {
+	const SIZE: usize = 64;
+	const CHUNKS: usize = SIZE / 3;
+	const REMAINDER: usize = SIZE % 3;
+	const LENGTH: usize = match REMAINDER {
+		0 => CHUNKS * 4,
+		r => (CHUNKS * 4) + r + 1,
+	};
+	let mut output = [0u8; LENGTH];
+
+	let mut iter = input.into_iter();
+	for i in 0..CHUNKS {
+		let index = i * 4;
+		let end_index = index + 4;
+
+		let chunk = [
+			iter.next().unwrap(),
+			iter.next().unwrap(),
+			iter.next().unwrap(),
+		];
+		output[index..end_index].swap_with_slice(&mut split::three(chunk))
+	}
+	match REMAINDER {
+		0 => {}
+		1 => output[LENGTH - 2..].swap_with_slice(&mut split::one(iter.next().unwrap())),
+		2 => output[LENGTH - 3..].swap_with_slice(&mut split::two([
+			iter.next().unwrap(),
+			iter.next().unwrap(),
+		])),
+		_ => unreachable!(),
+	};
+
+	let mut converted = [0u8; 86];
+	for i in 0..86 {
+		converted[i] = encode_table[output[i] as usize];
+	}
+
+	return converted;
+}
+mod split {
+	pub fn one(chunk: u8) -> [u8; 2] {
+		[&chunk >> 2, (&chunk & 0b00000011) << 4]
+	}
+
+	pub fn two(chunk: [u8; 2]) -> [u8; 3] {
+		[
+			&chunk[0] >> 2,
+			(&chunk[0] & 0b00000011) << 4 | &chunk[1] >> 4,
+			(&chunk[1] & 0b00001111) << 2,
+		]
+	}
+
+	pub fn three(chunk: [u8; 3]) -> [u8; 4] {
+		[
+			&chunk[0] >> 2,
+			(&chunk[0] & 0b00000011) << 4 | &chunk[1] >> 4,
+			(&chunk[1] & 0b00001111) << 2 | &chunk[2] >> 6,
+			&chunk[2] & 0b00111111,
+		]
+	}
+}
+
+const fn generate_alphabet() -> [u8; 64] {
+	let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+	let mut symbols = [0_u8; 64];
+	let source_bytes = alphabet.as_bytes();
+
+	// a way to copy that's allowed in const fn
+	let mut index = 0;
+	while index < 64 {
+		symbols[index] = source_bytes[index];
+		index += 1;
+	}
+
+	symbols
+}
+
+const encode_table: [u8; 64] = generate_alphabet();
+
 pub fn bytes_to_hex(bytes: &[u8]) -> String {
 	let mut hex_string = String::new();
 	for i in bytes {
@@ -24,14 +103,14 @@ pub fn bytes_to_hex(bytes: &[u8]) -> String {
 
 /// Convert hex string to bytes of a generic array size
 /// ```
-/// use crypto_forum::hex::hex_to_bytes;
+/// use crypto_forum::base64::hex_to_bytes;
 ///
 /// let result = hex_to_bytes("DF36");
 /// assert_eq!(result, Some([223, 54]))
 /// ```
 /// If there are not enough characters for the array size, it will return None
 /// ```
-/// use crypto_forum::hex::hex_to_bytes;
+/// use crypto_forum::base64::hex_to_bytes;
 ///
 /// let hex = "FFFFFFFF";
 /// let result: Option<[u8; 49]> = hex_to_bytes(&hex);
@@ -39,7 +118,7 @@ pub fn bytes_to_hex(bytes: &[u8]) -> String {
 /// ```
 /// If the string has out of range characters None will also be returned
 /// ```
-/// use crypto_forum::hex::hex_to_bytes;
+/// use crypto_forum::base64::hex_to_bytes;
 ///
 /// let hex = "x";
 /// let result: Option<[u8; 64]> = hex_to_bytes(&hex);
@@ -70,14 +149,14 @@ pub fn hex_to_bytes<const COUNT: usize>(hex_string: &str) -> Option<[u8; COUNT]>
 
 /// Convert hex string to bytes of a generic array size
 /// ```
-/// use crypto_forum::hex::unchecked_hex_to_bytes;
+/// use crypto_forum::base64::unchecked_hex_to_bytes;
 ///
 /// let result = unchecked_hex_to_bytes("DF36");
 /// assert_eq!(result, Some([223, 54]))
 /// ```
 /// If there are not enough characters for the array size, it will return None
 /// ```
-/// use crypto_forum::hex::unchecked_hex_to_bytes;
+/// use crypto_forum::base64::unchecked_hex_to_bytes;
 ///
 /// let hex = "FFFFFFFF";
 /// let result: Option<[u8; 49]> = unchecked_hex_to_bytes(&hex);
@@ -173,4 +252,20 @@ fn too_large_array() {
 	let hex = "FFFFFFFF";
 	let result: Option<[u8; 69]> = hex_to_bytes(&hex);
 	assert_eq!(result, None)
+}
+
+#[test]
+fn all_255_64() {
+	let input = [
+		0x4e, 0x18, 0xac, 0xfa, 0x2b, 0x3e, 0x6d, 0xab, 0x1e, 0xfb, 0xae, 0x3e, 0xc2, 0x8a, 0xe4,
+		0x8a, 0x78, 0x3e, 0xbd, 0xea, 0xf2, 0xfb, 0x07, 0xa5, 0x94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	];
+	let converted = encode(input);
+	let string = std::str::from_utf8(&converted).unwrap();
+
+	assert_eq!(
+		"This-is-base-64-working-very-wellAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+		string
+	);
 }

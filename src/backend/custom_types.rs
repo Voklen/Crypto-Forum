@@ -1,4 +1,4 @@
-use crate::hex::bytes_to_hex;
+use crate::base64::bytes_to_hex;
 
 use ed25519_dalek::Verifier;
 use sha2::{Digest, Sha512};
@@ -26,7 +26,6 @@ impl Error {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Message {
-	// Message stored in the file
 	pub prev_hash: [u8; 64],
 	pub public_key: ed25519_dalek::PublicKey,
 	pub message: String,

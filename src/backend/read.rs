@@ -1,4 +1,4 @@
-use crate::{custom_types::*, hex::*};
+use crate::{base64::*, custom_types::*};
 use ed25519_dalek::*;
 use sha2::{Digest, Sha512};
 

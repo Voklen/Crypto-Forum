@@ -1,4 +1,4 @@
-use crate::{custom_types::*, hex::*, read_serde};
+use crate::{base64::*, custom_types::*, read_serde};
 use std::fs;
 
 pub fn write_messages(file: &str, data: Vec<Message>) -> Result<String, Error> {
