@@ -1,4 +1,16 @@
-fn encode(input: [u8; 64]) -> [u8; 86] {
+pub trait Length {
+	const LEN: usize;
+}
+
+impl<T, const LENGTH: usize> Length for [T; LENGTH] {
+	const LEN: usize = LENGTH;
+}
+
+fn encode<T>(input: T) -> [u8; 86]
+where
+	T: Length,
+	T: IntoIterator<Item = u8>,
+{
 	const SIZE: usize = 64;
 	const CHUNKS: usize = SIZE / 3;
 	const REMAINDER: usize = SIZE % 3;
@@ -32,7 +44,7 @@ fn encode(input: [u8; 64]) -> [u8; 86] {
 
 	let mut converted = [0u8; 86];
 	for i in 0..86 {
-		converted[i] = encode_table[output[i] as usize];
+		converted[i] = ENCODE_TABLE[output[i] as usize];
 	}
 
 	return converted;
@@ -75,7 +87,7 @@ const fn generate_alphabet() -> [u8; 64] {
 	symbols
 }
 
-const encode_table: [u8; 64] = generate_alphabet();
+const ENCODE_TABLE: [u8; 64] = generate_alphabet();
 
 pub fn bytes_to_hex(bytes: &[u8]) -> String {
 	let mut hex_string = String::new();
