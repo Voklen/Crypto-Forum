@@ -1,16 +1,4 @@
-pub trait Length {
-	const LEN: usize;
-}
-
-impl<T, const LENGTH: usize> Length for [T; LENGTH] {
-	const LEN: usize = LENGTH;
-}
-
-fn encode<T>(input: T) -> [u8; 86]
-where
-	T: Length,
-	T: IntoIterator<Item = u8>,
-{
+fn encode_64(input: [u8; 64]) -> [u8; 86] {
 	const SIZE: usize = 64;
 	const CHUNKS: usize = SIZE / 3;
 	const REMAINDER: usize = SIZE % 3;
@@ -49,6 +37,47 @@ where
 
 	return converted;
 }
+
+fn encode_32(input: [u8; 32]) -> [u8; 43] {
+	const SIZE: usize = 32;
+	const CHUNKS: usize = SIZE / 3;
+	const REMAINDER: usize = SIZE % 3;
+	const LENGTH: usize = match REMAINDER {
+		0 => CHUNKS * 4,
+		r => (CHUNKS * 4) + r + 1,
+	};
+	let mut output = [0u8; LENGTH];
+
+	let mut iter = input.into_iter();
+	for i in 0..CHUNKS {
+		let index = i * 4;
+		let end_index = index + 4;
+
+		let chunk = [
+			iter.next().unwrap(),
+			iter.next().unwrap(),
+			iter.next().unwrap(),
+		];
+		output[index..end_index].swap_with_slice(&mut split::three(chunk))
+	}
+	match REMAINDER {
+		0 => {}
+		1 => output[LENGTH - 2..].swap_with_slice(&mut split::one(iter.next().unwrap())),
+		2 => output[LENGTH - 3..].swap_with_slice(&mut split::two([
+			iter.next().unwrap(),
+			iter.next().unwrap(),
+		])),
+		_ => unreachable!(),
+	};
+
+	let mut converted = [0u8; 43];
+	for i in 0..43 {
+		converted[i] = ENCODE_TABLE[output[i] as usize];
+	}
+
+	return converted;
+}
+
 mod split {
 	pub fn one(chunk: u8) -> [u8; 2] {
 		[&chunk >> 2, (&chunk & 0b00000011) << 4]
@@ -267,17 +296,29 @@ fn too_large_array() {
 }
 
 #[test]
-fn all_255_64() {
+fn normal_64() {
 	let input = [
 		0x4e, 0x18, 0xac, 0xfa, 0x2b, 0x3e, 0x6d, 0xab, 0x1e, 0xfb, 0xae, 0x3e, 0xc2, 0x8a, 0xe4,
 		0x8a, 0x78, 0x3e, 0xbd, 0xea, 0xf2, 0xfb, 0x07, 0xa5, 0x94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	];
-	let converted = encode(input);
+	let converted = encode_64(input);
 	let string = std::str::from_utf8(&converted).unwrap();
 
 	assert_eq!(
 		"This-is-base-64-working-very-wellAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
 		string
 	);
+}
+
+#[test]
+fn normal_32() {
+	let input = [
+		0x4e, 0x18, 0xac, 0xfa, 0x2b, 0x3e, 0x6d, 0xab, 0x1e, 0xfb, 0xae, 0x3e, 0xc2, 0x8a, 0xe4,
+		0x8a, 0x78, 0x3e, 0xbd, 0xea, 0xf2, 0xfb, 0x07, 0xa5, 0x94, 0, 0, 0, 0, 0, 0, 0,
+	];
+	let converted = encode_32(input);
+	let string = std::str::from_utf8(&converted).unwrap();
+
+	assert_eq!("This-is-base-64-working-very-wellAAAAAAAAAA", string);
 }
