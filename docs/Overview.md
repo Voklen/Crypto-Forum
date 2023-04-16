@@ -1,0 +1,1 @@
+Essentially, GitArk is a git repo with a forum for issues all stored on IPFS. You can see the structure of the forum in [File Structure.md](File Structure.md). The repo is accessed though a [GitArk link](GitArk link.md)
