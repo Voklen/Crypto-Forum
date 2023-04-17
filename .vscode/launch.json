@@ -40,7 +40,7 @@
 			},
 			"args": [
 				"-i",
-				"reference/reference.toml"
+				"QmR8rHpCCfnEh1P8nphdTLgjTL1zzzPaWie6bekYmwqAu3"
 			],
 			"cwd": "${workspaceFolder}"
 		},

@@ -1,14 +1,18 @@
 use crypto_forum::{custom_types::*, *};
 
+use futures::TryStreamExt;
+use ipfs_api_backend_hyper::{IpfsApi, IpfsClient};
+
 #[path = "CLI/user_keypair.rs"]
 mod user_keypair;
 #[path = "CLI/interactive_write.rs"]
 mod write;
 
-fn main() {
-	let (files, arguments) = get_arguments();
-	for messages_file in &files {
-		process_file(messages_file, &arguments)
+#[tokio::main]
+async fn main() {
+	let (links, arguments) = get_arguments();
+	for messages_file in &links {
+		process_file(messages_file, &arguments).await
 	}
 }
 
@@ -30,17 +34,17 @@ fn get_arguments() -> (Vec<String>, Vec<Argument>) {
 		std::process::exit(1)
 	}
 
-	let mut files = Vec::<String>::new();
+	let mut links = Vec::<String>::new();
 	let mut arguments = Vec::<Argument>::new();
 	for arg in arguments_as_strings {
 		if arg.starts_with('-') {
 			arguments.push(parse_dash_argument(&arg))
 		} else {
-			// If there is no "-" at the start of the argument, it's a file that's being passed
-			files.push(arg);
+			// If there is no "-" at the start of the argument, it's a link that's being passed
+			links.push(arg);
 		}
 	}
-	(files, arguments)
+	(links, arguments)
 }
 
 fn parse_dash_argument(arg: &str) -> Argument {
@@ -67,9 +71,9 @@ fn parse_dash_argument(arg: &str) -> Argument {
 	}
 }
 
-fn process_file(messages_file: &str, arguments: &[Argument]) {
-	println!("File: {}", messages_file);
-	let file_slice = read_file(messages_file);
+async fn process_file(link: &str, arguments: &[Argument]) {
+	println!("File: {}", link);
+	let file_slice = read_file(link).await;
 	let messages = read_serde::get_messages(&file_slice).unwrap();
 
 	let output_for_machines = arguments.contains(&Argument::MachineOutput);
@@ -80,15 +84,29 @@ fn process_file(messages_file: &str, arguments: &[Argument]) {
 	}
 
 	if arguments.contains(&Argument::Interactive) {
-		interactive_session(messages_file, messages);
+		interactive_session(link, messages);
 	}
 }
 
-fn read_file(messages_file: &str) -> String {
-	std::fs::read_to_string(messages_file).unwrap_or_else(|err| match err.kind() {
-		std::io::ErrorKind::NotFound => write::make_file(messages_file),
-		_ => panic!(),
-	})
+async fn read_file(link: &str) -> String {
+	let client = IpfsClient::default();
+	let result = client
+		.get(link)
+		.map_ok(|chunk| chunk.to_vec())
+		.try_concat()
+		.await;
+	match result {
+		Ok(res) => clean_ipfs_cat(res),
+		Err(e) => panic!("IPFS retreval error: {}", e),
+	}
+}
+
+fn clean_ipfs_cat(mut cat_vec: Vec<u8>) -> String {
+	cat_vec.drain(..512);
+	String::from_utf8(cat_vec)
+		.unwrap()
+		.trim_end_matches(char::from(0))
+		.to_owned()
 }
 
 fn interactive_session(messages_file: &str, messages: Vec<Message>) {
@@ -144,7 +162,7 @@ fn output_for_machine(messages: &Vec<Message>) {
 }
 
 pub fn input(prompt: &str) -> String {
-	println!("{}", prompt);
+	println!("{prompt}");
 
 	let mut input_string = String::new();
 	let read_result = std::io::stdin().read_line(&mut input_string);
