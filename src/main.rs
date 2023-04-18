@@ -1,18 +1,14 @@
 use crypto_forum::{custom_types::*, *};
 
-use futures::TryStreamExt;
-use ipfs_api_backend_hyper::{IpfsApi, IpfsClient};
-
 #[path = "CLI/user_keypair.rs"]
 mod user_keypair;
 #[path = "CLI/interactive_write.rs"]
 mod write;
 
-#[tokio::main]
-async fn main() {
+fn main() {
 	let (links, arguments) = get_arguments();
 	for messages_file in &links {
-		process_file(messages_file, &arguments).await
+		process_file(messages_file, &arguments)
 	}
 }
 
@@ -71,10 +67,9 @@ fn parse_dash_argument(arg: &str) -> Argument {
 	}
 }
 
-async fn process_file(link: &str, arguments: &[Argument]) {
+fn process_file(link: &str, arguments: &[Argument]) {
 	println!("File: {}", link);
-	let file_slice = read_file(link).await;
-	let messages = read_serde::get_messages(&file_slice).unwrap();
+	let messages = read_serde::get_messages(link).unwrap();
 
 	let output_for_machines = arguments.contains(&Argument::MachineOutput);
 	if output_for_machines {
@@ -86,27 +81,6 @@ async fn process_file(link: &str, arguments: &[Argument]) {
 	if arguments.contains(&Argument::Interactive) {
 		interactive_session(link, messages);
 	}
-}
-
-async fn read_file(link: &str) -> String {
-	let client = IpfsClient::default();
-	let result = client
-		.get(link)
-		.map_ok(|chunk| chunk.to_vec())
-		.try_concat()
-		.await;
-	match result {
-		Ok(res) => clean_ipfs_cat(res),
-		Err(e) => panic!("IPFS retreval error: {}", e),
-	}
-}
-
-fn clean_ipfs_cat(mut cat_vec: Vec<u8>) -> String {
-	cat_vec.drain(..512);
-	String::from_utf8(cat_vec)
-		.unwrap()
-		.trim_end_matches(char::from(0))
-		.to_owned()
 }
 
 fn interactive_session(messages_file: &str, messages: Vec<Message>) {

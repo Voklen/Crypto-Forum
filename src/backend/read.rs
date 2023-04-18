@@ -1,13 +1,44 @@
 use crate::{base64::*, custom_types::*};
 use ed25519_dalek::*;
+use futures::TryStreamExt;
+use ipfs_api_backend_hyper::{IpfsApi, IpfsClient};
 use sha2::{Digest, Sha512};
 
-pub fn get_messages(file_slice: &str) -> Result<Vec<Message>, Error> {
-	Ok(parse_full_file(file_slice)?
+pub fn get_messages(link: &str) -> Result<Vec<Message>, Error> {
+	Ok(parse_full_file(link)?
 		.messages
 		.into_iter()
 		.filter_map(vec_to_message)
 		.collect())
+}
+
+pub fn parse_full_file(link: &str) -> Result<FullFile, Error> {
+	let file_slice = read_file(link);
+	if file_slice.is_empty() {
+		return Ok(FullFile::new());
+	}
+	toml::from_str(&file_slice).map_err(Error::toml_deserialization)
+}
+
+pub fn read_file(link: &str) -> String {
+	let client = IpfsClient::default();
+	let runtime = tokio::runtime::Builder::new_current_thread()
+		.enable_all()
+		.build()
+		.unwrap();
+	let result = runtime.block_on(client.get(link).map_ok(|chunk| chunk.to_vec()).try_concat());
+	match result {
+		Ok(res) => clean_ipfs_cat(res),
+		Err(e) => panic!("IPFS retreval error: {}", e),
+	}
+}
+
+fn clean_ipfs_cat(mut cat_vec: Vec<u8>) -> String {
+	cat_vec.drain(..512);
+	String::from_utf8(cat_vec)
+		.unwrap()
+		.trim_end_matches(char::from(0))
+		.to_owned()
 }
 
 fn vec_to_message(f: FileMessage) -> Option<Message> {
@@ -44,11 +75,4 @@ fn vec_to_message(f: FileMessage) -> Option<Message> {
 	} else {
 		None
 	}
-}
-
-pub fn parse_full_file(file_slice: &str) -> Result<FullFile, Error> {
-	if file_slice.is_empty() {
-		return Ok(FullFile::new());
-	}
-	toml::from_str(file_slice).map_err(Error::toml_deserialization)
 }

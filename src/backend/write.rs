@@ -1,10 +1,10 @@
 use crate::{base64::*, custom_types::*, read_serde};
 use std::fs;
 
-pub fn write_messages(file: &str, data: Vec<Message>) -> Result<String, Error> {
-	let write_data = get_write_data(file, data)?;
+pub fn write_messages(link: &str, data: Vec<Message>) -> Result<String, Error> {
+	let write_data = get_write_data(link, data)?;
 	let data_as_toml = toml::to_string(&write_data).map_err(Error::toml_serialization)?;
-	fs::write(file, &data_as_toml).map_err(Error::StdIo)?;
+	fs::write(link, &data_as_toml).map_err(Error::StdIo)?;
 	Ok(data_as_toml)
 }
 
