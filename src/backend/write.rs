@@ -40,7 +40,7 @@ pub fn message_to_file_message(data: Vec<Message>) -> Vec<FileMessage> {
 		.collect()
 }
 
-fn upload_to_ipns(link: &str, contents: String) -> Result<AddResponse, Error> {
+fn upload_to_ipns(link: &str, contents: String) -> Result<(), Error> {
 	let client = IpfsClient::default();
 	let data = Cursor::new(contents);
 	let executor = tokio::runtime::Builder::new_current_thread()
@@ -49,5 +49,12 @@ fn upload_to_ipns(link: &str, contents: String) -> Result<AddResponse, Error> {
 		.map_err(Error::StdIo)?;
 
 	let result_future = client.add(data);
-	executor.block_on(result_future).map_err(Error::IPFS)
+	let result = executor.block_on(result_future).map_err(Error::IPFS)?;
+	let name = format!("/ipfs/{}", result.name);
+
+	//TODO Make saving repo specific
+	let repo_name = None;
+	let publish_future = client.name_publish(&name, false, None, None, repo_name);
+	executor.block_on(publish_future).map_err(Error::IPFS)?;
+	Ok(())
 }
