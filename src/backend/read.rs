@@ -22,18 +22,18 @@ pub fn parse_full_file(link: &str) -> Result<FullFile, Error> {
 
 pub fn read_file(ipns_link: &str) -> Result<String, Error> {
 	let client = IpfsClient::default();
-	let runtime = tokio::runtime::Builder::new_current_thread()
+	let executor = tokio::runtime::Builder::new_current_thread()
 		.enable_all()
 		.build()
 		.map_err(Error::StdIo)?;
 
 	let ipfs_link_future = client.name_resolve(Some(ipns_link), true, false);
-	let ipfs_link = runtime.block_on(ipfs_link_future).map_err(Error::IPFS)?;
+	let ipfs_link = executor.block_on(ipfs_link_future).map_err(Error::IPFS)?;
 	let content_future = client
 		.get(&ipfs_link.path)
 		.map_ok(|chunk| chunk.to_vec())
 		.try_concat();
-	let content = runtime.block_on(content_future).map_err(Error::IPFS)?;
+	let content = executor.block_on(content_future).map_err(Error::IPFS)?;
 	Ok(clean_ipfs_cat(content))
 }
 

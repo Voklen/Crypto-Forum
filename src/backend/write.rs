@@ -1,10 +1,11 @@
 use crate::{base64::*, custom_types::*, read_serde};
-use std::fs;
+use ipfs_api_backend_hyper::{response::AddResponse, IpfsApi, IpfsClient};
+use std::io::Cursor;
 
 pub fn write_messages(link: &str, data: Vec<Message>) -> Result<String, Error> {
 	let write_data = get_write_data(link, data)?;
 	let data_as_toml = toml::to_string(&write_data).map_err(Error::toml_serialization)?;
-	fs::write(link, &data_as_toml).map_err(Error::StdIo)?;
+	upload_to_ipns(link, data_as_toml.clone())?;
 	Ok(data_as_toml)
 }
 
@@ -12,7 +13,7 @@ fn get_write_data(file: &str, data: Vec<Message>) -> Result<FullFile, Error> {
 	let mut new_messages = message_to_file_message(data);
 
 	// Read existing messages (see Decisions.md for explanation)
-	let existing_file = get_full_file(file)?;
+	let existing_file = read_serde::parse_full_file(file)?;
 	let mut messages = existing_file.messages;
 	messages.append(&mut new_messages);
 
@@ -20,21 +21,6 @@ fn get_write_data(file: &str, data: Vec<Message>) -> Result<FullFile, Error> {
 		header: existing_file.header,
 		messages,
 	})
-}
-
-fn get_full_file(file: &str) -> Result<FullFile, Error> {
-	match fs::read_to_string(file) {
-		Ok(file_slice) => read_serde::parse_full_file(&file_slice),
-		Err(err) => handle_error(err),
-	}
-}
-
-fn handle_error(err: std::io::Error) -> Result<FullFile, Error> {
-	if err.kind() == std::io::ErrorKind::NotFound {
-		Ok(FullFile::new())
-	} else {
-		Err(Error::StdIo(err))
-	}
 }
 
 pub fn message_to_file_message(data: Vec<Message>) -> Vec<FileMessage> {
@@ -52,4 +38,16 @@ pub fn message_to_file_message(data: Vec<Message>) -> Vec<FileMessage> {
 			}
 		})
 		.collect()
+}
+
+fn upload_to_ipns(link: &str, contents: String) -> Result<AddResponse, Error> {
+	let client = IpfsClient::default();
+	let data = Cursor::new(contents);
+	let executor = tokio::runtime::Builder::new_current_thread()
+		.enable_all()
+		.build()
+		.map_err(Error::StdIo)?;
+
+	let result_future = client.add(data);
+	executor.block_on(result_future).map_err(Error::IPFS)
 }
