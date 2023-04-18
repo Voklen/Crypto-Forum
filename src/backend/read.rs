@@ -13,24 +13,28 @@ pub fn get_messages(link: &str) -> Result<Vec<Message>, Error> {
 }
 
 pub fn parse_full_file(link: &str) -> Result<FullFile, Error> {
-	let file_slice = read_file(link);
+	let file_slice = read_file(link)?;
 	if file_slice.is_empty() {
 		return Ok(FullFile::new());
 	}
 	toml::from_str(&file_slice).map_err(Error::toml_deserialization)
 }
 
-pub fn read_file(link: &str) -> String {
+pub fn read_file(ipns_link: &str) -> Result<String, Error> {
 	let client = IpfsClient::default();
 	let runtime = tokio::runtime::Builder::new_current_thread()
 		.enable_all()
 		.build()
-		.unwrap();
-	let result = runtime.block_on(client.get(link).map_ok(|chunk| chunk.to_vec()).try_concat());
-	match result {
-		Ok(res) => clean_ipfs_cat(res),
-		Err(e) => panic!("IPFS retreval error: {}", e),
-	}
+		.map_err(Error::StdIo)?;
+
+	let ipfs_link_future = client.name_resolve(Some(ipns_link), true, false);
+	let ipfs_link = runtime.block_on(ipfs_link_future).map_err(Error::IPFS)?;
+	let content_future = client
+		.get(&ipfs_link.path)
+		.map_ok(|chunk| chunk.to_vec())
+		.try_concat();
+	let content = runtime.block_on(content_future).map_err(Error::IPFS)?;
+	Ok(clean_ipfs_cat(content))
 }
 
 fn clean_ipfs_cat(mut cat_vec: Vec<u8>) -> String {

@@ -12,6 +12,7 @@ pub enum Error {
 	TomlDeserialization(toml::de::Error),
 	InvalidFileData(String),
 	SignatureError(ed25519_dalek::SignatureError),
+	IPFS(ipfs_api_backend_hyper::Error),
 }
 
 impl Error {
