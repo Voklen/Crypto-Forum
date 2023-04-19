@@ -58,3 +58,18 @@ fn upload_to_ipns(link: &str, contents: String) -> Result<(), Error> {
 	executor.block_on(publish_future).map_err(Error::IPFS)?;
 	Ok(())
 }
+
+pub fn new_ipns(name: &str) -> Result<String, Error> {
+	let client = IpfsClient::default();
+	let executor = tokio::runtime::Builder::new_current_thread()
+		.enable_all()
+		.build()
+		.map_err(Error::StdIo)?;
+
+	let key = ipfs_api_backend_hyper::KeyType::Ed25519;
+	let keygen_future = client.key_gen(name, key, 64);
+	let result = executor.block_on(keygen_future).map_err(Error::IPFS)?;
+	let ipns_link = result.id;
+
+	Ok(ipns_link)
+}

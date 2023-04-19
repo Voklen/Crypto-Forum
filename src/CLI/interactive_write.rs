@@ -50,20 +50,20 @@ fn get_messages_from_user(
 	get_messages_from_user(keypair, write_data, new_hash, bad_keypair)
 }
 
-pub fn make_file(file: &str) -> String {
-	let should_make_file = ask_for_bool("Would you like to make a file?");
-	if !should_make_file {
-		println!("No file made");
+pub fn new_repo(links: &Vec<String>) {
+	if links.is_empty() {
+		eprintln!("Please provide repo name with -c");
 		std::process::exit(0);
 	}
-
-	let slice = write_serde::write_messages(file, Vec::<Message>::new());
-
-	match slice {
-		Ok(i) => i,
-		Err(err) => {
-			println!("Could not write to file: {:?}", err);
-			make_file(file)
-		}
+	if links.len() != 1 {
+		eprintln!("Please only provide one repo name with -c");
+		std::process::exit(0);
 	}
+	match write_serde::new_ipns(&links[0]) {
+		Ok(ipns_link) => println!("Repo made at link: {ipns_link}"),
+		Err(error) => {
+			eprintln!("Failed to create repo with error: {:?}", error);
+			std::process::exit(0);
+		}
+	};
 }

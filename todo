@@ -1,6 +1,9 @@
 Now⌨:
+Write to newly created IPNS key
+Fix tests
 
 Soon⌚:
+Improve error handling
 
 Later🗓️:
 Improve last hash: refinements {

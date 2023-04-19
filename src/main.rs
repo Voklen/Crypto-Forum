@@ -7,6 +7,10 @@ mod write;
 
 fn main() {
 	let (links, arguments) = get_arguments();
+	if arguments.contains(&Argument::Create) {
+		write::new_repo(&links);
+		return;
+	}
 	for messages_file in &links {
 		process_file(messages_file, &arguments)
 	}
@@ -16,6 +20,7 @@ fn main() {
 pub enum Argument {
 	Interactive,
 	MachineOutput,
+	Create,
 }
 
 fn get_arguments() -> (Vec<String>, Vec<Argument>) {
@@ -47,6 +52,7 @@ fn parse_dash_argument(arg: &str) -> Argument {
 	match arg {
 		"-i" => Argument::Interactive,
 		"-m" => Argument::MachineOutput,
+		"-c" => Argument::Create,
 		"--version" => {
 			println!(
 				"{program_name} {program_ver}",
