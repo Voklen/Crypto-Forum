@@ -6,6 +6,6 @@ pub mod base64;
 #[path = "backend/encrypt_decrypt.rs"]
 pub mod encrypt_decrypt;
 #[path = "backend/read.rs"]
-pub mod read_serde;
+pub mod read;
 #[path = "backend/write.rs"]
-pub mod write_serde;
+pub mod write;

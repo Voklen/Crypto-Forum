@@ -3,12 +3,12 @@ use crypto_forum::{custom_types::*, *};
 #[path = "CLI/user_keypair.rs"]
 mod user_keypair;
 #[path = "CLI/interactive_write.rs"]
-mod write;
+mod write_cli;
 
 fn main() {
 	let (links, arguments) = get_arguments();
 	if arguments.contains(&Argument::Create) {
-		write::new_repo(&links);
+		write_cli::new_repo(&links);
 		return;
 	}
 	for messages_file in &links {
@@ -75,7 +75,7 @@ fn parse_dash_argument(arg: &str) -> Argument {
 
 fn process_file(link: &str, arguments: &[Argument]) {
 	println!("File: {}", link);
-	let messages = read_serde::get_messages(link).unwrap();
+	let messages = read::get_messages(link).unwrap();
 
 	let output_for_machines = arguments.contains(&Argument::MachineOutput);
 	if output_for_machines {
@@ -95,7 +95,7 @@ fn interactive_session(messages_file: &str, messages: Vec<Message>) {
 		Some(i) => i.get_hash(),
 		None => [0; 64],
 	};
-	write::interactive_write(messages_file, keypair, last_hash);
+	write_cli::interactive_write(messages_file, keypair, last_hash);
 }
 
 fn output_for_human(messages: &Vec<Message>) {

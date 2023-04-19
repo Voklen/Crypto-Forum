@@ -1,5 +1,5 @@
-use crate::{base64::*, custom_types::*, read_serde};
-use ipfs_api_backend_hyper::{response::AddResponse, IpfsApi, IpfsClient};
+use crate::{base64::*, custom_types::*, read};
+use ipfs_api_backend_hyper::{IpfsApi, IpfsClient};
 use std::io::Cursor;
 
 pub fn write_messages(link: &str, data: Vec<Message>) -> Result<String, Error> {
@@ -13,7 +13,7 @@ fn get_write_data(file: &str, data: Vec<Message>) -> Result<FullFile, Error> {
 	let mut new_messages = message_to_file_message(data);
 
 	// Read existing messages (see Decisions.md for explanation)
-	let existing_file = read_serde::parse_full_file(file)?;
+	let existing_file = read::parse_full_file(file)?;
 	let mut messages = existing_file.messages;
 	messages.append(&mut new_messages);
 

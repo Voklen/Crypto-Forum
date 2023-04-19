@@ -77,7 +77,7 @@ fn read() {
 
 	let test_file = "reference/reference.toml";
 	let file_slice = std::fs::read_to_string(test_file).unwrap();
-	let actual = read_serde::get_messages(&file_slice).unwrap();
+	let actual = read::get_messages(&file_slice).unwrap();
 	assert_eq!(actual, expected);
 }
 
@@ -94,9 +94,9 @@ fn read_write() {
 	}
 	std::fs::create_dir_all(TEST_DIR).unwrap_or_else(dir_error);
 
-	write_serde::write_messages(test_path, test_data).unwrap();
+	write::write_messages(test_path, test_data).unwrap();
 	let file_slice = std::fs::read_to_string(test_path).unwrap();
-	let actual = read_serde::get_messages(&file_slice).unwrap();
+	let actual = read::get_messages(&file_slice).unwrap();
 	assert_eq!(actual, expected);
 
 	std::fs::remove_file(test_path).unwrap();
