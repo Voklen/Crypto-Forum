@@ -75,9 +75,8 @@ macro_rules! setup {
 fn read() {
 	setup!(expected);
 
-	let test_file = "reference/reference.toml";
-	let file_slice = std::fs::read_to_string(test_file).unwrap();
-	let actual = read::get_messages(&file_slice).unwrap();
+	let reference_hash = "/ipns/k51qzi5uqu5diney84ah3uynwh935sg041je13us5ixrueniqlx1w0vrubjiwo";
+	let actual = read::get_messages(&reference_hash).unwrap();
 	assert_eq!(actual, expected);
 }
 

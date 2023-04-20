@@ -5,6 +5,13 @@ mod user_keypair;
 #[path = "CLI/interactive_write.rs"]
 mod write_cli;
 
+#[derive(PartialEq)]
+pub enum Argument {
+	Interactive,
+	MachineOutput,
+	Create,
+}
+
 fn main() {
 	let (links, arguments) = get_arguments();
 	if arguments.contains(&Argument::Create) {
@@ -14,13 +21,6 @@ fn main() {
 	for messages_file in &links {
 		process_file(messages_file, &arguments)
 	}
-}
-
-#[derive(PartialEq)]
-pub enum Argument {
-	Interactive,
-	MachineOutput,
-	Create,
 }
 
 fn get_arguments() -> (Vec<String>, Vec<Argument>) {
