@@ -15,7 +15,7 @@ pub enum Argument {
 fn main() {
 	let (links, arguments) = get_arguments();
 	if arguments.contains(&Argument::Create) {
-		write_cli::new_repo(&links);
+		write_cli::new_repo();
 		return;
 	}
 	for messages_file in &links {

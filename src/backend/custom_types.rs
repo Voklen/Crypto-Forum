@@ -125,3 +125,7 @@ impl FullFile {
 		}
 	}
 }
+
+pub fn ipns_link_to_key(link: &str) -> String {
+	format!("GitArkRepo{link}")
+}

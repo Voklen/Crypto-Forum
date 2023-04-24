@@ -1,7 +1,8 @@
 use crate::{ask_for_bool, input, write, Message};
+use crypto_forum::custom_types::FullFile;
 use ed25519_dalek::*;
 
-pub fn interactive_write(file: &str, keypair: Keypair, last_hash: [u8; 64]) {
+pub fn interactive_write(link: &str, keypair: Keypair, last_hash: [u8; 64]) {
 	let write_data = Vec::<Message>::new();
 
 	// THIS BREAKS IF THEIR KEY SEED IS ALL 0'S
@@ -13,10 +14,10 @@ pub fn interactive_write(file: &str, keypair: Keypair, last_hash: [u8; 64]) {
 	};
 
 	let messages = get_messages_from_user(&keypair, write_data, last_hash, &bad_keypair);
-	let write_result = write::write_messages(file, messages);
+	let write_result = write::write_messages(link, messages);
 	if write_result.is_err() {
 		println!("Failed to write to file");
-		interactive_write(file, keypair, last_hash)
+		interactive_write(link, keypair, last_hash)
 	};
 }
 
@@ -50,16 +51,9 @@ fn get_messages_from_user(
 	get_messages_from_user(keypair, write_data, new_hash, bad_keypair)
 }
 
-pub fn new_repo(links: &Vec<String>) {
-	if links.is_empty() {
-		eprintln!("Please provide repo name with -c");
-		std::process::exit(0);
-	}
-	if links.len() != 1 {
-		eprintln!("Please only provide one repo name with -c");
-		std::process::exit(0);
-	}
-	match write::new_ipns(&links[0]) {
+pub fn new_repo() {
+	//TODO Ask user for repo metadata
+	match write::new_ipns(&FullFile::new()) {
 		Ok(ipns_link) => println!("Repo made at link: {ipns_link}"),
 		Err(error) => {
 			eprintln!("Failed to create repo with error: {:?}", error);
