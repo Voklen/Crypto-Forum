@@ -1,5 +1,36 @@
 use crypto_forum::{custom_types::*, *};
 
+#[test]
+fn read() {
+	let expected = get_test_data();
+
+	let reference_hash = "/ipns/k51qzi5uqu5di2tezuvqevpp62u7qcpkv9jrnhhwnk3pnk5ivloy95tv9bskll";
+	let actual = read::get_messages(&reference_hash).unwrap();
+	assert_eq!(actual, expected);
+}
+
+#[test]
+fn read_write() {
+	let test_data = get_test_data();
+
+	let link = &write::new_ipns(&FullFile::new()).unwrap();
+	let _cleanup = IPNSKeyCleanup { link };
+	write::write_messages(&link, test_data.clone()).unwrap();
+	let actual = read::get_messages(&link).unwrap();
+	assert_eq!(actual, test_data);
+}
+
+struct IPNSKeyCleanup<'a> {
+	link: &'a str,
+}
+
+impl Drop for IPNSKeyCleanup<'_> {
+	fn drop(&mut self) {
+		let key = &ipns_link_to_key(self.link);
+		write::delete_key(key).unwrap();
+	}
+}
+
 fn get_test_data() -> Vec<Message> {
 	vec![
 		Message {
@@ -66,24 +97,3 @@ fn get_test_data() -> Vec<Message> {
 		},
 	]
 }
-
-#[test]
-fn read() {
-	let expected = get_test_data();
-
-	let reference_hash = "/ipns/k51qzi5uqu5di2tezuvqevpp62u7qcpkv9jrnhhwnk3pnk5ivloy95tv9bskll";
-	let actual = read::get_messages(&reference_hash).unwrap();
-	assert_eq!(actual, expected);
-}
-
-// #[test]
-// fn read_write() {
-// 	let test_data = get_test_data();
-
-// 	let link = write::new_ipns(&FullFile::new()).unwrap();
-// 	write::write_messages(&link, test_data.clone()).unwrap();
-// 	let actual = read::get_messages(&link).unwrap();
-// 	assert_eq!(actual, test_data);
-
-// 	std::fs::remove_file(test_path).unwrap();
-// }
