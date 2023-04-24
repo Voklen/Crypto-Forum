@@ -5,14 +5,14 @@ use ipfs_api_backend_hyper::{IpfsApi, IpfsClient};
 use sha2::{Digest, Sha512};
 
 pub fn get_messages(link: &str) -> Result<Vec<Message>, Error> {
-	Ok(parse_full_file(link)?
+	Ok(get_repo(link)?
 		.messages
 		.into_iter()
 		.filter_map(vec_to_message)
 		.collect())
 }
 
-pub fn parse_full_file(link: &str) -> Result<FullFile, Error> {
+pub fn get_repo(link: &str) -> Result<FullFile, Error> {
 	let file_slice = read_file(link)?;
 	if file_slice.is_empty() {
 		return Ok(FullFile::new());
@@ -54,14 +54,14 @@ fn vec_to_message(f: FileMessage) -> Option<Message> {
 		let mut result = Vec::<u8>::new();
 		result.extend_from_slice(&prev_hash_bytes);
 		result.extend_from_slice(&public_key_bytes);
-		result.extend_from_slice(f.message.as_bytes());
+		result.extend_from_slice(f.body.as_bytes());
 		result.extend_from_slice(&signature_bytes);
 		result
 	};
 
 	let prev_hash: [u8; 64] = hex_to_bytes(&f.prev_hash)?;
 	let public_key = PublicKey::from_bytes(&public_key_bytes).ok()?;
-	let message = f.message;
+	let body = f.body;
 	let signature = match Signature::from_bytes(&signature_bytes) {
 		Ok(i) => Some(i),
 		Err(_) => None,
@@ -69,7 +69,7 @@ fn vec_to_message(f: FileMessage) -> Option<Message> {
 	let message = Message {
 		prev_hash,
 		public_key,
-		message,
+		body,
 		signature,
 	};
 

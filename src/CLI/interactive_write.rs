@@ -27,8 +27,8 @@ fn get_messages_from_user(
 	prev_hash: [u8; 64],
 	bad_keypair: &Keypair,
 ) -> Vec<Message> {
-	let message = input("Please enter desired message");
-	let to_sign = &[message.as_bytes(), &prev_hash].concat();
+	let message_body = input("Please enter desired message");
+	let to_sign = &[message_body.as_bytes(), &prev_hash].concat();
 
 	let signature = if ask_for_bool("Would you like to properly sign it?") {
 		keypair.sign(to_sign)
@@ -36,14 +36,14 @@ fn get_messages_from_user(
 		bad_keypair.sign(to_sign)
 	};
 
-	let new_element = Message {
+	let new_message = Message {
 		prev_hash,
 		public_key: keypair.public,
-		message,
+		body: message_body,
 		signature,
 	};
-	let new_hash = new_element.get_hash(); // This line is here so we can get the hash before it's moved into write_data
-	write_data.push(new_element);
+	let new_hash = new_message.get_hash(); // This line is here so we can get the hash before it's moved into write_data
+	write_data.push(new_message);
 
 	if !ask_for_bool("Would you like to enter another message?") {
 		return write_data;

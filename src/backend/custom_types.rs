@@ -29,7 +29,7 @@ impl Error {
 pub struct Message {
 	pub prev_hash: [u8; 64],
 	pub public_key: ed25519_dalek::PublicKey,
-	pub message: String,
+	pub body: String,
 	pub signature: ed25519_dalek::Signature,
 }
 
@@ -39,7 +39,7 @@ impl Message {
 		let mut collection_vector = Vec::<u8>::new();
 		collection_vector.extend_from_slice(&self.prev_hash);
 		collection_vector.extend_from_slice(&self.public_key.to_bytes());
-		collection_vector.extend_from_slice(self.message.as_bytes());
+		collection_vector.extend_from_slice(self.body.as_bytes());
 		collection_vector.extend_from_slice(&self.signature.to_bytes());
 
 		let hash = Sha512::digest(&collection_vector);
@@ -47,7 +47,7 @@ impl Message {
 	}
 
 	pub fn is_signed(&self) -> bool {
-		let combined_data = &[self.message.as_bytes(), &self.prev_hash].concat();
+		let combined_data = &[self.body.as_bytes(), &self.prev_hash].concat();
 		self.public_key
 			.verify(combined_data, &self.signature)
 			.is_ok()
@@ -107,7 +107,7 @@ impl Header {
 pub struct FileMessage {
 	pub prev_hash: String,
 	pub public_key: String,
-	pub message: String,
+	pub body: String,
 	pub signature: String,
 }
 

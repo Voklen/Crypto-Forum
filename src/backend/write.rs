@@ -2,19 +2,20 @@ use crate::{base64::*, custom_types::*, read};
 use ipfs_api_backend_hyper::{IpfsApi, IpfsClient};
 use std::io::Cursor;
 
-pub fn write_messages(link: &str, data: Vec<Message>) -> Result<String, Error> {
+/// Append the messages to the GitArk repo at the link
+pub fn write_messages(link: &str, messages: Vec<Message>) -> Result<(), Error> {
 	let name = &ipns_link_to_key(link);
-	let write_data = get_write_data(link, data)?;
+	let write_data = get_write_data(link, messages)?;
 	let data_as_toml = toml::to_string(&write_data).map_err(Error::toml_serialization)?;
-	upload_to_ipns(name, data_as_toml.clone())?;
-	Ok(data_as_toml)
+	upload_to_ipns(name, data_as_toml)?;
+	Ok(())
 }
 
-fn get_write_data(link: &str, data: Vec<Message>) -> Result<FullFile, Error> {
+fn get_write_data(link: &str, messages: Vec<Message>) -> Result<FullFile, Error> {
 	// Read existing messages (see Decisions.md for explanation)
-	let existing_file = read::parse_full_file(link)?;
+	let existing_file = read::get_repo(link)?;
 
-	let mut new_messages = message_to_file_message(data);
+	let mut new_messages = messages.into_iter().map(message_to_file_message).collect();
 	let mut messages = existing_file.messages;
 	messages.append(&mut new_messages);
 
@@ -24,21 +25,17 @@ fn get_write_data(link: &str, data: Vec<Message>) -> Result<FullFile, Error> {
 	})
 }
 
-pub fn message_to_file_message(data: Vec<Message>) -> Vec<FileMessage> {
-	data.into_iter()
-		.map(|f| {
-			let prev_hash = bytes_to_hex(&f.prev_hash);
-			let signature = bytes_to_hex(&f.signature.to_bytes());
-			let public_key = bytes_to_hex(&f.public_key.to_bytes());
-			let message = f.message;
-			FileMessage {
-				prev_hash,
-				public_key,
-				message,
-				signature,
-			}
-		})
-		.collect()
+pub fn message_to_file_message(m: Message) -> FileMessage {
+	let prev_hash = bytes_to_hex(&m.prev_hash);
+	let signature = bytes_to_hex(&m.signature.to_bytes());
+	let public_key = bytes_to_hex(&m.public_key.to_bytes());
+	let body = m.body;
+	FileMessage {
+		prev_hash,
+		public_key,
+		body,
+		signature,
+	}
 }
 
 fn upload_to_ipns(key: &str, contents: String) -> Result<(), Error> {
@@ -58,6 +55,7 @@ fn upload_to_ipns(key: &str, contents: String) -> Result<(), Error> {
 	Ok(())
 }
 
+/// Creates a new IPNS link and returns the link to it
 pub fn new_ipns(contents: &FullFile) -> Result<String, Error> {
 	let client = IpfsClient::default();
 	let executor = tokio::runtime::Builder::new_current_thread()

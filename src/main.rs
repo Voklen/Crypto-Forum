@@ -99,43 +99,43 @@ fn interactive_session(messages_file: &str, messages: Vec<Message>) {
 }
 
 fn output_for_human(messages: &Vec<Message>) {
-	for i in messages {
-		let username = i.get_username();
-		let prev_hash = i.hex_prev_hash();
-		let hash = i.hex_hash();
-		let message = &i.message;
+	for message in messages {
+		let username = message.get_username();
+		let prev_hash = message.hex_prev_hash();
+		let hash = message.hex_hash();
+		let body = &message.body;
 		println!("--------");
-		if !i.is_signed() {
+		if !message.is_signed() {
 			println!("!!!WARNING: INVALID SIGNATURE!!!");
 			println!("!!!WE HAVE NO PROOF THIS PUBLIC KEY EVER POSTED THIS!!!");
 		}
 		match username {
 			Some(name) => println!("Public key: {name}"),
-			None => println!("Public key: {}", i.hex_public_key()),
+			None => println!("Public key: {}", message.hex_public_key()),
 		}
 		println!("Replying to message with hash: {prev_hash}");
-		println!("Message: \n{message}");
+		println!("Message: \n{body}");
 		println!("Hash: {hash}");
 		println!("--------")
 	}
 }
 
 fn output_for_machine(messages: &Vec<Message>) {
-	for i in messages {
-		let public_key = i.get_username();
-		let prev_hash = i.hex_prev_hash();
-		let hash = i.hex_hash();
-		let signed = i.is_signed();
-		let message = &i.message;
-		// Print `message` at the end because it could contain spaces, keywords, and who-knows-what (and has an unknown size)
-		// Which would make it hard to know when `message` ends meaning anything after it on the same line is harder to parse
+	for message in messages {
+		let public_key = message.get_username();
+		let prev_hash = message.hex_prev_hash();
+		let hash = message.hex_hash();
+		let signed = message.is_signed();
+		let body = &message.body;
+		// Print `body` at the end because it could contain spaces, keywords, and who-knows-what (and has an unknown size)
+		// Which would make it hard to know when `body` ends meaning anything after it on the same line is harder to parse
 		match public_key {
 			Some(username) => println!(
-				"Username {username} Replying_to_hash {prev_hash} Hash {hash} Properly_signed {signed} Message {message}"
+				"Username {username} Replying_to_hash {prev_hash} Hash {hash} Properly_signed {signed} Message {body}"
 			),
 			None => println!(
-				"Public_key {public} Replying_to_hash {prev_hash} Hash {hash} Properly_signed {signed} Message {message}",
-				public = i.hex_public_key()
+				"Public_key {public} Replying_to_hash {prev_hash} Hash {hash} Properly_signed {signed} Message {body}",
+				public = message.hex_public_key()
 			),
 		}
 	}
