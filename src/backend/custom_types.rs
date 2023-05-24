@@ -4,6 +4,13 @@ use ed25519_dalek::Verifier;
 use sha2::{Digest, Sha512};
 use std::fs;
 
+#[derive(PartialEq)]
+pub enum Argument {
+	Interactive,
+	MachineOutput,
+	Create,
+}
+
 #[derive(Debug)]
 pub enum Error {
 	StdIo(std::io::Error),

@@ -5,13 +5,6 @@ mod user_keypair;
 #[path = "CLI/interactive_write.rs"]
 mod write_cli;
 
-#[derive(PartialEq)]
-pub enum Argument {
-	Interactive,
-	MachineOutput,
-	Create,
-}
-
 fn main() {
 	let (links, arguments) = get_arguments();
 	if arguments.contains(&Argument::Create) {

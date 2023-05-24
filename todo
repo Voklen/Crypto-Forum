@@ -1,6 +1,5 @@
 Now⌨:
 Write to newly created IPNS key
-Fix tests
 
 Soon⌚:
 Improve error handling
@@ -25,3 +24,4 @@ Multiple threads (as in forum threads): refinements {
 }
 Unit tests (kind of, it's a continuous process)
 User flies to get username
+Fix tests
