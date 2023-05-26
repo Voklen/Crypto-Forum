@@ -1,8 +1,9 @@
 Now⌨:
-Write to newly created IPNS key
+UX improvements
 
 Soon⌚:
 Improve error handling
+Add help option
 
 Later🗓️:
 Improve last hash: refinements {
@@ -11,7 +12,6 @@ Improve last hash: refinements {
 	ask user to select one
 	Set last_hash to selection
 }
-UX improvements
 Search
 
 Done🎉:
@@ -25,3 +25,4 @@ Multiple threads (as in forum threads): refinements {
 Unit tests (kind of, it's a continuous process)
 User flies to get username
 Fix tests
+Write to newly created IPNS key

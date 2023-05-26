@@ -51,13 +51,19 @@ fn get_messages_from_user(
 	get_messages_from_user(keypair, write_data, new_hash, bad_keypair)
 }
 
-pub fn new_repo() {
+/// Creates a new GitArk repo, returns the link to the repo
+/// # Errors
+/// The program will quit with an error message
+pub fn new_repo() -> String {
 	//TODO Ask user for repo metadata
 	match write::new_ipns(&FullFile::new()) {
-		Ok(ipns_link) => println!("Repo made at link: {ipns_link}"),
+		Ok(ipns_link) => {
+			println!("Repo made at link: {ipns_link}");
+			ipns_link
+		}
 		Err(error) => {
 			eprintln!("Failed to create repo with error: {:?}", error);
-			std::process::exit(0);
+			std::process::exit(0)
 		}
-	};
+	}
 }

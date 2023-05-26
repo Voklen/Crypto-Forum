@@ -8,7 +8,8 @@ mod write_cli;
 fn main() {
 	let (links, arguments) = get_arguments();
 	if arguments.contains(&Argument::Create) {
-		write_cli::new_repo();
+		let created_link = write_cli::new_repo();
+		process_file(&created_link, &arguments);
 		return;
 	}
 	for messages_file in &links {
