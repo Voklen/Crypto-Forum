@@ -46,28 +46,48 @@ fn parse_dash_argument(arg: &str) -> Argument {
 		"-i" => Argument::Interactive,
 		"-m" => Argument::MachineOutput,
 		"-c" => Argument::Create,
-		"--version" => {
-			println!(
-				"{program_name} {program_ver}",
-				program_name = env!("CARGO_PKG_NAME"),
-				program_ver = env!("CARGO_PKG_VERSION")
-			);
-			println!("Copyright (C) 2022 Alexander Gorichev\nLicense GPL-3.0-only: GNU GPL version 3.0 only <https://gnu.org/licenses/gpl-3.0.html>.\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.\n\nWritten by Alexander Gorichev.");
-			std::process::exit(0)
-		}
-		_ => {
-			println!(
-				"{program_name}: invalid option -- '{argument}'",
-				program_name = env!("CARGO_PKG_NAME"),
-				argument = arg
-			);
-			std::process::exit(1)
-		}
+		"-v" => print_version_info(),
+
+		"--interactive" => Argument::Interactive,
+		"--machine-output" => Argument::MachineOutput,
+		"--create" => Argument::Create,
+		"--version" => print_version_info(),
+
+		_ => unknown_arg(arg),
 	}
 }
 
+fn print_version_info() -> Argument {
+	println!(
+		"{program_name} {program_ver}",
+		program_name = env!("CARGO_PKG_NAME"),
+		program_ver = env!("CARGO_PKG_VERSION")
+	);
+	println!(
+		"
+Copyright (C) 2022 Alexander Gorichev
+License GPL-3.0-only: GNU GPL version 3.0 only <https://gnu.org/licenses/gpl-3.0.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by Alexander Gorichev.
+Send all issues to <https://github.com/Voklen/Crypto-Forum/issues> or <Alex.Gorichev@protonmail.com>
+I hope you enjoy :)"
+	);
+	std::process::exit(0)
+}
+
+fn unknown_arg(arg: &str) -> Argument {
+	println!(
+		"{program_name}: invalid option -- '{argument}'",
+		program_name = env!("CARGO_PKG_NAME"),
+		argument = arg
+	);
+	std::process::exit(1)
+}
+
 fn process_file(link: &str, arguments: &[Argument]) {
-	println!("File: {}", link);
+	println!("File: {link}");
 	let messages = read::get_messages(link).unwrap();
 
 	let output_for_machines = arguments.contains(&Argument::MachineOutput);
