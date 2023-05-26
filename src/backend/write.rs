@@ -1,4 +1,4 @@
-use crate::{base64::*, custom_types::*, read};
+use crate::{custom_types::*, read};
 use ipfs_api_backend_hyper::{IpfsApi, IpfsClient};
 use std::io::Cursor;
 
@@ -26,9 +26,9 @@ fn get_write_data(link: &str, messages: Vec<Message>) -> Result<FullFile, Error>
 }
 
 pub fn message_to_file_message(m: Message) -> FileMessage {
-	let prev_hash = bytes_to_hex(&m.prev_hash);
-	let signature = bytes_to_hex(&m.signature.to_bytes());
-	let public_key = bytes_to_hex(&m.public_key.to_bytes());
+	let prev_hash = m.prev_hash_string();
+	let signature = m.signature_string();
+	let public_key = m.public_key_string();
 	let body = m.body;
 	FileMessage {
 		prev_hash,

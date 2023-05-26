@@ -1,8 +1,8 @@
 use crypto_forum::{custom_types::*, *};
 
-#[path = "CLI/user_keypair.rs"]
+#[path = "cli/user_keypair.rs"]
 mod user_keypair;
-#[path = "CLI/interactive_write.rs"]
+#[path = "cli/interactive_write.rs"]
 mod write_cli;
 
 fn main() {
@@ -94,8 +94,8 @@ fn interactive_session(messages_file: &str, messages: Vec<Message>) {
 fn output_for_human(messages: &Vec<Message>) {
 	for message in messages {
 		let username = message.get_username();
-		let prev_hash = message.hex_prev_hash();
-		let hash = message.hex_hash();
+		let prev_hash = message.prev_hash_string();
+		let hash = message.hash_string();
 		let body = &message.body;
 		println!("--------");
 		if !message.is_signed() {
@@ -104,7 +104,7 @@ fn output_for_human(messages: &Vec<Message>) {
 		}
 		match username {
 			Some(name) => println!("Public key: {name}"),
-			None => println!("Public key: {}", message.hex_public_key()),
+			None => println!("Public key: {}", message.public_key_string()),
 		}
 		println!("Replying to message with hash: {prev_hash}");
 		println!("Message: \n{body}");
@@ -116,8 +116,8 @@ fn output_for_human(messages: &Vec<Message>) {
 fn output_for_machine(messages: &Vec<Message>) {
 	for message in messages {
 		let public_key = message.get_username();
-		let prev_hash = message.hex_prev_hash();
-		let hash = message.hex_hash();
+		let prev_hash = message.prev_hash_string();
+		let hash = message.hash_string();
 		let signed = message.is_signed();
 		let body = &message.body;
 		// Print `body` at the end because it could contain spaces, keywords, and who-knows-what (and has an unknown size)
@@ -128,7 +128,7 @@ fn output_for_machine(messages: &Vec<Message>) {
 			),
 			None => println!(
 				"Public_key {public} Replying_to_hash {prev_hash} Hash {hash} Properly_signed {signed} Message {body}",
-				public = message.hex_public_key()
+				public = message.public_key_string()
 			),
 		}
 	}

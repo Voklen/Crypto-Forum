@@ -1,5 +1,4 @@
-use crate::base64::bytes_to_hex;
-
+use base64::{engine::general_purpose, Engine};
 use ed25519_dalek::Verifier;
 use sha2::{Digest, Sha512};
 use std::fs;
@@ -61,28 +60,32 @@ impl Message {
 	}
 
 	// Display methods
-	pub fn hex_prev_hash(&self) -> String {
+	pub fn prev_hash_string(&self) -> String {
 		let bytes = &self.prev_hash;
-		bytes_to_hex(bytes)
+		Self::encode_base64(bytes)
 	}
 
-	pub fn hex_public_key(&self) -> String {
+	pub fn public_key_string(&self) -> String {
 		let bytes = self.public_key.as_bytes();
-		bytes_to_hex(bytes)
+		Self::encode_base64(bytes)
 	}
 
-	pub fn hex_signature(&self) -> String {
+	pub fn signature_string(&self) -> String {
 		let bytes = &self.signature.to_bytes();
-		bytes_to_hex(bytes)
+		Self::encode_base64(bytes)
 	}
 
-	pub fn hex_hash(&self) -> String {
+	pub fn hash_string(&self) -> String {
 		let bytes = &self.get_hash();
-		bytes_to_hex(bytes)
+		Self::encode_base64(bytes)
+	}
+
+	fn encode_base64(bytes: &[u8]) -> String {
+		general_purpose::STANDARD_NO_PAD.encode(bytes)
 	}
 
 	pub fn get_username(&self) -> Option<String> {
-		let public_key = self.hex_public_key();
+		let public_key = self.public_key_string();
 		let usernames_dir = "reference/usernames/";
 		let username_file = usernames_dir.to_owned() + &public_key;
 		let result = match fs::read_to_string(username_file) {
@@ -110,7 +113,7 @@ impl Header {
 	}
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct FileMessage {
 	pub prev_hash: String,
 	pub public_key: String,

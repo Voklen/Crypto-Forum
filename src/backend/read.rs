@@ -1,4 +1,5 @@
-use crate::{base64::*, custom_types::*};
+use crate::custom_types::*;
+use base64::{engine::general_purpose, Engine};
 use ed25519_dalek::*;
 use futures::TryStreamExt;
 use ipfs_api_backend_hyper::{IpfsApi, IpfsClient};
@@ -46,9 +47,9 @@ fn clean_ipfs_cat(mut cat_vec: Vec<u8>) -> String {
 }
 
 fn vec_to_message(f: FileMessage) -> Option<Message> {
-	let prev_hash_bytes: [u8; 64] = hex_to_bytes(&f.prev_hash)?;
-	let public_key_bytes: [u8; PUBLIC_KEY_LENGTH] = hex_to_bytes(&f.public_key)?;
-	let signature_bytes: [u8; 64] = hex_to_bytes(&f.signature)?;
+	let prev_hash_bytes: [u8; 64] = decode_base64(&f.prev_hash)?;
+	let public_key_bytes: [u8; PUBLIC_KEY_LENGTH] = decode_base64(&f.public_key)?;
+	let signature_bytes: [u8; 64] = decode_base64(&f.signature)?;
 
 	let to_hash = {
 		let mut result = Vec::<u8>::new();
@@ -59,7 +60,7 @@ fn vec_to_message(f: FileMessage) -> Option<Message> {
 		result
 	};
 
-	let prev_hash: [u8; 64] = hex_to_bytes(&f.prev_hash)?;
+	let prev_hash: [u8; 64] = decode_base64(&f.prev_hash)?;
 	let public_key = PublicKey::from_bytes(&public_key_bytes).ok()?;
 	let body = f.body;
 	let signature = match Signature::from_bytes(&signature_bytes) {
@@ -79,4 +80,12 @@ fn vec_to_message(f: FileMessage) -> Option<Message> {
 	} else {
 		None
 	}
+}
+
+fn decode_base64<const N: usize>(string: &str) -> Option<[u8; N]> {
+	// I want to use `decode_slice` for performance but it was not working
+	// maybe have another go sometime
+	let base64 = general_purpose::STANDARD_NO_PAD;
+	let as_vec = base64.decode(string).ok()?;
+	as_vec.try_into().ok()
 }

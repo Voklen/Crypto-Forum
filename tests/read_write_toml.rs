@@ -4,7 +4,7 @@ use crypto_forum::{custom_types::*, *};
 fn read() {
 	let expected = get_test_data();
 
-	let reference_hash = "/ipns/k51qzi5uqu5di2tezuvqevpp62u7qcpkv9jrnhhwnk3pnk5ivloy95tv9bskll";
+	let reference_hash = "/ipns/k51qzi5uqu5di70nif47ek3yg20ltitgcjmuafwwq0jbhndat32n40zqmeybq2";
 	let actual = read::get_messages(&reference_hash).unwrap();
 	assert_eq!(actual, expected);
 }
