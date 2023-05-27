@@ -1,4 +1,4 @@
-use crate::{ask_for_bool, input, write, Message};
+use crate::{input::*, write, Message};
 use crypto_forum::custom_types::FullFile;
 use ed25519_dalek::*;
 

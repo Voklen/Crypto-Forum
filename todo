@@ -1,8 +1,7 @@
 Now⌨:
-UX improvements
+Improve error handling
 
 Soon⌚:
-Improve error handling
 Add help option
 
 Later🗓️:
@@ -26,3 +25,4 @@ Unit tests (kind of, it's a continuous process)
 User flies to get username
 Fix tests
 Write to newly created IPNS key
+UX improvements

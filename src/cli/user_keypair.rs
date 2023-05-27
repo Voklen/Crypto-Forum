@@ -1,7 +1,7 @@
 use crate::{
-	ask_for_bool,
 	encrypt_decrypt::{encrypt_and_write, read_and_decrypt},
-	input, Error,
+	input::*,
+	Error,
 };
 use ed25519_dalek::*;
 use sha2::{Digest, Sha256, Sha512};
