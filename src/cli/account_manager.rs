@@ -22,18 +22,12 @@ pub fn login(accounts_dir: &str) -> Result<Keypair, Error> {
 
 fn dir_is_empty(directory: &str) -> bool {
 	match fs::read_dir(directory) {
-		Ok(mut files) => {
-			if files.next().is_none() {
-				true
-			} else {
-				false
-			}
-		}
+		Ok(mut files) => files.next().is_none(),
 		Err(_) => false,
 	}
 }
 
-pub fn create_account(accounts_dir: &str) -> Result<Keypair, Error> {
+fn create_account(accounts_dir: &str) -> Result<Keypair, Error> {
 	let account_name = input("Enter new account name:");
 
 	let first_password = get_password("Please create a password");
