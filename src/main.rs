@@ -6,6 +6,8 @@ use crate::print_messages::*;
 mod account_manager;
 #[path = "cli/arguments.rs"]
 mod arguments;
+#[path = "cli/errors.rs"]
+mod errors;
 #[path = "cli/input.rs"]
 mod input;
 #[path = "cli/print_messages.rs"]

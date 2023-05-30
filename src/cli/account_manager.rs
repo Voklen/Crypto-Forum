@@ -1,5 +1,6 @@
 use crate::{
 	encrypt_decrypt::{encrypt_and_write, read_and_decrypt},
+	errors::throw,
 	input::*,
 	Error,
 };
@@ -39,19 +40,22 @@ fn create_account(accounts_dir: &str) -> Result<Keypair, Error> {
 
 	let file_path = [accounts_dir, &account_name].concat();
 	let keypair = new_keypair();
-	create_dir(accounts_dir)?;
+	create_dir(accounts_dir);
 	encrypt_and_write(&file_path, &keypair.to_bytes(), &first_password)?;
 	Ok(keypair)
 }
 
-fn create_dir(accounts_dir: &str) -> Result<(), Error> {
-	fs::create_dir(accounts_dir).or_else(|err| {
-		if err.kind() == std::io::ErrorKind::AlreadyExists {
-			Ok(())
-		} else {
-			Err(Error::StdIo(err))
-		}
-	})
+fn create_dir(accounts_dir: &str) {
+	let result = fs::create_dir(accounts_dir);
+	let err = match result {
+		Ok(()) => return,
+		Err(err) => err,
+	};
+	if err.kind() == std::io::ErrorKind::AlreadyExists {
+		return;
+	}
+	let err_message = format!("Error creating directory: {}", err.to_string());
+	throw(&err_message);
 }
 
 fn get_existing_account(accounts_dir: &str) -> Result<Keypair, Error> {
@@ -69,7 +73,7 @@ fn get_existing_account(accounts_dir: &str) -> Result<Keypair, Error> {
 }
 
 fn open_account(selection: &str, accounts_dir: &str) -> Result<Keypair, Error> {
-	let password = get_password(&format!("Please enter the password for {}", selection));
+	let password = get_password(&format!("Please enter the password for {selection}"));
 	let full_path = accounts_dir.to_owned() + &selection;
 	let file_data = read_and_decrypt(&full_path, &password)?;
 	Keypair::from_bytes(&file_data).map_err(Error::SignatureError)
@@ -89,7 +93,7 @@ fn get_and_print_str(input: Result<fs::DirEntry, std::io::Error>) -> Option<Stri
 		return None;
 	}
 	let file_name = file.file_name().to_str()?.to_owned();
-	println!("{}", file_name);
+	println!("{file_name}");
 	Some(file_name)
 }
 
