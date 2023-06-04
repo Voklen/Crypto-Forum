@@ -1,8 +1,22 @@
-pub fn throw(error_message: &str) -> ! {
+#[macro_export]
+macro_rules! throw{
+    ($($message:tt)*) => {{
+		use	crate::errors::throw_error_fuction;
+        let res = format!($($message)*);
+        throw_error_fuction(res)
+    }}
+}
+
+pub fn throw_error_fuction(error_message: String) -> ! {
+	#[cfg(not(debug_assertions))]
+	exit_production(error_message);
+	#[cfg(debug_assertions)]
+	panic!("{error_message}");
+}
+
+#[allow(dead_code)]
+fn exit_poduction(error_message: String) {
 	let program_name = env!("CARGO_PKG_NAME");
 	println!("{program_name}: {error_message}");
-	#[cfg(not(debug_assertions))]
 	std::process::exit(1);
-	#[cfg(debug_assertions)]
-	panic!();
 }

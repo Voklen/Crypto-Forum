@@ -1,8 +1,7 @@
 use crate::{
 	encrypt_decrypt::{encrypt_and_write, read_and_decrypt},
-	errors::throw,
 	input::*,
-	Error,
+	throw, Error,
 };
 use ed25519_dalek::*;
 use sha2::{Digest, Sha256, Sha512};
@@ -49,8 +48,7 @@ fn create_dir(accounts_dir: &str) {
 	if err.kind() == std::io::ErrorKind::AlreadyExists {
 		return;
 	}
-	let err_message = format!("Error creating directory: {err}");
-	throw(&err_message);
+	throw!("Error creating directory: {err}");
 }
 
 fn get_existing_account(accounts_dir: &str) -> Keypair {
@@ -84,9 +82,7 @@ fn get_and_print_accounts(accounts_dir: &str) -> Vec<String> {
 fn get_account_files(accounts_dir: &str) -> fs::ReadDir {
 	match fs::read_dir(accounts_dir) {
 		Ok(res) => res,
-		Err(e) => throw(&format!(
-			"Failed to retrieve accounts from {accounts_dir}: {e}"
-		)),
+		Err(e) => throw!("Failed to retrieve accounts from {accounts_dir}: {e}"),
 	}
 }
 

@@ -1,6 +1,5 @@
 Now⌨:
-Improve error handling:
-	Turn throw function into macro that acts like format!()
+Improve error handling
 
 Soon⌚:
 Add help option
@@ -28,3 +27,4 @@ Fix tests
 Write to newly created IPNS key
 UX improvements
 Smooth out account creation UX
+Turn throw function into macro that acts like format!()
