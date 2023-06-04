@@ -1,5 +1,7 @@
 Now⌨:
-Improve error handling
+Improve error handling:
+	Turn throw function into macro that acts like format!()
+	Change order user is asked about accounts
 
 Soon⌚:
 Add help option

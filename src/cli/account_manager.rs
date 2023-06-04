@@ -8,7 +8,7 @@ use ed25519_dalek::*;
 use sha2::{Digest, Sha256, Sha512};
 use std::fs;
 
-pub fn login(accounts_dir: &str) -> Result<Keypair, Error> {
+pub fn login(accounts_dir: &str) -> Keypair {
 	if dir_is_empty(accounts_dir) {
 		return create_account(accounts_dir);
 	}
@@ -28,7 +28,7 @@ fn dir_is_empty(directory: &str) -> bool {
 	}
 }
 
-fn create_account(accounts_dir: &str) -> Result<Keypair, Error> {
+fn create_account(accounts_dir: &str) -> Keypair {
 	let account_name = input("Enter new account name:");
 
 	let first_password = get_password("Please create a password");
@@ -41,8 +41,8 @@ fn create_account(accounts_dir: &str) -> Result<Keypair, Error> {
 	let file_path = [accounts_dir, &account_name].concat();
 	let keypair = new_keypair();
 	create_dir(accounts_dir);
-	encrypt_and_write(&file_path, &keypair.to_bytes(), &first_password)?;
-	Ok(keypair)
+	encrypt_and_write(&file_path, &keypair.to_bytes(), &first_password).unwrap();
+	keypair
 }
 
 fn create_dir(accounts_dir: &str) {
@@ -58,14 +58,14 @@ fn create_dir(accounts_dir: &str) {
 	throw(&err_message);
 }
 
-fn get_existing_account(accounts_dir: &str) -> Result<Keypair, Error> {
+fn get_existing_account(accounts_dir: &str) -> Keypair {
 	println!("Accounts:");
-	let account_files = get_and_print_accounts(accounts_dir)?;
+	let account_files = get_and_print_accounts(accounts_dir);
 
 	// Select & open account
 	let selection = input("What account would you like to use?");
 	if account_files.contains(&selection) {
-		open_account(&selection, accounts_dir)
+		open_account(&selection, accounts_dir).unwrap()
 	} else {
 		println!("Invalid selection, please pick an account");
 		get_existing_account(accounts_dir)
@@ -79,12 +79,18 @@ fn open_account(selection: &str, accounts_dir: &str) -> Result<Keypair, Error> {
 	Keypair::from_bytes(&file_data).map_err(Error::SignatureError)
 }
 
-fn get_and_print_accounts(accounts_dir: &str) -> Result<Vec<String>, Error> {
-	let account_files: Vec<String> = fs::read_dir(accounts_dir)
-		.map_err(Error::StdIo)?
-		.filter_map(get_and_print_str)
-		.collect();
-	Ok(account_files)
+fn get_and_print_accounts(accounts_dir: &str) -> Vec<String> {
+	let files = get_account_files(accounts_dir);
+	files.filter_map(get_and_print_str).collect()
+}
+
+fn get_account_files(accounts_dir: &str) -> fs::ReadDir {
+	match fs::read_dir(accounts_dir) {
+		Ok(res) => res,
+		Err(e) => throw(&format!(
+			"Failed to retrieve accounts from {accounts_dir}: {e}"
+		)),
+	}
 }
 
 fn get_and_print_str(input: Result<fs::DirEntry, std::io::Error>) -> Option<String> {

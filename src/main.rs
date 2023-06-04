@@ -44,7 +44,7 @@ pub fn process_file(link: &str, arguments: &[Argument]) {
 }
 
 fn interactive_session(messages_file: &str, messages: Vec<Message>) {
-	let keypair = account_manager::login("reference/accounts/").unwrap();
+	let keypair = account_manager::login("reference/accounts/");
 	let last_hash = match messages.last() {
 		Some(i) => i.get_hash(),
 		None => [0; 64],
