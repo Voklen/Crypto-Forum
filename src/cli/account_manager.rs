@@ -9,21 +9,17 @@ use sha2::{Digest, Sha256, Sha512};
 use std::fs;
 
 pub fn login(accounts_dir: &str) -> Keypair {
+	create_dir(accounts_dir);
 	if dir_is_empty(accounts_dir) {
 		return create_account(accounts_dir);
 	}
-
-	let create_new_account = ask_for_bool("Would you like to create a new account?");
-	if create_new_account {
-		create_account(accounts_dir)
-	} else {
-		get_existing_account(accounts_dir)
-	}
+	get_existing_account(accounts_dir)
 }
 
 fn dir_is_empty(directory: &str) -> bool {
 	match fs::read_dir(directory) {
 		Ok(mut files) => files.next().is_none(),
+		//TODO better handle errors
 		Err(_) => false,
 	}
 }
@@ -40,7 +36,6 @@ fn create_account(accounts_dir: &str) -> Keypair {
 
 	let file_path = [accounts_dir, &account_name].concat();
 	let keypair = new_keypair();
-	create_dir(accounts_dir);
 	encrypt_and_write(&file_path, &keypair.to_bytes(), &first_password).unwrap();
 	keypair
 }
@@ -54,7 +49,7 @@ fn create_dir(accounts_dir: &str) {
 	if err.kind() == std::io::ErrorKind::AlreadyExists {
 		return;
 	}
-	let err_message = format!("Error creating directory: {}", err.to_string());
+	let err_message = format!("Error creating directory: {err}");
 	throw(&err_message);
 }
 
@@ -62,14 +57,16 @@ fn get_existing_account(accounts_dir: &str) -> Keypair {
 	println!("Accounts:");
 	let account_files = get_and_print_accounts(accounts_dir);
 
-	// Select & open account
-	let selection = input("What account would you like to use?");
+	let prompt = "What account would you like to use? (type \"new\" to create a new one)";
+	let selection = input(prompt);
 	if account_files.contains(&selection) {
-		open_account(&selection, accounts_dir).unwrap()
-	} else {
-		println!("Invalid selection, please pick an account");
-		get_existing_account(accounts_dir)
+		return open_account(&selection, accounts_dir).unwrap();
 	}
+	if &selection == "new" {
+		return create_account(accounts_dir);
+	}
+	println!("Invalid selection, please pick an account");
+	get_existing_account(accounts_dir)
 }
 
 fn open_account(selection: &str, accounts_dir: &str) -> Result<Keypair, Error> {
