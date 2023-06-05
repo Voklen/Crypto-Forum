@@ -35,8 +35,21 @@ fn create_account(accounts_dir: &str) -> Keypair {
 
 	let file_path = [accounts_dir, &account_name].concat();
 	let keypair = new_keypair();
-	encrypt_and_write(&file_path, &keypair.to_bytes(), &first_password).unwrap();
+	let result = encrypt_and_write(&file_path, &keypair.to_bytes(), &first_password);
+	check_encrypt_and_write_error(result);
 	keypair
+}
+
+fn check_encrypt_and_write_error(result: Result<(), Error>) {
+	let err = match result {
+		Ok(()) => return,
+		Err(e) => e,
+	};
+	match err {
+		Error::Encryption(e) => throw!("Error encrypting password: {e}"),
+		Error::StdIo(e) => throw!("Error writing to account file: {e}"),
+		e => throw!("Unexpected error while encrypting and saving the account: {e}"),
+	};
 }
 
 fn create_dir(accounts_dir: &str) {
@@ -58,7 +71,7 @@ fn get_existing_account(accounts_dir: &str) -> Keypair {
 	let prompt = "What account would you like to use? (type \"new\" to create a new one)";
 	let selection = input(prompt);
 	if account_files.contains(&selection) {
-		return open_account(&selection, accounts_dir).unwrap();
+		return open_account(&selection, accounts_dir);
 	}
 	if &selection == "new" {
 		return create_account(accounts_dir);
@@ -67,11 +80,24 @@ fn get_existing_account(accounts_dir: &str) -> Keypair {
 	get_existing_account(accounts_dir)
 }
 
-fn open_account(selection: &str, accounts_dir: &str) -> Result<Keypair, Error> {
+fn open_account(selection: &str, accounts_dir: &str) -> Keypair {
 	let password = get_password(&format!("Please enter the password for {selection}"));
 	let full_path = accounts_dir.to_owned() + &selection;
-	let file_data = read_and_decrypt(&full_path, &password)?;
-	Keypair::from_bytes(&file_data).map_err(Error::SignatureError)
+	let file_data =
+		read_and_decrypt(&full_path, &password).unwrap_or_else(handle_read_and_decrypt_error);
+	Keypair::from_bytes(&file_data).unwrap_or_else(handle_key_creation_error)
+}
+
+fn handle_read_and_decrypt_error(err: Error) -> Vec<u8> {
+	match err {
+		Error::StdIo(e) => throw!("Error reading from account file: {e}"),
+		Error::Encryption(e) => throw!("Error decrypting password: {e}"), //TODO ask again after wrong password
+		e => throw!("Unexpected error while encrypting and saving the account: {e}"),
+	}
+}
+
+fn handle_key_creation_error(err: SignatureError) -> Keypair {
+	throw!("Error creating key from account file: {err}")
 }
 
 fn get_and_print_accounts(accounts_dir: &str) -> Vec<String> {
@@ -99,7 +125,8 @@ fn get_and_print_str(input: Result<fs::DirEntry, std::io::Error>) -> Option<Stri
 fn new_keypair() -> Keypair {
 	let secret_seed = get_random_from_usr();
 
-	let secret: SecretKey = SecretKey::from_bytes(&secret_seed[..SECRET_KEY_LENGTH]).unwrap();
+	let secret: SecretKey = SecretKey::from_bytes(&secret_seed[..SECRET_KEY_LENGTH])
+		.unwrap_or_else(|e| throw!("Unexpected error when creating key: {e}"));
 	let public: PublicKey = PublicKey::from(&secret);
 	Keypair { secret, public }
 }
