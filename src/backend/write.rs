@@ -6,7 +6,7 @@ use std::io::Cursor;
 pub fn write_messages(link: &str, messages: Vec<Message>) -> Result<(), Error> {
 	let name = &ipns_link_to_key(link);
 	let write_data = get_write_data(link, messages)?;
-	let data_as_toml = toml::to_string(&write_data).map_err(Error::toml_serialization)?;
+	let data_as_toml = toml::to_string(&write_data).map_err(Error::TomlSerialization)?;
 	upload_to_ipns(name, data_as_toml)?;
 	Ok(())
 }
@@ -76,7 +76,7 @@ pub fn new_ipns(contents: &FullFile) -> Result<String, Error> {
 }
 
 fn write_to_new_ipns(key: &str, contents: &FullFile) -> Result<(), Error> {
-	let data_as_toml = toml::to_string(contents).map_err(Error::toml_serialization)?;
+	let data_as_toml = toml::to_string(contents).map_err(Error::TomlSerialization)?;
 	upload_to_ipns(key, data_as_toml)
 }
 

@@ -1,7 +1,7 @@
 use base64::{engine::general_purpose, Engine};
 use ed25519_dalek::Verifier;
 use sha2::{Digest, Sha512};
-use std::fs;
+use std::{fmt, fs};
 
 #[derive(PartialEq)]
 pub enum Argument {
@@ -19,15 +19,21 @@ pub enum Error {
 	InvalidFileData(String),
 	SignatureError(ed25519_dalek::SignatureError),
 	IPFS(ipfs_api_backend_hyper::Error),
+	FromUtf8(std::string::FromUtf8Error),
 }
 
-impl Error {
-	pub fn toml_serialization(error: toml::ser::Error) -> Error {
-		Error::TomlSerialization(error)
-	}
-
-	pub fn toml_deserialization(error: toml::de::Error) -> Error {
-		Error::TomlDeserialization(error)
+impl fmt::Display for Error {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match self {
+			Self::StdIo(string) => write!(f, "std::io error:{string}"),
+			Self::Encryption(string) => write!(f, "Encryption error:{string}"),
+			Self::TomlSerialization(string) => write!(f, "TOML serialization error:{string}"),
+			Self::TomlDeserialization(string) => write!(f, "TOML serialization error:{string}"),
+			Self::InvalidFileData(string) => write!(f, "Invalid file data error:{string}"),
+			Self::SignatureError(string) => write!(f, "Signature error:{string}"),
+			Self::IPFS(string) => write!(f, "IPFS error:{string}"),
+			Self::FromUtf8(string) => write!(f, "Error converting from UTF-8:{string}"),
+		}
 	}
 }
 

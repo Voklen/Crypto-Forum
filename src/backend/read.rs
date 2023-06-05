@@ -18,7 +18,7 @@ pub fn get_repo(link: &str) -> Result<FullFile, Error> {
 	if file_slice.is_empty() {
 		return Ok(FullFile::new());
 	}
-	toml::from_str(&file_slice).map_err(Error::toml_deserialization)
+	toml::from_str(&file_slice).map_err(Error::TomlDeserialization)
 }
 
 pub fn read_file(ipns_link: &str) -> Result<String, Error> {
@@ -31,19 +31,11 @@ pub fn read_file(ipns_link: &str) -> Result<String, Error> {
 	let ipfs_link_future = client.name_resolve(Some(ipns_link), true, false);
 	let ipfs_link = executor.block_on(ipfs_link_future).map_err(Error::IPFS)?;
 	let content_future = client
-		.get(&ipfs_link.path)
+		.cat(&ipfs_link.path)
 		.map_ok(|chunk| chunk.to_vec())
 		.try_concat();
 	let content = executor.block_on(content_future).map_err(Error::IPFS)?;
-	Ok(clean_ipfs_cat(content))
-}
-
-fn clean_ipfs_cat(mut cat_vec: Vec<u8>) -> String {
-	cat_vec.drain(..512);
-	String::from_utf8(cat_vec)
-		.unwrap()
-		.trim_end_matches(char::from(0))
-		.to_owned()
+	String::from_utf8(content).map_err(Error::FromUtf8)
 }
 
 fn vec_to_message(f: FileMessage) -> Option<Message> {

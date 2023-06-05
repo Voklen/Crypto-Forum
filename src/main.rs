@@ -29,7 +29,7 @@ fn main() {
 
 pub fn process_file(link: &str, arguments: &[Argument]) {
 	println!("File: {link}");
-	let messages = read::get_messages(link).unwrap();
+	let messages = get_messages(link);
 
 	let output_for_machines = arguments.contains(&Argument::MachineOutput);
 	if output_for_machines {
@@ -40,6 +40,20 @@ pub fn process_file(link: &str, arguments: &[Argument]) {
 
 	if arguments.contains(&Argument::Interactive) {
 		interactive_session(link, messages);
+	}
+}
+
+fn get_messages(link: &str) -> Vec<Message> {
+	let error = match read::get_messages(link) {
+		Ok(res) => return res,
+		Err(e) => e,
+	};
+	match error {
+		Error::StdIo(e) => throw!("Async tokio error at {link}: {e}"),
+		Error::IPFS(e) => throw!("Error reading from IPFS at {link}: {e}"),
+		Error::FromUtf8(e) => throw!("Error parsing UTF-8 string from IPFS cat at {link}: {e}"),
+		Error::TomlDeserialization(e) => throw!("Error while parsing TOML at {link}: {e}"),
+		e => throw!("An unexpected error has occured when reading messages: {e}"),
 	}
 }
 
