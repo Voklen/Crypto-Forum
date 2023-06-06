@@ -1,3 +1,4 @@
+use arguments::Argument;
 use crypto_forum::{custom_types::*, *};
 
 use crate::print_messages::*;

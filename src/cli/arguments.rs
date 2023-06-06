@@ -1,4 +1,9 @@
-use crypto_forum::custom_types::*;
+#[derive(PartialEq)]
+pub enum Argument {
+	Interactive,
+	MachineOutput,
+	Create,
+}
 
 pub fn get_args() -> (Vec<String>, Vec<Argument>) {
 	// Skip the first argument because it's just the executable path
@@ -43,13 +48,13 @@ fn parse_dashes(arg: &str) -> Argument {
 	}
 }
 
-fn unknown_arg(arg: &str) -> Argument {
+fn unknown_arg(arg: &str) -> ! {
 	let program_name = env!("CARGO_PKG_NAME");
 	println!("{program_name}: invalid option -- '{arg}'",);
 	std::process::exit(1)
 }
 
-fn print_version_info() -> Argument {
+fn print_version_info() -> ! {
 	println!(
 		"{program_name} {program_ver}",
 		program_name = env!("CARGO_PKG_NAME"),
