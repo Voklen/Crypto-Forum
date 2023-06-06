@@ -3,7 +3,6 @@ Now⌨:
 Soon⌚:
 Add IPNS links to other contributors
 Ask user again if password is wrong
-Add help option
 
 Later🗓️:
 Improve last hash: refinements {
@@ -30,3 +29,4 @@ UX improvements
 Smooth out account creation UX
 Turn throw function into macro that acts like format!()
 Improve error handling
+Add help option

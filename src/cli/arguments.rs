@@ -31,14 +31,22 @@ fn parse_dashes(arg: &str) -> Argument {
 		"-m" => Argument::MachineOutput,
 		"-c" => Argument::Create,
 		"-v" => print_version_info(),
+		"-h" => print_help(),
 
 		"--interactive" => Argument::Interactive,
 		"--machine-output" => Argument::MachineOutput,
 		"--create" => Argument::Create,
 		"--version" => print_version_info(),
+		"--help" => print_help(),
 
 		_ => unknown_arg(arg),
 	}
+}
+
+fn unknown_arg(arg: &str) -> Argument {
+	let program_name = env!("CARGO_PKG_NAME");
+	println!("{program_name}: invalid option -- '{arg}'",);
+	std::process::exit(1)
 }
 
 fn print_version_info() -> Argument {
@@ -61,8 +69,26 @@ I hope you enjoy :)"
 	std::process::exit(0)
 }
 
-fn unknown_arg(arg: &str) -> Argument {
+fn print_help() -> ! {
 	let program_name = env!("CARGO_PKG_NAME");
-	println!("{program_name}: invalid option -- '{arg}'",);
-	std::process::exit(1)
+	println!(
+		"
+Usage: {program_name} [OPTION]...
+Distributed git service
+
+	-i  --interactive     run in interactive mode
+	-m  --machine-output  print in a way more sutible for parsing
+	-c  --create          create a new repo (no link required as argument)
+	-v  --version         output version information and exit
+	-h  --help            display this help and exit
+
+To create a new repo run:
+	{program_name} -c
+To edit an existing repo use:
+	{program_name} -i <IPNS link>
+
+Send all issues to <https://github.com/Voklen/Crypto-Forum/issues> or <Alex.Gorichev@protonmail.com>
+"
+	);
+	std::process::exit(0)
 }
