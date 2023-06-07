@@ -15,8 +15,8 @@ pub fn throw_error_fuction(error_message: String) -> ! {
 }
 
 #[allow(dead_code)]
-fn exit_poduction(error_message: String) {
+fn exit_production(error_message: String) -> ! {
 	let program_name = env!("CARGO_PKG_NAME");
-	println!("{program_name}: {error_message}");
+	eprintln!("{program_name}: {error_message}");
 	std::process::exit(1);
 }

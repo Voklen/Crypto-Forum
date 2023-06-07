@@ -1,4 +1,4 @@
-use crate::{input::*, write, Message};
+use crate::{input::*, throw, write, Message};
 use crypto_forum::custom_types::FullFile;
 use ed25519_dalek::*;
 
@@ -61,9 +61,6 @@ pub fn new_repo() -> String {
 			println!("Repo made at link: {ipns_link}");
 			ipns_link
 		}
-		Err(error) => {
-			eprintln!("Failed to create repo with error: {:?}", error);
-			std::process::exit(0)
-		}
+		Err(err) => throw!("Failed to create repo with error: {err}"),
 	}
 }
