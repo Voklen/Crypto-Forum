@@ -13,7 +13,7 @@ fn read() {
 fn read_write() {
 	let test_data = get_test_data();
 
-	let link = &write::new_ipns(&FullFile::new()).unwrap();
+	let link = &write::new_ipns().unwrap();
 	let _cleanup = IPNSKeyCleanup { link };
 	write::write_messages(&link, test_data.clone()).unwrap();
 	let actual = read::get_messages(&link).unwrap();

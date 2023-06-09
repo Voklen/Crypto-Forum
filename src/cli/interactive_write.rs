@@ -56,7 +56,7 @@ fn get_messages_from_user(
 /// The program will quit with an error message
 pub fn new_repo() -> String {
 	//TODO Ask user for repo metadata
-	match write::new_ipns(&FullFile::new()) {
+	match write::new_ipns() {
 		Ok(ipns_link) => {
 			println!("Repo made at link: {ipns_link}");
 			ipns_link

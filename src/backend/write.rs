@@ -1,5 +1,5 @@
 use crate::{custom_types::*, read};
-use ipfs_api_backend_hyper::{IpfsApi, IpfsClient};
+use ipfs_api_backend_hyper::{IpfsApi, IpfsClient, KeyType};
 use std::io::Cursor;
 
 /// Append the messages to the GitArk repo at the link
@@ -56,7 +56,7 @@ fn upload_to_ipns(key: &str, contents: String) -> Result<(), Error> {
 }
 
 /// Creates a new IPNS link and returns the link to it
-pub fn new_ipns(contents: &FullFile) -> Result<String, Error> {
+pub fn new_ipns() -> Result<String, Error> {
 	let client = IpfsClient::default();
 	let executor = tokio::runtime::Builder::new_current_thread()
 		.enable_all()
@@ -64,19 +64,18 @@ pub fn new_ipns(contents: &FullFile) -> Result<String, Error> {
 		.map_err(Error::StdIo)?;
 
 	let temp_key = "ThisIsATempGitArkNameIfYouAreSeeingThisSomethingWentWrong";
-	let key_type = ipfs_api_backend_hyper::KeyType::Ed25519;
-	let keygen_future = client.key_gen(temp_key, key_type, 64);
+	let keygen_future = client.key_gen(temp_key, KeyType::Ed25519, 64);
 	let result = executor.block_on(keygen_future).map_err(Error::IPFS)?;
 	let ipns_link = result.id;
 
-	write_to_new_ipns(temp_key, contents)?;
+	write_to_new_ipns(temp_key)?;
 	rename_ipns_key(temp_key, &ipns_link)?;
 
 	Ok(ipns_link)
 }
 
-fn write_to_new_ipns(key: &str, contents: &FullFile) -> Result<(), Error> {
-	let data_as_toml = toml::to_string(contents).map_err(Error::TomlSerialization)?;
+fn write_to_new_ipns(key: &str) -> Result<(), Error> {
+	let data_as_toml = toml::to_string(&FullFile::new()).map_err(Error::TomlSerialization)?;
 	upload_to_ipns(key, data_as_toml)
 }
 
